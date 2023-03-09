@@ -79,19 +79,6 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
     $ComputerName                               = (Get-WmiObject win32_computersystem).DNSHostName
 
 
-###############################################################
-# Global Variables
-#
-# Used to mitigate throttling in Azure Resource Graph
-###############################################################
-
-    # building global variable with all DCEs, which can be viewed by Log Ingestion app
-    $global:AzDceDetails = Get-AzDceListAll -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
-    
-    # building global variable with all DCRs, which can be viewed by Log Ingestion app
-    $global:AzDcrDetails = Get-AzDcrListAll -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
-
-
 ############################################################################################################################################
 # FUNCTIONS
 ############################################################################################################################################
@@ -118,6 +105,19 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
             $Download = (New-Object System.Net.WebClient).DownloadFile("https://raw.githubusercontent.com/KnudsenMorten/AzLogDcrIngestPS/main/AzLogDcrIngestPS.psm1", ".\AzLogDcrIngestPS.psm1.psm1")  
         }
 
+
+###############################################################
+# Global Variables
+#
+# Used to mitigate throttling in Azure Resource Graph
+# Needs to be loaded after load of functions
+###############################################################
+
+    # building global variable with all DCEs, which can be viewed by Log Ingestion app
+    $global:AzDceDetails = Get-AzDceListAll -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+    
+    # building global variable with all DCRs, which can be viewed by Log Ingestion app
+    $global:AzDcrDetails = Get-AzDcrListAll -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
 
 
 ############################################################################################################################################
