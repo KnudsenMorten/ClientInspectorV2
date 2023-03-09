@@ -1,15 +1,31 @@
-﻿$LogFile = [System.Environment]::GetEnvironmentVariable('TEMP','Machine') + "\ClientInspector.txt"
+﻿#Requires -Version 5.0
+<#
+    .NAME
+    ClientInspector
+
+    .SYNOPSIS
+    This script will collect lots of informations from the client. Data is sent to Azure LogAnalytics Custom Tables.
+    The upload happens via Log Ingestion API, Azure Data Collection Rules (DCR) and Azure Data Collection Endpoints
+
+    .NOTES
+    VERSION: 230309
+
+    .COPYRIGHT
+    @mortenknudsendk on Twitter
+    Blog: https://mortenknudsen.net
+    
+    .LICENSE
+    Licensed under the MIT license.
+
+    .WARRANTY
+    Use at your own risk, no warranty given!
+#>
+
+$LogFile = [System.Environment]::GetEnvironmentVariable('TEMP','Machine') + "\ClientInspector.txt"
 Start-Transcript -Path $LogFile -IncludeInvocationHeader
 
 $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyContinue
 
-Write-Output ""
-Write-Output "***********************************************************************************************"
-Write-Output "CLIENT INSPECTOR | SYSTEM | COLLECTION"
-Write-Output ""
-Write-Output "Support: Morten Knudsen - mok@2linkit.net | 40 178 179"
-Write-Output "***********************************************************************************************"
-Write-Output ""
   
 ##########################################
 # VARIABLES
@@ -63,6 +79,19 @@ Write-Output ""
     $ComputerName                               = (Get-WmiObject win32_computersystem).DNSHostName
 
 
+###############################################################
+# Global Variables
+#
+# Used to mitigate throttling in Azure Resource Graph
+###############################################################
+
+    # building global variable with all DCEs, which can be viewed by Log Ingestion app
+    $global:AzDceDetails = Get-AzDceListAll -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+    
+    # building global variable with all DCRs, which can be viewed by Log Ingestion app
+    $global:AzDcrDetails = Get-AzDcrListAll -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+
+
 ############################################################################################################################################
 # FUNCTIONS
 ############################################################################################################################################
@@ -72,15 +101,23 @@ Write-Output ""
         {
             Import-module ".\AzLogDcrIngestPS.psm1" -Global -force -DisableNameChecking  -WarningAction SilentlyContinue
         }
-    ElseIf ("$Env:OneDrive\Documents\GitHub\AzLogDcrIngestPS\AzLogDcrIngestPS.psm1")    # used by Morten Knudsen for testing
+    ElseIf ("$Env:OneDrive\Documents\GitHub\AzLogDcrIngestPS-Dev\AzLogDcrIngestPS.psm1")    # used by Morten Knudsen for development
         {
             Import-module "C:\Users\mok.2LINKIT\OneDrive - 2linkIT\Documents\GitHub\ClientInspector\ClientInspector-functions.psm1" -Global -Force -DisableNameChecking
         }
-    Else   # force download using Github. This is needed for Intne Remediation collection, since the functions library are large, and Intune only support 200 Kb at the moment
+    Else   # force download using Github. This is needed for Intune remediations, since the functions library are large, and Intune only support 200 Kb at the moment
         {
-            Write-Output "Downloading latest version of needed Powershell functions (Morten Knudsen Github) .... Please Wait !"
+            Write-Output ""
+            Write-Output "Downloading latest version of needed Powershell functions from Morten Knudsen Github .... Please Wait !"
+            Write-Output ""
+            Write-Output "The Powershell functions, AzLogDcrIngestPS, are developed and maintained by Morten Knudsen, Microsoft MVP"
+            Write-Output ""
+            Write-Output "Please send feedback or comments to mok@mortenknudsen.net. Also feel free to pull findings/issues in Github."
+            Write-Output ""
+
             $Download = (New-Object System.Net.WebClient).DownloadFile("https://raw.githubusercontent.com/KnudsenMorten/AzLogDcrIngestPS/main/AzLogDcrIngestPS.psm1", ".\AzLogDcrIngestPS.psm1.psm1")  
         }
+
 
 
 ############################################################################################################################################
@@ -135,18 +172,6 @@ Write-Output ""
                             }
                         }
             }
-
-###############################################################
-# Global Variables
-#
-# Used to mitigate throttling in Azure Resource Graph
-###############################################################
-
-    # building global variable with all DCEs, which can be viewed by Log Ingestion app
-    $global:AzDceDetails = Get-AzDceListAll -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
-    
-    # building global variable with all DCRs, which can be viewed by Log Ingestion app
-    $global:AzDcrDetails = Get-AzDcrListAll -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
 
 
 ###############################################################
