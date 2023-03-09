@@ -48,6 +48,20 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
     $AzDcrDceTableCreateFromReferenceMachine    = @()
     $AzDcrDceTableCreateFromAnyMachine          = $true
 
+$TenantId                                   = "f0fa27a0-8e7c-4f63-9a77-ec94786b7c9e" 
+$LogIngestAppId                             = "2730eb04-c72c-4b5b-b8aa-459e820b4f15" 
+$LogIngestAppSecret                         = "B3y8Q~mx5OMWpv_enjAkmpquDXiq2OwFCyOkscq5" 
+
+$DceName                                    = "dce-log-platform-management-client-demo2-p" 
+$LogAnalyticsWorkspaceResourceId            = 
+"/subscriptions/fce4f282-fcc6-43fb-94d8-bf1701b862c3/resourceGroups/rg-logworkspaces/providers/Microsoft.OperationalInsights/workspaces/log-platform-management-client-demo2-p" 
+
+$AzDcrPrefixClient                          = "clt2" 
+$AzDcrSetLogIngestApiAppPermissionsDcrLevel = $false
+$AzDcrLogIngestServicePrincipalObjectId     = "35cec60d-211a-4690-a43e-bc657c4f9703" 
+$AzDcrDceTableCreateFromReferenceMachine    = @()
+$AzDcrDceTableCreateFromAnyMachine          = $true
+
 #-------------------
 <#
     # DEMO 100
@@ -90,7 +104,7 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
         }
     ElseIf ("$Env:OneDrive\Documents\GitHub\AzLogDcrIngestPS-Dev\AzLogDcrIngestPS.psm1")    # used by Morten Knudsen for development
         {
-            Import-module "C:\Users\mok.2LINKIT\OneDrive - 2linkIT\Documents\GitHub\ClientInspector\ClientInspector-functions.psm1" -Global -Force -DisableNameChecking
+            Import-module "$Env:OneDrive\Documents\GitHub\AzLogDcrIngestPS-Dev\AzLogDcrIngestPS.psm1" -Global -Force -DisableNameChecking
         }
     Else   # force download using Github. This is needed for Intune remediations, since the functions library are large, and Intune only support 200 Kb at the moment
         {
