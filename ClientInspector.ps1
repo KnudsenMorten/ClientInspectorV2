@@ -1,16 +1,31 @@
-﻿$LogFile = [System.Environment]::GetEnvironmentVariable('TEMP','Machine') + "\ClientInspector.txt"
+﻿#Requires -Version 5.0
+<#
+    .NAME
+    ClientInspector
+
+    .SYNOPSIS
+    This script will collect lots of informations from the client. Data is sent to Azure LogAnalytics Custom Tables.
+    The upload happens via Log Ingestion API, Azure Data Collection Rules (DCR) and Azure Data Collection Endpoints
+
+    .NOTES
+    VERSION: 230309
+
+    .COPYRIGHT
+    @mortenknudsendk on Twitter
+    Blog: https://mortenknudsen.net
+    
+    .LICENSE
+    Licensed under the MIT license.
+
+    .WARRANTY
+    Use at your own risk, no warranty given!
+#>
+
+$LogFile = [System.Environment]::GetEnvironmentVariable('TEMP','Machine') + "\ClientInspector.txt"
 Start-Transcript -Path $LogFile -IncludeInvocationHeader
 
 $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyContinue
 
-Write-Output ""
-Write-Output "***********************************************************************************************"
-Write-Output "CLIENT INSPECTOR | SYSTEM | COLLECTION"
-Write-Output ""
-Write-Output "Support: Morten Knudsen - mok@2linkit.net | 40 178 179"
-Write-Output "***********************************************************************************************"
-Write-Output ""
-  
 ##########################################
 # VARIABLES
 ##########################################
@@ -18,37 +33,18 @@ Write-Output ""
 <# ----- onboarding lines ----- BEGIN #>
 
     # DEMO1
-    $TenantId                                   = "f0fa27a0-8e7c-4f63-9a77-ec94786b7c9e" 
-    $LogIngestAppId                             = "3ea6e820-bf7b-477e-b45b-fe5e78392285" 
-    $LogIngestAppSecret                         = "4c58Q~RazL53EQz4K_WHjkemGti2qCO60x37nbUV" 
+    $TenantId                                   = "xxxx" 
+    $LogIngestAppId                             = "xxxx" 
+    $LogIngestAppSecret                         = "xxxx" 
 
-    $DceName                                    = "dce-log-platform-management-client-demo1-p" 
-    $LogAnalyticsWorkspaceResourceId            = 
-    "/subscriptions/fce4f282-fcc6-43fb-94d8-bf1701b862c3/resourceGroups/rg-logworkspaces/providers/Microsoft.OperationalInsights/workspaces/log-platform-management-client-demo1-p" 
+    $DceName                                    = "xxxx" 
+    $LogAnalyticsWorkspaceResourceId            = "xxxx"
 
-    $AzDcrPrefixClient                          = "clt1" 
+    $AzDcrPrefixClient                          = "clt" 
     $AzDcrSetLogIngestApiAppPermissionsDcrLevel = $false
-    $AzDcrLogIngestServicePrincipalObjectId     = "a5598f6c-5681-4185-9092-09d36ce35c85" 
+    $AzDcrLogIngestServicePrincipalObjectId     = "xxxx" 
     $AzDcrDceTableCreateFromReferenceMachine    = @()
-    $AzDcrDceTableCreateFromAnyMachine          = $true
-
-#-------------------
-<#
-    # DEMO 100
-    $TenantId                                   = "f0fa27a0-8e7c-4f63-9a77-ec94786b7c9e" 
-    $LogIngestAppId                             = "92c50edf-ee1c-4034-bdbb-f81b1739b77f" 
-    $LogIngestAppSecret                         = "Ek38Q~LTKFotNoE.QhruU7dOM8Dd_vGs-utsqbyo" 
-
-    $DceName                                    = "dce-log-platform-management-client-demo100-p" 
-    $LogAnalyticsWorkspaceResourceId            = 
-    "/subscriptions/fce4f282-fcc6-43fb-94d8-bf1701b862c3/resourceGroups/rg-logworkspaces/providers/Microsoft.OperationalInsights/workspaces/log-platform-management-client-demo100-p" 
-
-    $AzDcrPrefixClient                          = "Clt100" 
-    $AzDcrSetLogIngestApiAppPermissionsDcrLevel = $true
-    $AzDcrLogIngestServicePrincipalObjectId     = "fe45e6bd-1651-4e0d-833f-9c4f199428b6" 
-    $AzDcrDceTableCreateFromReferenceMachine    = @()
-    $AzDcrDceTableCreateFromAnyMachine          = $true
-#>
+    $AzDcrDceTableCreateFromAnyMachine          = $false
 
 
 <#  ----- onboading lines -----  END  #>
@@ -72,15 +68,36 @@ Write-Output ""
         {
             Import-module ".\AzLogDcrIngestPS.psm1" -Global -force -DisableNameChecking  -WarningAction SilentlyContinue
         }
-    ElseIf ("$Env:OneDrive\Documents\GitHub\AzLogDcrIngestPS\AzLogDcrIngestPS.psm1")    # used by Morten Knudsen for testing
+    ElseIf ("$Env:OneDrive\Documents\GitHub\AzLogDcrIngestPS-Dev\AzLogDcrIngestPS.psm1")    # used by Morten Knudsen for development
         {
             Import-module "C:\Users\mok.2LINKIT\OneDrive - 2linkIT\Documents\GitHub\ClientInspector\ClientInspector-functions.psm1" -Global -Force -DisableNameChecking
         }
-    Else   # force download using Github. This is needed for Intne Remediation collection, since the functions library are large, and Intune only support 200 Kb at the moment
+    Else   # force download using Github. This is needed for Intune remediations, since the functions library are large, and Intune only support 200 Kb at the moment
         {
-            Write-Output "Downloading latest version of needed Powershell functions (Morten Knudsen Github) .... Please Wait !"
+            Write-Output ""
+            Write-Output "Downloading latest version of needed Powershell functions from Morten Knudsen Github .... Please Wait !"
+            Write-Output ""
+            Write-Output "The Powershell functions, AzLogDcrIngestPS, are developed and maintained by Morten Knudsen, Microsoft MVP"
+            Write-Output ""
+            Write-Output "Please send feedback or comments to mok@mortenknudsen.net. Also feel free to pull findings/issues in Github."
+            Write-Output ""
+
             $Download = (New-Object System.Net.WebClient).DownloadFile("https://raw.githubusercontent.com/KnudsenMorten/AzLogDcrIngestPS/main/AzLogDcrIngestPS.psm1", ".\AzLogDcrIngestPS.psm1.psm1")  
         }
+
+
+###############################################################
+# Global Variables
+#
+# Used to mitigate throttling in Azure Resource Graph
+# Needs to be loaded after load of functions
+###############################################################
+
+    # building global variable with all DCEs, which can be viewed by Log Ingestion app
+    $global:AzDceDetails = Get-AzDceListAll -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+    
+    # building global variable with all DCRs, which can be viewed by Log Ingestion app
+    $global:AzDcrDetails = Get-AzDcrListAll -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
 
 
 ############################################################################################################################################
@@ -135,19 +152,6 @@ Write-Output ""
                             }
                         }
             }
-
-###############################################################
-# Global Variables
-#
-# Used to mitigate throttling in Azure Resource Graph
-###############################################################
-
-    # building global variable with all DCEs, which can be viewed by Log Ingestion app
-    $global:AzDceDetails = Get-AzDceListAll -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
-    
-    # building global variable with all DCRs, which can be viewed by Log Ingestion app
-    $global:AzDcrDetails = Get-AzDcrListAll -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
-
 
 ###############################################################
 # USER [1]
