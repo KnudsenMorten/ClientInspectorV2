@@ -1,4 +1,6 @@
-﻿#Requires -Version 5.0
+﻿#Requires -RunAsAdministrator
+#Requires -Version 5.0
+
 <#
     .NAME
     ClientInspector
@@ -9,6 +11,7 @@
 
     .NOTES
     VERSION: 230309
+    Developed by Morten Knudsen, Microsoft MVP
 
     .COPYRIGHT
     @mortenknudsendk on Twitter
@@ -22,17 +25,24 @@
 #>
 
 $LogFile = [System.Environment]::GetEnvironmentVariable('TEMP','Machine') + "\ClientInspector.txt"
-Start-Transcript -Path $LogFile -IncludeInvocationHeader
+Try
+    {
+        Stop-Transcript   # if running
+        Start-Transcript -Path $LogFile -IncludeInvocationHeader
+    }
+Catch
+    {
+        Write-output "Could not start transscript logging"
+    }
 
-$VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyContinue
-
+  
 ##########################################
 # VARIABLES
 ##########################################
 
 <# ----- onboarding lines ----- BEGIN #>
 
-    # DEMO1
+<#
     $TenantId                                   = "xxxx" 
     $LogIngestAppId                             = "xxxx" 
     $LogIngestAppSecret                         = "xxxx" 
@@ -46,33 +56,41 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
     $AzDcrDceTableCreateFromReferenceMachine    = @()
     $AzDcrDceTableCreateFromAnyMachine          = $false
 
+#>
 
 <#  ----- onboading lines -----  END  #>
 
-    # latest run info
-    $LastRun_RegPath                            = "HKLM:\SOFTWARE\2LINKIT"
-    $LastRun_RegKey                             = "ClientInspector_System"
+    # latest run info - needed for Intune detection to work
+    $LastRun_RegPath                                 = "HKLM:\SOFTWARE\2LINKIT"
+    $LastRun_RegKey                                  = "ClientInspector_System"
 
     # default variables
-    [datetime]$CollectionTime                   = ( Get-date ([datetime]::Now.ToUniversalTime()) -format "yyyy-MM-ddTHH:mm:ssK" )
-    $DNSName                                    = (Get-WmiObject win32_computersystem).DNSHostName +"." + (Get-WmiObject win32_computersystem).Domain
-    $ComputerName                               = (Get-WmiObject win32_computersystem).DNSHostName
+    $VerbosePreference                               = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyContinue
+    $DNSName                                         = (Get-CimInstance win32_computersystem).DNSHostName +"." + (Get-CimInstance win32_computersystem).Domain
+    $ComputerName                                    = (Get-CimInstance win32_computersystem).DNSHostName
+    [datetime]$CollectionTime                        = ( Get-date ([datetime]::Now.ToUniversalTime()) -format "yyyy-MM-ddTHH:mm:ssK" )
 
 
 ############################################################################################################################################
 # FUNCTIONS
 ############################################################################################################################################
-    
+
+    $ScriptDirectory = $PSScriptRoot
+
     # Needed funtions found in local path - for example if deployed through ConfigMgr, where we don't need to download the functions each time
-    If (Test-Path ".\AzLogDcrIngestPS.psm1")
+    If (Test-Path "$($ScriptDirectory)\AzLogDcrIngestPS.psm1")
         {
-            Import-module ".\AzLogDcrIngestPS.psm1" -Global -force -DisableNameChecking  -WarningAction SilentlyContinue
+            Import-module "$($ScriptDirectory)\AzLogDcrIngestPS.psm1" -Global -force -DisableNameChecking  -WarningAction SilentlyContinue
         }
-    ElseIf ("$Env:OneDrive\Documents\GitHub\AzLogDcrIngestPS-Dev\AzLogDcrIngestPS.psm1")    # used by Morten Knudsen for development
+    
+    # Used by Morten Knudsen for development
+    ElseIf ("$Env:OneDrive\Documents\GitHub\AzLogDcrIngestPS-Dev\AzLogDcrIngestPS.psm1")
         {
-            Import-module "C:\Users\mok.2LINKIT\OneDrive - 2linkIT\Documents\GitHub\ClientInspector\ClientInspector-functions.psm1" -Global -Force -DisableNameChecking
+            Import-module "$Env:OneDrive\Documents\GitHub\AzLogDcrIngestPS-Dev\AzLogDcrIngestPS.psm1" -Global -Force -DisableNameChecking
         }
-    Else   # force download using Github. This is needed for Intune remediations, since the functions library are large, and Intune only support 200 Kb at the moment
+
+    # force download using Github. This is needed for Intune remediations, since the functions library are large, and Intune only support 200 Kb at the moment
+    Else   
         {
             Write-Output ""
             Write-Output "Downloading latest version of needed Powershell functions from Morten Knudsen Github .... Please Wait !"
@@ -82,7 +100,8 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
             Write-Output "Please send feedback or comments to mok@mortenknudsen.net. Also feel free to pull findings/issues in Github."
             Write-Output ""
 
-            $Download = (New-Object System.Net.WebClient).DownloadFile("https://raw.githubusercontent.com/KnudsenMorten/AzLogDcrIngestPS/main/AzLogDcrIngestPS.psm1", ".\AzLogDcrIngestPS.psm1.psm1")  
+            $Download = (New-Object System.Net.WebClient).DownloadFile("https://raw.githubusercontent.com/KnudsenMorten/AzLogDcrIngestPS/main/AzLogDcrIngestPS.psm1", "$($ScriptDirectory)\AzLogDcrIngestPS.psm1")  
+            Import-module "$($ScriptDirectory)\AzLogDcrIngestPS.psm1" -Global -force -DisableNameChecking  -WarningAction SilentlyContinue
         }
 
 
@@ -153,6 +172,7 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
                         }
             }
 
+
 ###############################################################
 # USER [1]
 ###############################################################
@@ -186,7 +206,7 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
                                          }
 
         # add CollectionTime to existing array
-        $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+        $DataVariable1 = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
 
         # add Computer info to existing array
         $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName
@@ -203,16 +223,12 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
 
         CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                              -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
-                                             -DceName $DceName -DcrName $DcrName -TableName $TableName `
+                                             -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                              -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
-                                             -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel
-        
-    #-----------------------------------------------------------------------------------------------
-    # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
-    #-----------------------------------------------------------------------------------------------
+                                             -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                             -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                             -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
 
-        Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable `
-                                                           -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
 
 ###############################################################
 # COMPUTER INFORMATION [2]
@@ -266,11 +282,13 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
     # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
     #-------------------------------------------------------------------------------------------
 
-        CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
+        CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId `
                                              -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
-                                             -DceName $DceName -DcrName $DcrName -TableName $TableName `
+                                             -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                              -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
-                                             -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel
+                                             -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                             -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                             -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
         
     #-----------------------------------------------------------------------------------------------
     # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
@@ -324,9 +342,11 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName `
+                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
-                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel
+                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                                 -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                                 -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
         
         #-----------------------------------------------------------------------------------------------
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
@@ -381,9 +401,11 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName `
+                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
-                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel
+                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                                 -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                                 -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
         
         #-----------------------------------------------------------------------------------------------
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
@@ -437,9 +459,11 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName `
+                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
-                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel
+                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                                 -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                                 -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
         
         #-----------------------------------------------------------------------------------------------
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
@@ -494,9 +518,11 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName `
+                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
-                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel
+                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                                 -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                                 -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
         
         #-----------------------------------------------------------------------------------------------
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
@@ -557,9 +583,11 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName `
+                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
-                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel
+                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                                 -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                                 -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
         
         #-----------------------------------------------------------------------------------------------
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
@@ -597,7 +625,7 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
             
             Write-Output "Collecting installed application information via WMI (slow)"
 
-            $DataVariable = Get-WmiObject -Class Win32_Product
+            $DataVariable = Get-CimInstance -Class Win32_Product
 
         #-------------------------------------------------------------------------------------------
         # Preparing data structure
@@ -613,7 +641,7 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
         $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
 
         # Get insight about the schema structure of an object BEFORE changes. Command is only needed to verify columns in schema
-        # $SchemaBefore = Get-ObjectSchema -Data $DataVariable -ReturnFormat Array
+        # $SchemaBefore = Get-ObjectSchemaAsArray -Data $DataVariable
         
         # Remove unnecessary columns in schema
         $DataVariable = Filter-ObjectExcludeProperty -Data $DataVariable -ExcludeProperty __*,SystemProperties,Scope,Qualifiers,Properties,ClassPath,Class,Derivation,Dynasty,Genus,Namespace,Path,Property_Count,RelPath,Server,Superclass
@@ -630,9 +658,11 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName `
+                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
-                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel
+                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                                 -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                                 -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
         
         #-----------------------------------------------------------------------------------------------
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
@@ -689,7 +719,7 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
         $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
 
         # Get insight about the schema structure of an object BEFORE changes. Command is only needed to verify columns in schema
-        # $SchemaBefore = Get-ObjectSchema -Data $DataVariable -ReturnFormat Array
+        # $SchemaBefore = Get-ObjectSchemaAsArray -Data $DataVariable
         
         # Remove unnecessary columns in schema
         $DataVariable = Filter-ObjectExcludeProperty -Data $DataVariable -ExcludeProperty Memento*,Inno*,'(default)',1033
@@ -706,9 +736,11 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName `
+                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
-                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel
+                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                                 -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                                 -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
         
         #-----------------------------------------------------------------------------------------------
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
@@ -762,7 +794,7 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
         $Alternative2AntivirusDefinitionStatus      = ""
         $Alternative2AntivirusRealTimeStatus        = ""
 
-        $AntiVirusProducts = Get-WmiObject -Namespace "root\SecurityCenter2" -Class AntiVirusProduct
+        $AntiVirusProducts = Get-CimInstance -Namespace "root\SecurityCenter2" -Class AntiVirusProduct
 
         $ret = @()
         foreach($AntiVirusProduct in $AntiVirusProducts)
@@ -865,9 +897,11 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName `
+                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
-                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel
+                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                                 -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                                 -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
         
         #-----------------------------------------------------------------------------------------------
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
@@ -1115,9 +1149,11 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName `
+                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
-                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel
+                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                                 -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                                 -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
         
         #-----------------------------------------------------------------------------------------------
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
@@ -1289,9 +1325,11 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName `
+                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
-                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel
+                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                                 -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                                 -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
         
         #-----------------------------------------------------------------------------------------------
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
@@ -1377,9 +1415,11 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName `
+                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
-                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel
+                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                                 -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                                 -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
         
         #-----------------------------------------------------------------------------------------------
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
@@ -1455,9 +1495,11 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName `
+                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
-                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel
+                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                                 -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                                 -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
         
         #-----------------------------------------------------------------------------------------------
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
@@ -1535,9 +1577,11 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName `
+                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
-                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel
+                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                                 -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                                 -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
         
         #-----------------------------------------------------------------------------------------------
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
@@ -1601,9 +1645,11 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName `
+                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
-                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel
+                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                                 -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                                 -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
         
         #-----------------------------------------------------------------------------------------------
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
@@ -1657,9 +1703,11 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName `
+                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
-                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel
+                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                                 -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                                 -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
         
         #-----------------------------------------------------------------------------------------------
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
@@ -1688,17 +1736,27 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
 
             $WU_ServiceManager = Get-WUServiceManager | Where-Object { $_.IsDefaultAUService -eq $true }
 
-            If ($WU_ServiceManager.ServiceID -eq "9482f4b4-e343-43b6-b170-9a65bc822c77")      # Windows Update
-                {
-                    Write-Output ""
-                    Write-Output "Pending Windows Updates (source: Windows Update)"
+            # Windows Update
+            If ($WU_ServiceManager.ServiceID -eq "9482f4b4-e343-43b6-b170-9a65bc822c77")
+                { 
                     $WU_PendingUpdates = Get-WindowsUpdate -WindowsUpdate
                 }
-            ElseIf ($WU_ServiceManager.ServiceID -eq "7971f918-a847-4430-9279-4a52d1efe18d")  # Microsoft Update
-                {
-                    Write-Output ""
-                    Write-Output "Pending Windows Updates (source: Microsoft Update)"
+            # Microsoft Update
+            ElseIf ($WU_ServiceManager.ServiceID -eq "7971f918-a847-4430-9279-4a52d1efe18d")
+                { 
                     $WU_PendingUpdates = Get-WindowsUpdate -MicrosoftUpdate
+                }
+            
+            # WSUS
+            Elseif ($WU_ServiceManager.ServiceID -eq "3da21691-e39d-4da6-8a4b-b43877bcb1b7")
+                { 
+                    $WU_PendingUpdates = Get-WindowsUpdate -ServiceID $WU_ServiceManager.ServiceID
+                }
+
+            # other
+            Else
+                { 
+                    $WU_PendingUpdates = Get-WindowsUpdate
                 }
 
         #-------------------------------------------------------------------------------------------
@@ -1708,51 +1766,23 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
             If ($WU_PendingUpdates)
                 {
                     # convert CIM array to PSCustomObject and remove CIM class information
-                    $WU_PendingUpdates = Convert-CimArrayToObjectFixStructure -data $WU_PendingUpdates
+                    $DataVariable = Convert-CimArrayToObjectFixStructure -data $WU_PendingUpdates
 
-                        # Add information to array
-                        If ($WU_PendingUpdates)
-                            {
-                                $CountDataVariable = ($WU_PendingUpdates | Measure-Object).Count
-                                $PosDataVariable   = 0
-                                Do
-                                    {
-                                        # CVEs
-                                            $UpdateCVEs = $WU_PendingUpdates[$PosDataVariable].CveIDs -join ";"
-                                            $WU_PendingUpdates[$PosDataVariable] | Add-Member -Type NoteProperty -Name 'UpdateCVEs' -Value $UpdateCVEs -force
-
-                                        # Classification (e.g. Security Update)
-                                            $UpdateClassification     = $WU_PendingUpdates[$PosDataVariable].Categories | Where-Object { $_.Type -eq "UpdateClassification" } | Select Name
-                                            $UpdateClassificationName = $UpdateClassification.Name
-                                            $WU_PendingUpdates[$PosDataVariable] | Add-Member -Type NoteProperty -Name 'UpdateClassification' -Value $UpdateClassificationName -force
-
-                                        # Target (e.g. product, SQL)
-                                            $UpdateTarget     = $WU_PendingUpdates[$PosDataVariable].Categories | Where-Object { $_.Type -ne "UpdateClassification" } | Select Name
-                                            $UpdateTargetName = $UpdateTarget.Name
-                                            $WU_PendingUpdates[$PosDataVariable] | Add-Member -Type NoteProperty -Name 'UpdateTarget' -Value $UpdateTargetName -force
-
-                                        # KB
-                                            $UpdateKB = $WU_PendingUpdates[$PosDataVariable].KBArticleIDs -join ";"
-                                            $WU_PendingUpdates[$PosDataVariable] | Add-Member -Type NoteProperty -Name 'UpdateKB' -Value $UpdateKB -force
-
-                                        # KB Published Date
-                                            $UpdateKBPublished                 = $WU_PendingUpdates[$PosDataVariable].LastDeploymentChangeTime
-                                            $WU_PendingUpdates[$PosDataVariable] | Add-Member -Type NoteProperty -Name 'UpdateKBPublished' -Value $UpdateKBPublished -force
-
-                                        $PosDataVariable = 1 + $PosDataVariable
-                                    }
-                                Until ($PosDataVariable -eq $CountDataVariable)
-                        }
-
-    
                     # add CollectionTime to existing array
                     $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $WU_PendingUpdates
 
                     # add Computer & UserLoggedOn info to existing array
                     $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
 
+                    # Remove unnecessary columns in schema
+                    $DataVariable = Filter-ObjectExcludeProperty -Data $DataVariable -ExcludeProperty BundledUpdates, Categories, CveIds, DownloadContents, Identity, InstallationBehavior, UninstallationSteps, `
+                                                                                                      KBArticleIDs, Languages, MoreInfoUrls, SecurityBulletinIDs, SuperSededUpdateIds, UninstallationBehavior, WindowsDriverUpdateEntries
+
                     # Validating/fixing schema data structure of source data
                     $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+
+                    # Aligning data structure with schema (requirement for DCR)
+                    $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
                 }
 
         #-------------------------------------------------------------------------------------------
@@ -1761,9 +1791,11 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName `
+                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
-                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel
+                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                                 -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                                 -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
         
         #-----------------------------------------------------------------------------------------------
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
@@ -1790,12 +1822,7 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
             
             Write-Output "Collecting Last Installations of Windows Updates information"
 
-            $UpdateSession                     = New-Object -ComObject 'Microsoft.Update.Session'
-            $UpdateSession.WebProxy.AutoDetect = $false
-            $UpdateSearcher                    = $UpdateSession.CreateUpdateSearcher()
-            $SearchResult                      = $UpdateSearcher.Search('IsInstalled=1 and IsHidden=0')
-            $SearchResultFiltered              = $SearchResult | Where-Object { ($_.LastDeploymentChangeTime -le (Get-Date).AddDays(-31)) }
-            $WU_LastInstallations              = $searchResultFiltered.Updates
+            $WU_LastInstallations = Get-WuHistory -MaxDate ((Get-date).AddDays(-31))
 
         #-------------------------------------------------------------------------------------------
         # Preparing data structure
@@ -1804,64 +1831,38 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
             # Add CollectionTime & ComputerName to array
             If ($WU_LastInstallations)
                 {
-                    # convert CIM array to PSCustomObject and remove CIM class information
-                    $WU_LastInstallations = Convert-CimArrayToObjectFixStructure -data $WU_LastInstallations
-
-                    $CountDataVariable = ($WU_LastInstallations | Measure-Object).Count
-                    $PosDataVariable   = 0
+                    $CountVar = ($WU_LastInstallations | Measure-Object).count
+                    
+                    $PosDataVariable = 0
                     Do
                         {
-                            # CVEs
-                                $UpdateCVEsInfo = $WU_LastInstallations[$PosDataVariable].CveIDs -join ";"
-                                $WU_LastInstallations[$PosDataVariable] | Add-Member -Type NoteProperty -Name 'UpdateCVEs' -Value $UpdateCVEsInfo -force
-
-                            # Classification (e.g. Security Update)
-                                $UpdateClassification     = $WU_LastInstallations[$PosDataVariable].Categories | Where-Object { $_.Type -eq "UpdateClassification" } | Select Name
-                                $UpdateClassificationName = $UpdateClassification.Name
-                                $WU_LastInstallations[$PosDataVariable] | Add-Member -Type NoteProperty -Name 'UpdateClassification' -Value $UpdateClassificationName -force
-
-                            # Target (e.g. product, SQL)
-                                $UpdateTarget = $WU_LastInstallations[$PosDataVariable].Categories | Where-Object { $_.Type -ne "UpdateClassification" } | Select Name
-                                $UpdateTargetName = $UpdateTarget.Name
-                                $WU_LastInstallations[$PosDataVariable] | Add-Member -Type NoteProperty -Name 'UpdateTarget' -Value $UpdateTargetName -force
-
-                            # KB
-                                $KB = ($WU_LastInstallations[$PosDataVariable].KBArticleIDs -join ";")
-                                If ($KB)
-                                    {
-                                        $UpdateKB = "KB" + $KB
-                                    }
-                                $WU_LastInstallations[$PosDataVariable] | Add-Member -Type NoteProperty -Name 'UpdateKB' -Value $UpdateKB -force
-
-                            # KB Published Date
-                                $UpdateKBPublished = $WU_LastInstallations[$PosDataVariable].LastDeploymentChangeTime
-                                $WU_LastInstallations[$PosDataVariable] | Add-Member -Type NoteProperty -Name 'UpdateKBPublished' -Value $UpdateKBPublished -force
-
-                            # Remove DownloadContents from array
-                                $WU_LastInstallations[$PosDataVariable].PSObject.Properties.Remove("DownloadContents")
-
-                            # Remove BundledUpdates from array
-                                $WU_LastInstallations[$PosDataVariable].PSObject.Properties.Remove("BundledUpdates")
+                            # Remove UninstallationSteps from array
+                            $WU_LastInstallations[$PosDataVariable].PSObject.Properties.Remove("UninstallationSteps")
 
                             # Remove Categories from array
-                                $WU_LastInstallations[$PosDataVariable].PSObject.Properties.Remove("Categories")
-
-                            $PosDataVariable = 1 + $PosDataVariable
-                        }
-                    Until ($PosDataVariable -eq $CountDataVariable)
-
+                            $WU_LastInstallations[$PosDataVariable].PSObject.Properties.Remove("Categories")
     
-                # add CollectionTime to existing array
-                $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $WU_LastInstallations
+                            # Remove UpdateIdentity from array
+                            $WU_LastInstallations[$PosDataVariable].PSObject.Properties.Remove("UpdateIdentity")
 
-                # add Computer & UserLoggedOn info to existing array
-                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+                            $PosDataVariable += 1
+                        }
+                    Until ($PosDataVariable -eq $CountVar)
 
-                # Validating/fixing schema data structure of source data
-                $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+                    # convert CIM array to PSCustomObject and remove CIM class information
+                    $DataVariable = Convert-CimArrayToObjectFixStructure -data $WU_LastInstallations
 
-                # Aligning data structure with schema (requirement for DCR)
-                $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+                    # add CollectionTime to existing array
+                    $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+
+                    # add Computer & UserLoggedOn info to existing array
+                    $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+
+                    # Validating/fixing schema data structure of source data
+                    $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+
+                    # Aligning data structure with schema (requirement for DCR)
+                    $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
             }
         Else
             {
@@ -1874,9 +1875,11 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName `
+                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
-                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel
+                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                                 -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                                 -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
         
         #-----------------------------------------------------------------------------------------------
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
@@ -1976,9 +1979,11 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName `
+                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
-                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel
+                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                                 -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                                 -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
         
         #-----------------------------------------------------------------------------------------------
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
@@ -2104,9 +2109,11 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName `
+                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
-                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel
+                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                                 -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                                 -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
         
         #-----------------------------------------------------------------------------------------------
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
@@ -2155,13 +2162,13 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
                 $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
 
                 # Get insight about the schema structure of an object BEFORE changes. Command is only needed to verify schema - can be disabled
-                $SchemaBefore = Get-ObjectSchema -Data $DataVariable -ReturnFormat Array
+                $SchemaBefore = Get-ObjectSchemaAsArray -Data $DataVariable
         
                 # Remove unnecessary columns in schema
                 $DataVariable = Filter-ObjectExcludeProperty -Data $DataVariable -ExcludeProperty Memento*,Inno*,'(default)',1033
 
                 # Get insight about the schema structure of an object AFTER changes. Command is only needed to verify schema - can be disabled
-                $Schema = Get-ObjectSchema -Data $DataVariable -ReturnFormat Array
+                $Schema = Get-ObjectSchemaAsArray -Data $DataVariable
 
                 # Validating/fixing schema data structure of source data
                 $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
@@ -2198,9 +2205,11 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName `
+                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
-                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel
+                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                                 -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                                 -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
         
         #-----------------------------------------------------------------------------------------------
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
@@ -2284,9 +2293,11 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName `
+                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
-                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel
+                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                                 -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                                 -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
         
         #-----------------------------------------------------------------------------------------------
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
@@ -2328,7 +2339,7 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
         If ($LocalAdmins -eq $null)
             {
                 ########################################################################################################################
-                # Fix local admin group - The problem is empty SIDs in the Administrators Group caused by domain joins/leave/join etc
+                # Fix local admin group - The problem is empty SIDs in the Administrators Group caused by domain joins/leave/join
                 ########################################################################################################################
                     $administrators = @(
                     ([ADSI]"WinNT://./$($LocalAdminGroupname)").psbase.Invoke('Members') |
@@ -2376,9 +2387,11 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName `
+                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
-                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel
+                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                                 -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                                 -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
         
         #-----------------------------------------------------------------------------------------------
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
@@ -2462,9 +2475,11 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName `
+                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
-                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel
+                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                                 -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                                 -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
         
         #-----------------------------------------------------------------------------------------------
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
@@ -2538,9 +2553,11 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName `
+                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
-                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel
+                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                                 -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                                 -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
         
         #-----------------------------------------------------------------------------------------------
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
@@ -2581,7 +2598,7 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
         If ($TPM)
             {
                 # Get TPM Version, cannot be found using Get-TPM - must be retrieved from WMI
-                $TPMInfo_WMI = Get-WmiObject -Namespace "Root\CIMV2\Security\MicrosoftTpm" -query "Select * from Win32_Tpm"
+                $TPMInfo_WMI = Get-CimInstance -Namespace "Root\CIMV2\Security\MicrosoftTpm" -query "Select * from Win32_Tpm"
                 If ($TPMInfo_WMI)
                     {
                         $TPM_Version_WMI_Major = (($TPMInfo_WMI.SpecVersion.split(","))[0])
@@ -2645,9 +2662,11 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName `
+                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
-                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel
+                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                                 -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                                 -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
         
         #-----------------------------------------------------------------------------------------------
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
@@ -2672,5 +2691,11 @@ $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyCont
     #  Set last run value in registry
         $Result = New-ItemProperty -Path $LastRun_RegPath -Name $LastRun_RegKey -Value $Now -PropertyType STRING -Force | Out-Null
 
-# Stop-Transcript
+Try
+    {
+        Stop-Transcript
+    }
+Catch
+    {
+    }
 
