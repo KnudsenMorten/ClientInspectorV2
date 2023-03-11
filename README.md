@@ -29,16 +29,30 @@ Drop me an email on mok@mortenknudsen.net with your code, so I can include it.
 
 
 ### How to get insight of my environment from the data (desired state)?
-Initially, you will have access to Azure Dashboards installed by the ClientInSpectorV2-DeploymentKit
+Initially, you will have access to Azure Dashboards installed by the [ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit)
 
 The idea of the dashboards are that they will show where your infrastucture if drifting from best practice. Think of them as KPIs, where we might not be in control.
 Instead of having a task with patching and managing antivirus, we will have KPIs, which will show, where computers are **not** patched - or where realtime protection in anvirus is not running - or machines which has bluesceened during the last 24 hours.
 
 Each of the dashboards are based on Azure Workbooks, so if you want to drill down, you can click on a link and will get access to the detailed information.
-All the data can be accessed using Kusto (KQL) queries in Azure LogAnalytics - or by the provided Azure Workbooks and Azure Dashboards
 
 ![Dashboards](img/Dashboards-screen.jpg)
 
+#### Azure Workbooks
+As mentioned the data can be viewed with Azure Workbooks deployed as part of the solution.
+
+[Link to see the provided Azure Workbooks](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-workbooks-part-of-deployment)
+
+#### Azure Dashboards
+When deployed by ClientInSpectorV2-DeploymentKit, you will have access to sample Azure Dashboards to get you started. They are created based on pinned parts from Azure Workbooks.
+
+[Link to see the provided Azure Dashboards](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-dashboards-part-of-deployment)
+
+#### Make you own workbooks & dashboards
+
+If you want to add more views (or workbooks), you can start by investigating the collected data in the custom logs tables using KQL quries. Then make your new views in the workbooks - and pin your favorites to your dashboards.
+
+#### Advanced hunting
 If you want to do advanced hunting, you can use traditional Kusto (KQL) queries in the tables
 <details>
   <summary>Sample query</summary>
@@ -111,9 +125,6 @@ InvClientDefenderAvV2_CL
 </details>
 
 
-If you use the [ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit), you will also get access to **13 ready-to-use workbooks** and **14 ready-to-use dashboards**.
-
-If you want to add more views (or workbooks), you can start by investigating the collected data in the custom logs tables using KQL quries. Then make your new views in the workbooks - and pin your favorites to your dashboards.
    
 ## Archicture & flow
 ClientInspector (v2) is uploading the collected data into **custom logs** in **Azure LogAnalytics workspace** - using **Log ingestion API**, **Azure Data Collection Rules (DCR)** and **Azure Data Collection Endpoints (DCE)**. 
@@ -347,13 +358,3 @@ You will run the inventory script by a traditional package / deployment
 
 </details>
 
-## Azure Workbooks
-As mentioned the data can be viewed with Azure Workbooks deployed as part of the solution.
-
-[Link to see the provided Azure Workbooks](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-workbooks-part-of-deployment)
-
-
-## Azure Dashboards
-When deployed by ClientInSpectorV2-DeploymentKit, you will have access to sample Azure Dashboards to get you started. They are created based on pinned parts from Azure Workbooks.
-
-[Link to see the provided Azure Dashboards](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-dashboards-part-of-deployment)
