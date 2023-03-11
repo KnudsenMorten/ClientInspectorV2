@@ -24,8 +24,8 @@ The script collects the following information (settings, information, configurat
 18. TPM information - relavant to detect machines with/without TPM
 
 Feel free to add more cool data-collections to suit your needs. 
-I would love to hear what you are collection. Maybe we can include your ideas into ClientInspector so the whole community can gain access to smart ideas.
-Drop me an email on mok@mortenknudsen.net with your code, so I can include it.
+If you want to take part in the community, please send me your collections, if you think they can be of great great value to others.
+Drop me an email on mok@mortenknudsen.net with your code, then I will include it - for the benefit of the whole community.
 
 
 ## Dashboards - How to get insight of my environment from the data (desired state)?
@@ -34,13 +34,14 @@ Initially, you will have access to Azure Dashboards installed by the [ClientInSp
 The idea of the dashboards are that they will show where your infrastucture if drifting from best practice. Think of them as KPIs, where we might not be in control.
 Instead of having a task with patching and managing antivirus, we will have KPIs, which will show, where computers are **not** patched - or where realtime protection in anvirus is not running - or machines which has bluesceened during the last 24 hours.
 
+![Antivirus](img/Sample-Bitlocker-2.png)
+
+![Bluescreens](img/Sample-Bluescreens.png)
+
 Each of the dashboards are based on Azure Workbooks, so if you want to drill down, you can click on a link and will get access to the detailed information.
 
 ![Dashboards](img/Dashboards-screen.jpg)
 
-![Antivirus](img/Sample-Bitlocker-2.png)
-
-![Bluescreens](img/Sample-Bluescreens.png)
 
 ### Azure Workbooks
 As mentioned the data can be viewed with Azure Workbooks deployed as part of the solution.
