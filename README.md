@@ -134,11 +134,17 @@ Scripts for Microsoft Intune and ConfigMgr (or any other tool running a CMD-file
     $LastRun_RegKey   = "ClientInSpector_System"
 ```
 3. Now we need to create the remediation job. Go into Microsoft Intune portal -> Reports -> Endpoint Analysis --> Proactive remediations - and create a script package as shown below
+
 ![Flow](img/Intune-remediation-1.png.png)
+
 ![Flow](img/Intune-remediation-2.png.png)
+
 ![Flow](img/Intune-remediation-3.png.png)
+
 ![Flow](img/Intune-remediation-4.png.png)
+
 ![Flow](img/Intune-remediation-5.png.png)
+
 </details>
 
 ### How to deploy using ConfigMgr (or any other tool running a CMD-file) ?
