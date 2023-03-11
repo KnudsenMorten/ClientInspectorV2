@@ -183,10 +183,10 @@ $DataVariable = Get-CimInstance -ClassName Win32_BIOS
 #-------------------------------------------------------------------------------------------
 
 # convert CIM array to PSCustomObject and remove CIM class information
-	$DataVariable = Convert-CimArrayToObjectFixStructure -data $DataVariable -Verbose:$Verbose
+$DataVariable = Convert-CimArrayToObjectFixStructure -data $DataVariable -Verbose:$Verbose
 
 # add CollectionTime to existing array
-	$DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
+$DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
 # add Computer & UserLoggedOn info to existing array
 $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn -Verbose:$Verbose
@@ -208,7 +208,7 @@ Get-ObjectSchemaAsArray -Data $DataVariable -Verbose:$Verbose
 ````
 </details>
 
-[Please see more details about the available functions on the AzLogDcrIngestPS site](https://github.com/KnudsenMorten/AzLogDcrIngestPS)
+[Please see more details about available functions in AzLogDcrIngestPS - and how to use them here](https://github.com/KnudsenMorten/AzLogDcrIngestPS)
 
 
 ## Initial configuration of ClientInspector - creation of tables/DCRs from reference computer
