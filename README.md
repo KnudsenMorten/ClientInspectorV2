@@ -339,11 +339,12 @@ You will run the inventory script by a traditional package / deployment
 </details>
 
 ## Azure Workbook
-<details>
-  <summary>See dashboards which are deployed as part of the solution?</summary>
+As mentioned the data can be viewed with Azure Workbooks and Azure Dashboards deployed as part of the solution.
 
-[link](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-workbooks-part-of-deployment)
+[Link to see the provided Azure Workbooks](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-workbooks-part-of-deployment)
 
-</details>
 
 ## Azure Dashboards
+As mentioned the data can be viewed with Azure Dashboards (built on Azure Workbooks) deployed as part of the solution.
+
+[Link to see the provided Azure Dashboards](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-dashboards-part-of-deployment)
