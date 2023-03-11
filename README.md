@@ -4,24 +4,24 @@
 **ClientInspector** can be used to collect lots of great information of from your **Windows clients** - and send the data to **Azure LogAnalytics Custom Tables**.
 
 The script collects the following information (settings, information, configuration, state):
-	1.   User Logged On to Client
-	2.   Computer information - bios, processor, hardware info, Windows OS info, OS information, last restart
-	3.   Installed applications, both using WMI and registry
-	4.   Antivirus Security Center from Windows - default antivirus, state, configuration
-	5.   Microsoft Defender Antivirus - all settings including ASR, exclusions, realtime protection, etc
-	6.   Office - version, update channel config, SKUs
-	7.   VPN client - version, product
-	8.   LAPS - version
-	9.   Admin By Request (3rd party) - version
-	10.  Windows Update - last result (when), windows update source information (where), pending updates, last installations (what)
-	11.  Bitlocker - configuration
-	12.  Eventlog - look for specific events including logon events, blue screens, etc.
-	13.  Network adapters - configuration, installed adapters
-	14.  IP information for all adapters
-	15.  Local administrators group membership
-	16.  Windows firewall - settings for all 3 modes
-	17.  Group Policy - last refresh
-	18.  TPM information - relavant to detect machines with/without TPM
+1.  User Logged On to Client
+2.  Computer information - bios, processor, hardware info, Windows OS info, OS information, last restart
+3.  Installed applications, both using WMI and registry
+4.  Antivirus Security Center from Windows - default antivirus, state, configuration
+5.   Microsoft Defender Antivirus - all settings including ASR, exclusions, realtime protection, etc
+6.   Office - version, update channel config, SKUs
+7.   VPN client - version, product
+8.   LAPS - version
+9.   Admin By Request (3rd party) - version
+10.  Windows Update - last result (when), windows update source information (where), pending updates, last installations (what)
+11.  Bitlocker - configuration
+12.  Eventlog - look for specific events including logon events, blue screens, etc.
+13.  Network adapters - configuration, installed adapters
+14.  IP information for all adapters
+15.  Local administrators group membership
+16.  Windows firewall - settings for all 3 modes
+17.  Group Policy - last refresh
+18.  TPM information - relavant to detect machines with/without TPM
 
 All the data can be accessed using Kusto (KQL) queries in Azure LogAnalytics - or by the provided Azure Workbooks and Azure Dashboards
 
