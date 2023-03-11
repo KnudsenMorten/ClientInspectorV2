@@ -119,6 +119,8 @@ ClientInspector requires some prerequisites to run, which can be deployed using 
 <details>
   <summary>Detailed information about Azure components used as part of ClientInspector - and their purpose?</summary>
 
+<br>
+
 The following components are needed:
 
 | Azure Resource                | Purpose                                           | More information |
@@ -131,6 +133,7 @@ The following components are needed:
 | Azure Workbooks               | As part of the deployment, sample workbooks will be deployed  | https://learn.microsoft.com/en-us/azure/azure-monitor/visualize/workbooks-overview |
 | Azure Dashboards              | As part of the deployment, sample workbooks will be deployed  | https://learn.microsoft.com/en-us/azure/azure-monitor/visualize/tutorial-logs-dashboards |
 | Kusto (KQL)                   | Data can be analyzed using Kust (KQL) queries | https://learn.microsoft.com/en-us/azure/azure-monitor/logs/get-started-queries |
+
 </details>
 
 
