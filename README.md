@@ -25,7 +25,7 @@ The script collects the following information (settings, information, configurat
 
 Feel free to add more cool data-collections to suit your needs. 
 I would love to hear what you are collection. Maybe we can include your ideas into ClientInspector so the whole community can gain access to smart ideas.
-Drop me an email on mok@mortenknudsen.net
+Drop me an email on mok@mortenknudsen.net with your code, so I can include it.
 
 
 ### How to access the data ?
@@ -107,11 +107,21 @@ If you use the [ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorte
 If you want to add more views (or workbooks), you can start by investigating the collected data in the custom logs tables using KQL quries. Then make your new views in the workbooks - and pin your favorites to your dashboards.
    
 ## Archicture & flow
-**ClientInspector (v2)** is uploading the collected data into **custom logs** in **Azure LogAnalytics workspace** - using **Log ingestion API**, **Azure Data Collection Rules (DCR)** and **Azure Data Collection Endpoints (DCE)**. 
+ClientInspector (v2) is uploading the collected data into **custom logs** in **Azure LogAnalytics workspace** - using **Log ingestion API**, **Azure Data Collection Rules (DCR)** and **Azure Data Collection Endpoints (DCE)**. 
 
 ![Flow](img/flow.png)
 
 The old ClientInspector (v1) was using the HTTP Data Collector API and custom logs (MMA-format).
+
+## Implementation (high-level steps)
+The steps to setup ClientInspector in your environment are:
+1. [Setup environment using ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit)
+    [If you want to learn more about the components, please check this link](#infrastructure-setup-pre-requisite)
+
+2. [Run ClientInspector the first time (initial setup)](#initial-configuration-of-clientinspector---creation-of-tablesdcrs-from-reference-computer). This step reads the source data - and creates the necessary custom log tables and DCR with the correct schema to understand the data
+
+3. [Setup deployment job to let ClientInspector run every day to collect the inventory] (#how-to-run-clientinspector-after-initial-setup-has-completed)
+
 
 ## Infrastructure setup (pre-requisite)
 ClientInspector requires some prerequisites to run, which can be deployed using the [ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit)
