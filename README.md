@@ -117,7 +117,7 @@ The old ClientInspector (v1) was using the HTTP Data Collector API and custom lo
 The steps to setup ClientInspector in your environment are:
 1. [Setup environment using ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit)
 
-    [If you want to learn more about the components, please check this link](#infrastructure-setup-pre-requisite)
+    [Click here to learn more about the Azure components in the solution](#infrastructure-setup-pre-requisite)
 
 2. [Run ClientInspector the first time (initial setup)](#initial-configuration-of-clientinspector---creation-of-tablesdcrs-from-reference-computer). This step reads the source data - and creates the necessary custom log tables and DCR with the correct schema to understand the data
 
@@ -338,3 +338,12 @@ You will run the inventory script by a traditional package / deployment
 
 </details>
 
+## Azure Workbook
+<details>
+  <summary>See dashboards which are deployed as part of the solution?</summary>
+
+https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#security-1
+
+</details>
+
+## Azure Dashboards
