@@ -26,6 +26,72 @@ The script collects the following information (settings, information, configurat
 ### How to access the data ?
 All the data can be accessed using Kusto (KQL) queries in Azure LogAnalytics - or by the provided Azure Workbooks and Azure Dashboards
 
+Sample query
+```
+InvClientDefenderAvV2_CL 
+| summarize CollectionTime = arg_max(CollectionTime, *) by Computer
+| where ((AMRunningMode == "Not running") or 
+    (parse_version(AMProductVersion) < parse_version("4.18.2203")) or 
+    (MPComputerStatusFound == false) or (MPPreferenceFound == false) or
+    (RealTimeProtectionEnabled == false) or
+    (AntivirusSignatureAge > 7) or (AntispywareSignatureAge > 7) or (NISSignatureAge > 7) or
+    (AMRunningMode == "EDR Block Mode") or (AMRunningMode == "Passive Mode") or
+    (AntispywareEnabled == false) or
+    ((TamperProtectionSource != "ATP") and (TamperProtectionSource != "Intune")) or (IsTamperProtected == false)
+    )
+| project
+    Computer,
+    UserLoggedOn,
+    CollectionTime,
+    MPComputerStatusFound,
+    MPPreferenceFound,
+    AMEngineVersion,
+    AMProductVersion,
+    AMRunningMode,
+    AMServiceEnabled,
+    AMServiceVersion,
+    AntispywareEnabled,
+    AntispywareSignatureAge,
+    AntispywareSignatureLastUpdated,
+    AntispywareSignatureVersion,
+    AntivirusEnabled,
+    AntivirusSignatureAge,
+    AntivirusSignatureLastUpdated,
+    AntivirusSignatureVersion,
+    BehaviorMonitorEnabled,
+    DefenderSignaturesOutOfDate,
+    DisableAutoExclusions,
+    DisableBehaviorMonitoring,
+    DisableRealtimeMonitoring,
+    DisableScanningMappedNetworkDrivesForFullScan,
+    DisableScanningNetworkFiles,
+    DisableScriptScanning,
+    EnableControlledFolderAccess,
+    EnableNetworkProtection,
+    FullScanAge,
+    IoavProtectionEnabled,
+    IsTamperProtected,
+    IsVirtualMachine,
+    MAPSReporting,
+    NISEnabled,
+    NISEngineVersion,
+    NISSignatureAge,
+    NISSignatureLastUpdated,
+    NISSignatureVersion,
+    OnAccessProtectionEnabled,
+    ProductStatus,
+    PUAProtection,
+    QuickScanAge,
+    RealTimeProtectionEnabled,
+    RealTimeScanDirection,
+    RebootRequired,
+    ScanAvgCPULoadFactor,
+    SignatureUpdateCatchupInterval,
+    SignatureUpdateInterval,
+    SubmitSamplesConsent,
+    TamperProtectionSource 
+```
+
 If you use the [ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit), you will also get access to **13 ready-to-use workbooks** and **14 ready-to-use dashboards**.
 
 If you want to add more views (or workbooks), you can start by investigating the collected data in the custom logs tables using KQL quries. Then make your new views in the workbooks - and pin your favorites to your dashboards.
@@ -61,17 +127,16 @@ ClientInspector requires some prerequisites to run, which can be deployed using 
 
 The following components are needed:
 
-| Azure Resource                | Purpose      | More information
-| :-------------                | :-----                                            |
-| Any REST endpoint             | This is the source sending data                   |
-| Log Ingestion API             | This is the new API that replaces the old HTTP Data Collector API | https://learn.microsoft.com/en-us/azure/azure-monitor/logs/logs-ingestion-api-overview
-| Data Collection Endpoint (DCE)| This is the entry point of communication from the endpoint. Data is sent to a **Azure Data Collection Endpoint Ingestion Uri**. A single DCE can support multiple DCRs, so you can specify a different DCR for different sources and target tables. | https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/data-collection-endpoint-overview?tabs=portal
-https://learn.microsoft.com/en-us/azure/azure-monitor/logs/logs-ingestion-api-overview#endpoint-uri
-| Data Collection Rules (DCR)   | Data collection rules define data collected (schema) and specify how and where that data should be sent or stored. The DCR must understand the structure of the input data and the structure of the target table. If the two don't match, it can use a transformation to convert the source data to match the target table. You can also use the transformation to filter source data and perform any other calculations or conversions. | https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/data-collection-rule-overview
-| Azure LogAnaltyics Workspace  | Data is sent to custom logs in Azure LogAnalytics  | https://learn.microsoft.com/en-us/azure/azure-monitor/logs/log-analytics-overview
-| Azure Workbooks               | As part of the deployment, sample workbooks will be deployed  | https://learn.microsoft.com/en-us/azure/azure-monitor/visualize/workbooks-overview
-| Azure Dashboards              | As part of the deployment, sample workbooks will be deployed  | https://learn.microsoft.com/en-us/azure/azure-monitor/visualize/tutorial-logs-dashboards
-| Kusto (KQL)                   | Data can be analyzed using Kust (KQL) queries | https://learn.microsoft.com/en-us/azure/azure-monitor/logs/get-started-queries
+| Azure Resource                | Purpose                                           | More information |
+| :-------------                | :-----                                            | :-----           |
+| Any REST endpoint             | This is the source sending data                   |                  |
+| Log Ingestion API             | This is the new API that replaces the old HTTP Data Collector API | https://learn.microsoft.com/en-us/azure/azure-monitor/logs/logs-ingestion-api-overview |
+| Data Collection Endpoint (DCE)| This is the entry point of communication from the endpoint. Data is sent to a **Azure Data Collection Endpoint Ingestion Uri**. A single DCE can support multiple DCRs, so you can specify a different DCR for different sources and target tables. | https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/data-collection-endpoint-overview?tabs=portal |
+| Data Collection Rules (DCR)   | Data collection rules define data collected (schema) and specify how and where that data should be sent or stored. The DCR must understand the structure of the input data and the structure of the target table. If the two don't match, it can use a transformation to convert the source data to match the target table. You can also use the transformation to filter source data and perform any other calculations or conversions. | https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/data-collection-rule-overview | 
+| Azure LogAnaltyics Workspace  | Data is sent to custom logs in Azure LogAnalytics  | https://learn.microsoft.com/en-us/azure/azure-monitor/logs/log-analytics-overview |
+| Azure Workbooks               | As part of the deployment, sample workbooks will be deployed  | https://learn.microsoft.com/en-us/azure/azure-monitor/visualize/workbooks-overview |
+| Azure Dashboards              | As part of the deployment, sample workbooks will be deployed  | https://learn.microsoft.com/en-us/azure/azure-monitor/visualize/tutorial-logs-dashboards |
+| Kusto (KQL)                   | Data can be analyzed using Kust (KQL) queries | https://learn.microsoft.com/en-us/azure/azure-monitor/logs/get-started-queries |
 
 
 ## Powershell function AzLogDcringestPS
