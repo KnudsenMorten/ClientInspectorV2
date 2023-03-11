@@ -120,12 +120,25 @@ Scripts for Microsoft Intune and ConfigMgr (or any other tool running a CMD-file
 ### How to deploy using Microsoft Intune ?
 <details>
   <summary>How to deploy using Microsoft Intune ?</summary>
+  You will run the inventory script using the method remediation script in Microsoft Intune.
   
-  ```js
-  function logSomething(something) {
-    console.log('Something', something);
-  }
-  ```
+1. Start by downloading the [detection script](https://raw.githubusercontent.com/KnudsenMorten/ClientInspectorV2/main/Intune/ClientInspector_Detection.ps1)
+2. Open the file with your favorite editor. Adjust the frequency on how often you want the inventory to run
+```
+##################################
+# VARIABLES
+##################################
+
+    $RunEveryHours    = 8
+    $LastRun_RegPath  = "HKLM:\SOFTWARE\ClientInspector"
+    $LastRun_RegKey   = "ClientInSpector_System"
+```
+3. Now we need to create the remediation job. Go into Microsoft Intune portal -> Reports -> Endpoint Analysis --> Proactive remediations - and create a script package as shown below
+![Flow](img/Intune-remediation-1.png.png)
+![Flow](img/Intune-remediation-2.png.png)
+![Flow](img/Intune-remediation-3.png.png)
+![Flow](img/Intune-remediation-4.png.png)
+![Flow](img/Intune-remediation-5.png.png)
 </details>
 
 ### How to deploy using ConfigMgr (or any other tool running a CMD-file) ?
