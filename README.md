@@ -28,12 +28,18 @@ I would love to hear what you are collection. Maybe we can include your ideas in
 Drop me an email on mok@mortenknudsen.net with your code, so I can include it.
 
 
-### How to access the data ?
+### How to get insight of my environment from the data (desired state)?
+Initially, you will have access to Azure Dashboards installed by the ClientInSpectorV2-DeploymentKit
+
+The idea of the dashboards are that they will show where your infrastucture if drifting from best practice. Think of them as KPIs, where we might not be in control.
+Instead of having a task with patching and managing antivirus, we will have KPIs, which will show, where computers are **not** patched - or where realtime protection in anvirus is not running - or machines which has bluesceened during the last 24 hours.
+
+Each of the dashboards are based on Azure Workbooks, so if you want to drill down, you can click on a link and will get access to the detailed information.
 All the data can be accessed using Kusto (KQL) queries in Azure LogAnalytics - or by the provided Azure Workbooks and Azure Dashboards
 
 ![Dashboards](img/Dashboards-screen.jpg)
 
-
+If you want to do advanced hunting, you can use traditional Kusto (KQL) queries in the tables
 <details>
   <summary>Sample query</summary>
   
