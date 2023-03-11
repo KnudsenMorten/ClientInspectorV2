@@ -156,13 +156,14 @@ You can download latest version here:
 
 ### Authentication
 Authentication for the Logs Ingestion API is performed at the DCE, which uses standard Azure Resource Manager authentication. 
+
 A common strategy is to use an application ID and application key which is also the method used in ClientInspector.
 
 ### Source data
 The source data sent by ClientInSpector is formatted in JSON and must match the structure expected by the DCR. 
 It doesn't necessarily need to match the structure of the target table because the DCR can include a transformation to convert the data to match the table's structure.
 
-ClientInspector uses several functions within the Powershell module, **AzLogDcIngestPS**, to handle source data adjustsments to **remove "noice" in data**, to **remove prohibited colums in tables/DCR** - and support needs for **transparancy** with extra insight like **UserLoggedOn**, **CollectionTime**, **Computer**:
+ClientInspector uses several functions within the Powershell module, **AzLogDcIngestPS**, to handle source data adjustsments to **remove "noice" in data**, to **remove prohibited colums in tables/DCR** - and support needs for **transparency** with extra insight like **UserLoggedOn**, **CollectionTime**, **Computer**:
 
 <details>
   <summary>Examples of how to use functions Convert-CimArrayToObjectFixStructure, Add-CollectionTimeToAllEntriesInArray, Add-ColumnDataToAllEntriesInArray, ValidateFix-AzLogAnalyticsTableSchemaColumnNames, Build-DataArrayToAlignWithSchema, Filter-ObjectExcludeProperty</summary>
@@ -172,38 +173,38 @@ ClientInspector uses several functions within the Powershell module, **AzLogDcIn
 # Collecting data (in)
 #-------------------------------------------------------------------------------------------
 	
-	Write-Output ""
-	Write-Output "Collecting Bios information ... Please Wait !"
+Write-Output ""
+Write-Output "Collecting Bios information ... Please Wait !"
 
-	$DataVariable = Get-CimInstance -ClassName Win32_BIOS
+$DataVariable = Get-CimInstance -ClassName Win32_BIOS
 
 #-------------------------------------------------------------------------------------------
 # Preparing data structure
 #-------------------------------------------------------------------------------------------
 
-	# convert CIM array to PSCustomObject and remove CIM class information
+# convert CIM array to PSCustomObject and remove CIM class information
 	$DataVariable = Convert-CimArrayToObjectFixStructure -data $DataVariable -Verbose:$Verbose
 
-	# add CollectionTime to existing array
+# add CollectionTime to existing array
 	$DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
-	# add Computer & UserLoggedOn info to existing array
-	$DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn -Verbose:$Verbose
+# add Computer & UserLoggedOn info to existing array
+$DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn -Verbose:$Verbose
 
-	# Remove unnecessary columns in schema
-	$DataVariable = Filter-ObjectExcludeProperty -Data $DataVariable -ExcludeProperty __*,SystemProperties,Scope,Qualifiers,Properties,ClassPath,Class,Derivation,Dynasty,Genus,Namespace,Path,Property_Count,RelPath,Server,Superclass -Verbose:$Verbose
+# Remove unnecessary columns in schema
+$DataVariable = Filter-ObjectExcludeProperty -Data $DataVariable -ExcludeProperty __*,SystemProperties,Scope,Qualifiers,Properties,ClassPath,Class,Derivation,Dynasty,Genus,Namespace,Path,Property_Count,RelPath,Server,Superclass -Verbose:$Verbose
 
-	# Validating/fixing schema data structure of source data
-	$DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
+# Validating/fixing schema data structure of source data
+$DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
-	# Aligning data structure with schema (requirement for DCR)
-	$DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
+# Aligning data structure with schema (requirement for DCR)
+$DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
 ````
 
 You can verify the source object by running this command
 ````
-		# Get insight about the schema structure of an object BEFORE changes. Command is only needed to verify columns in schema
-		Get-ObjectSchemaAsArray -Data $DataVariable -Verbose:$Verbose
+# Get insight about the schema structure of an object BEFORE changes. Command is only needed to verify columns in schema
+Get-ObjectSchemaAsArray -Data $DataVariable -Verbose:$Verbose
 ````
 </details>
 
