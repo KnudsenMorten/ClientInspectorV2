@@ -215,9 +215,10 @@ Get-ObjectSchemaAsArray -Data $DataVariable -Verbose:$Verbose
 
 <details>
   <summary>How to configure the initial setup of Azure LogAnalytics tables and Data Collection Rules (first-time)</summary>
-  
-I recommend to have a reference computer, which is used for table/DCR management. This way it is a controlled process, if changes must be made for example change of data structure
 
+<br>
+I recommend to have a reference computer, which is used for table/DCR management. This way it is a controlled process, if changes must be made for example change of data structure
+  
 Configuration:
 1. Create a folder on a reference machine for example C:\ClientInspectorV2. It can easily be your own computer
 2. [Download the latest version of ClientInspector.ps1](https://raw.githubusercontent.com/KnudsenMorten/ClientInspectorV2/ClientInspector.ps1) - and place it in the folder created
@@ -253,7 +254,8 @@ Scripts for Microsoft Intune and ConfigMgr (or any other tool running a CMD-file
 
 <details>
   <summary>How to deploy using Microsoft Intune ?</summary>
-  
+
+<br>
   You will run the inventory script using the method remediation script in Microsoft Intune.
   
 1. [Download the detection script ClientInspector_Detection.ps1](https://raw.githubusercontent.com/KnudsenMorten/ClientInspectorV2/main/Intune/ClientInspector_Detection.ps1)
