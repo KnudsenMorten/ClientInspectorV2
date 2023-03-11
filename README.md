@@ -135,16 +135,16 @@ The following components are needed:
 
 
 ## Powershell function AzLogDcringestPS (pre-requisite)
-**ClientInspector** requires the Powershell module, **AzLogDcrIngestPS**, developed by [Morten Knudsen, Microsoft MVP](https://mvp.microsoft.com/en-us/PublicProfile/5005156?fullName=Morten%20Knudsen).
+ClientInspector requires the Powershell module, **AzLogDcrIngestPS**, developed by [Morten Knudsen, Microsoft MVP](https://mvp.microsoft.com/en-us/PublicProfile/5005156?fullName=Morten%20Knudsen).
 
 Core features of AzLogDcrIngestPS:
-	* create/update the DCRs and tables automatically - based on the source object schema
-	* validate the schema for naming convention issues. If exist found, it will mitigate the issues
-	* update schema of DCRs and tables, if the structure of the source object changes
-	* auto-fix if something goes wrong with a DCR or table
-	* can remove data from the source object, if there are colums of data you don't want to send
-	* can convert source objects based on CIM or PS objects into PSCustomObjects/array
-	* can add relevant information to each record like UserLoggedOn, Computer, CollectionTime
+* create/update the DCRs and tables automatically - based on the source object schema
+* validate the schema for naming convention issues. If exist found, it will mitigate the issues
+* update schema of DCRs and tables, if the structure of the source object changes
+* auto-fix if something goes wrong with a DCR or table
+* can remove data from the source object, if there are colums of data you don't want to send
+* can convert source objects based on CIM or PS objects into PSCustomObjects/array
+* can add relevant information to each record like UserLoggedOn, Computer, CollectionTime
 
 ClientInspector supports to include the Powershell functions in various ways:
 
