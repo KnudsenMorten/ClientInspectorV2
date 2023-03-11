@@ -151,6 +151,7 @@ ClientInspector supports to include the Powershell functions in various ways:
 You can download latest version here:
 
 [AzLogDcringestPS (Github)](https://github.com/KnudsenMorten/AzLogDcrIngestPS)
+
 [AzLogDcringestPS (Powershell Gallery)](https://www.powershellgallery.com/packages/AzLogDcrIngestPS)
 
 ### Authentication
