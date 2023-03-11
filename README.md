@@ -215,8 +215,7 @@ Get-ObjectSchemaAsArray -Data $DataVariable -Verbose:$Verbose
 
 <details>
   <summary>How to configure the initial setup of Azure LogAnalytics tables and Data Collection Rules (first-time)</summary>
-
-
+ 
 I recommend to have a reference computer, which is used for table/DCR management. This way it is a controlled process, if changes must be made for example change of data structure
 
 Configuration:
