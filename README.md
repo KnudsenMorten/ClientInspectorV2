@@ -28,7 +28,7 @@ I would love to hear what you are collection. Maybe we can include your ideas in
 Drop me an email on mok@mortenknudsen.net with your code, so I can include it.
 
 
-### How to get insight of my environment from the data (desired state)?
+## Dashboards - How to get insight of my environment from the data (desired state)?
 Initially, you will have access to Azure Dashboards installed by the [ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit)
 
 The idea of the dashboards are that they will show where your infrastucture if drifting from best practice. Think of them as KPIs, where we might not be in control.
@@ -38,21 +38,21 @@ Each of the dashboards are based on Azure Workbooks, so if you want to drill dow
 
 ![Dashboards](img/Dashboards-screen.jpg)
 
-#### Azure Workbooks
+### Azure Workbooks
 As mentioned the data can be viewed with Azure Workbooks deployed as part of the solution.
 
 [Link to see the provided Azure Workbooks](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-workbooks-part-of-deployment)
 
-#### Azure Dashboards
+### Azure Dashboards
 When deployed by ClientInSpectorV2-DeploymentKit, you will have access to sample Azure Dashboards to get you started. They are created based on pinned parts from Azure Workbooks.
 
 [Link to see the provided Azure Dashboards](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-dashboards-part-of-deployment)
 
-#### Make you own workbooks & dashboards
+### Can I make my own workbooks & dashboards - yes !!
 
 If you want to add more views (or workbooks), you can start by investigating the collected data in the custom logs tables using KQL quries. Then make your new views in the workbooks - and pin your favorites to your dashboards.
 
-#### Advanced hunting
+### Advanced hunting
 If you want to do advanced hunting, you can use traditional Kusto (KQL) queries in the tables
 <details>
   <summary>Sample query</summary>
@@ -124,6 +124,55 @@ InvClientDefenderAvV2_CL
   ```
 </details>
 
+### Example: Kusto query to merge data from 3 tables
+```
+InvClientComputerInfoBiosV2_CL 
+| summarize TimeGenerated = arg_max(TimeGenerated,*) by Computer
+	| join (InvClientComputerInfoSystemV2_CL
+	|    summarize TimeGenerated = arg_max(TimeGenerated,*) by Computer)
+	   on $left.Computer == $right.Computer
+	| join (InvClientComputerOSInfoV2_CL 
+	|    summarize TimeGenerated = arg_max(TimeGenerated,*) by Computer)
+	   on $left.Computer == $right.Computer
+| project Computer, UserLoggedOn, SerialNumber, Manufacturer, PCSystemType, SystemFamily, Model, Windows=Caption2, WindowsVersion=Version1, TimeGenerated
+```
+
+### Example: Here is an example of doing same query from Powershell against LogAnalytics
+```
+Connect-AzAccount
+
+#----------------------------------------------------------------------------------------------------------------------
+# Variables
+#----------------------------------------------------------------------------------------------------------------------
+
+$LogAnalyticsWorkspaceId        = "e74ca75a-c0e6-4933-a4f7-e5ae943fe4ac" 
+
+#----------------------------------------------------------------------------------------------------------------------
+# Collecting Computer data from Azure LogAnalytics
+#----------------------------------------------------------------------------------------------------------------------
+$Query = @'
+            InvClientComputerInfoBiosV2_CL 
+            | summarize TimeGenerated = arg_max(TimeGenerated,*) by Computer
+                | join (InvClientComputerInfoSystemV2_CL
+                |    summarize TimeGenerated = arg_max(TimeGenerated,*) by Computer)
+                   on $left.Computer == $right.Computer
+                | join (InvClientComputerOSInfoV2_CL 
+                |    summarize TimeGenerated = arg_max(TimeGenerated,*) by Computer)
+                   on $left.Computer == $right.Computer
+            | project Computer, UserLoggedOn, SerialNumber, Manufacturer, PCSystemType, SystemFamily, Model, Windows=Caption2, WindowsVersion=Version1, TimeGenerated
+'@
+
+write-output "Collecting computer information from LogAnalytics"
+$Query = Invoke-AzOperationalInsightsQuery -WorkspaceId $LogAnalyticsWorkspaceId -Query $Query
+$ComputerInfoArray = $Query.Results
+$ComputerInfoArray
+```
+### Integrating the data with other sources (warrantycheck against Lenovo warranty-database)
+When we have the data in Azure LogAnalytics, we can start to integrate the data with other sources, like Dell or Lenovo warranty data via REST api lookup.
+
+Here is an example of output, which was auto-created by a powershell script - extracting a list of computers & serial number - and then doing lookup to Lenovo warranty database to retrieve information about when the computer was purchased - and its warranty state.
+
+[Sample warranty output (PDF), based on data collected by ClientInspector](https://github.com/KnudsenMorten/ClientInspectorV2/img/WarrantyInfo.pdf)
 
    
 ## Archicture & flow
