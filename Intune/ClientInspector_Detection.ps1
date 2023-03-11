@@ -3,8 +3,6 @@ Write-Output "******************************************************************
 Write-Output "CLIENT INSPECTOR | SYSTEM | DETECTION FOR MICROSOFT MEM/INTUNE"
 Write-Output ""
 Write-Output "Purpose: Purpose of this script is to detect if client inspector should run or it has run during the last x hours"
-Write-Output ""
-Write-Output "Support: Morten Knudsen - mok@2linkit.net | 40 178 179"
 Write-Output "***********************************************************************************************"
 #------------------------------------------------------------------------------------------------
 
@@ -12,8 +10,8 @@ Write-Output "******************************************************************
 # VARIABLES
 ##################################
 
-    $RunEveryHours    = 4
-    $LastRun_RegPath  = "HKLM:\SOFTWARE\2LINKIT"
+    $RunEveryHours    = 8
+    $LastRun_RegPath  = "HKLM:\SOFTWARE\ClientInspector"
     $LastRun_RegKey   = "ClientInSpector_System"
 
 
