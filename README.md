@@ -137,7 +137,7 @@ The following components are needed:
 ## Powershell function AzLogDcringestPS (pre-requisite)
 ClientInspector requires the Powershell module, **AzLogDcrIngestPS**, developed by [Morten Knudsen, Microsoft MVP](https://mvp.microsoft.com/en-us/PublicProfile/5005156?fullName=Morten%20Knudsen).
 
-Core features of AzLogDcrIngestPS:
+Core features of Powershell module **AzLogDcrIngestPS**:
 * create/update the DCRs and tables automatically - based on the source object schema
 * validate the schema for naming convention issues. If exist found, it will mitigate the issues
 * update schema of DCRs and tables, if the structure of the source object changes
