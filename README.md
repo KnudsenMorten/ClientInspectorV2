@@ -41,7 +41,55 @@ Each of the dashboards are based on Azure Workbooks, so if you want to drill dow
 ### Azure Workbooks
 As mentioned the data can be viewed with Azure Workbooks deployed as part of the solution.
 
-[Link to see the provided Azure Workbooks](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-workbooks-part-of-deployment)
+<details>
+  <summary>Sample views included in provided Azure Workbooks</summary>
+
+![Antivirus](img/Sample-Antivirus-1.png)
+
+![Antivirus](img/Sample-Antivirus-2.png)
+
+![Antivirus](img/Sample-Antivirus-3.png)
+
+![Antivirus](img/Sample-Applications.png)
+
+![Antivirus](img/Sample-Bitlocker-1.png)
+
+![Antivirus](img/Sample-Bitlocker-2.png)
+
+![Antivirus](img/Sample-Bluescreens.png)
+
+![Antivirus](img/Sample-ComputerInfo-1.png)
+
+![Antivirus](img/Sample-ComputerInfo-2.png)
+
+![Antivirus](img/Sample-ComputerInfo-3.png)
+
+![Antivirus](img/Sample-ComputerInfo-4.png)
+
+![Antivirus](img/Sample-Defender.png)
+
+![Antivirus](img/Sample-Office-1.png)
+
+![Antivirus](img/Sample-Office-2.png)
+
+![Antivirus](img/Sample-Office-3.png)
+
+![Antivirus](img/Sample-Office-3.png)
+
+![Antivirus](img/Sample-WindowsUpdate-1.png)
+
+![Antivirus](img/Sample-WindowsUpdate-2.png)
+
+![Antivirus](img/Sample-WindowsUpdate-3.png)
+
+![Antivirus](img/Sample-WinFw.png)
+  
+</details>
+
+
+
+
+[Link to see the complete list of provided Azure Workbooks](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-workbooks-part-of-deployment)
 
 ### Azure Dashboards
 When deployed by ClientInSpectorV2-DeploymentKit, you will have access to sample Azure Dashboards to get you started. They are created based on pinned parts from Azure Workbooks.
@@ -181,7 +229,7 @@ When we have the data in Azure LogAnalytics, we can start to integrate the data 
 
 Here is an example of output, which was auto-created by a powershell script - extracting a list of computers & serial number - and then doing lookup to Lenovo warranty database to retrieve information about when the computer was purchased - and its warranty state.
 
-[Sample warranty output (Excel), based on data collected by ClientInspector](https://github.com/KnudsenMorten/ClientInspectorV2/blob/main/img/WarrantyInfo.xlsx)
+[Sample warranty output (Excel), based on data collected by ClientInspector](https://github.com/KnudsenMorten/ClientInspectorV2/raw/main/img/WarrantyInfo.xlsx)
    
 ## Archicture & flow
 ClientInspector (v2) is uploading the collected data into **custom logs** in **Azure LogAnalytics workspace** - using **Log ingestion API**, **Azure Data Collection Rules (DCR)** and **Azure Data Collection Endpoints (DCE)**. 
