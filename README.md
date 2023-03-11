@@ -167,8 +167,9 @@ ClientInspector uses several functions within the Powershell module, **AzLogDcIn
 
 <details>
   <summary>Sample with usage of functions **Convert-CimArrayToObjectFixStructure**, **Add-CollectionTimeToAllEntriesInArray**, **Add-ColumnDataToAllEntriesInArray**, **ValidateFix-AzLogAnalyticsTableSchemaColumnNames**, **Build-DataArrayToAlignWithSchema**, **Filter-ObjectExcludeProperty**</summary>
+```js
   
-  ```js
+```
 #-------------------------------------------------------------------------------------------
 # Collecting data (in)
 #-------------------------------------------------------------------------------------------
@@ -199,23 +200,22 @@ ClientInspector uses several functions within the Powershell module, **AzLogDcIn
 
 	# Aligning data structure with schema (requirement for DCR)
 	$DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
-  }
-  ```
-</details>
-
+````
 
 You can verify the source object by running this command
 ````
-	# Get insight about the schema structure of an object BEFORE changes. Command is only needed to verify columns in schema
-	Get-ObjectSchemaAsArray -Data $DataVariable -Verbose:$Verbose
+		# Get insight about the schema structure of an object BEFORE changes. Command is only needed to verify columns in schema
+		Get-ObjectSchemaAsArray -Data $DataVariable -Verbose:$Verbose
 ````
+```js
+</details>
 
 
 ## Initial configuration of ClientInspector - creation of tables/DCRs from reference computer
 
 <details>
   <summary>How to configure the initial setup of Azure LogAnalytics tables and Data Collection Rules (first-time)</summary>
-  ```js
+```js
 I recommend to have a reference computer, which is used for table/DCR management. This way it is a controlled process, if changes must be made for example change of data structure
 
 Configuration:
@@ -245,7 +245,7 @@ C:\ClientInspector\ClientInspector.ps1 -PsFunctionLibrary LocalPath_Import -verb
 7. It wil now run for 10-15 min and create the necessary tables & Data Collection Rules - based on the actual structure in your environment
 8. When first run of the script has completed, then run it again. Now data will be sent into the solution.
 9. Verify data is coming in using Kusto queries in the different tables. NOTE: In can take up approx 10 min for the first upload of data, as the pipeline needs to be created in backend
-  ```
+```js
 </details>
 
 ## How to run ClientInspector after initial setup has completed?
@@ -254,6 +254,8 @@ Scripts for Microsoft Intune and ConfigMgr (or any other tool running a CMD-file
 
 <details>
   <summary>How to deploy using Microsoft Intune ?</summary>
+```js
+
   You will run the inventory script using the method remediation script in Microsoft Intune.
   
 1. [Download the detection script ClientInspector_Detection.ps1](https://raw.githubusercontent.com/KnudsenMorten/ClientInspectorV2/main/Intune/ClientInspector_Detection.ps1)
@@ -297,6 +299,7 @@ You will run the inventory script by a traditional package / deployment.
 4. Copy the 2 needed files **ClientInspector.cmd** and **ClientInspector.ps1** into the directory
 5. Make a package - and point the package to run **ClientInspector.cmd**
 6. Make a deployment. NOTE: Make source to configure the deployment to download the package down to the client
+```js
 </details>
 
 
