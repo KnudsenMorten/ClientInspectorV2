@@ -118,7 +118,7 @@ ClientInspector requires some prerequisites to run, which can be deployed using 
 
 <details>
   <summary>Detailed information about Azure components used as part of ClientInspector - and their purpose?</summary>
-  ```js
+
 The following components are needed:
 
 | Azure Resource                | Purpose                                           | More information |
@@ -131,7 +131,6 @@ The following components are needed:
 | Azure Workbooks               | As part of the deployment, sample workbooks will be deployed  | https://learn.microsoft.com/en-us/azure/azure-monitor/visualize/workbooks-overview |
 | Azure Dashboards              | As part of the deployment, sample workbooks will be deployed  | https://learn.microsoft.com/en-us/azure/azure-monitor/visualize/tutorial-logs-dashboards |
 | Kusto (KQL)                   | Data can be analyzed using Kust (KQL) queries | https://learn.microsoft.com/en-us/azure/azure-monitor/logs/get-started-queries |
-  ```
 </details>
 
 
@@ -167,9 +166,8 @@ ClientInspector uses several functions within the Powershell module, **AzLogDcIn
 
 <details>
   <summary>Sample with usage of functions **Convert-CimArrayToObjectFixStructure**, **Add-CollectionTimeToAllEntriesInArray**, **Add-ColumnDataToAllEntriesInArray**, **ValidateFix-AzLogAnalyticsTableSchemaColumnNames**, **Build-DataArrayToAlignWithSchema**, **Filter-ObjectExcludeProperty**</summary>
+
 ```js
-  
-```
 #-------------------------------------------------------------------------------------------
 # Collecting data (in)
 #-------------------------------------------------------------------------------------------
@@ -207,7 +205,6 @@ You can verify the source object by running this command
 		# Get insight about the schema structure of an object BEFORE changes. Command is only needed to verify columns in schema
 		Get-ObjectSchemaAsArray -Data $DataVariable -Verbose:$Verbose
 ````
-```js
 </details>
 
 
@@ -215,14 +212,14 @@ You can verify the source object by running this command
 
 <details>
   <summary>How to configure the initial setup of Azure LogAnalytics tables and Data Collection Rules (first-time)</summary>
-```js
+
 I recommend to have a reference computer, which is used for table/DCR management. This way it is a controlled process, if changes must be made for example change of data structure
 
 Configuration:
 1. Create a folder on a reference machine for example C:\ClientInspectorV2. It can easily be your own computer
 2. [Download the latest version of ClientInspector.ps1](https://raw.githubusercontent.com/KnudsenMorten/ClientInspectorV2/ClientInspector.ps1) - and place it in the folder created
 3. Open the file ClientInspector.ps1 - and insert the variables that was the output the deployment using **ClientInSpectorV2-DeploymentKit**
-```
+```js
 $TenantId                                   = "xxxx" 
 $LogIngestAppId                             = "xxxx" 
 $LogIngestAppSecret                         = "xxxx" 
@@ -239,13 +236,12 @@ $AzDcrDceTableCreateFromAnyMachine          = $true
 4. [Download the latest version of AzLogDcringestPS.ps1](https://raw.githubusercontent.com/KnudsenMorten/AzLogDcrIngestPS/main/AzLogDcrIngestPS.psm1) - and place it in the folder created
 5. Start Powershell as local admin
 6. Start the script using this command
-```
+```js
 C:\ClientInspector\ClientInspector.ps1 -PsFunctionLibrary LocalPath_Import -verbose:$true
 ```
 7. It wil now run for 10-15 min and create the necessary tables & Data Collection Rules - based on the actual structure in your environment
 8. When first run of the script has completed, then run it again. Now data will be sent into the solution.
 9. Verify data is coming in using Kusto queries in the different tables. NOTE: In can take up approx 10 min for the first upload of data, as the pipeline needs to be created in backend
-```js
 </details>
 
 ## How to run ClientInspector after initial setup has completed?
@@ -254,15 +250,13 @@ Scripts for Microsoft Intune and ConfigMgr (or any other tool running a CMD-file
 
 <details>
   <summary>How to deploy using Microsoft Intune ?</summary>
-```js
 
   You will run the inventory script using the method remediation script in Microsoft Intune.
   
 1. [Download the detection script ClientInspector_Detection.ps1](https://raw.githubusercontent.com/KnudsenMorten/ClientInspectorV2/main/Intune/ClientInspector_Detection.ps1)
 
-
-3. Open the file with your favorite editor. Adjust the frequency on how often you want the inventory to run
-```
+2. Open the file with your favorite editor. Adjust the frequency on how often you want the inventory to run
+```js
 ##################################
 # VARIABLES
 ##################################
@@ -299,7 +293,5 @@ You will run the inventory script by a traditional package / deployment.
 4. Copy the 2 needed files **ClientInspector.cmd** and **ClientInspector.ps1** into the directory
 5. Make a package - and point the package to run **ClientInspector.cmd**
 6. Make a deployment. NOTE: Make source to configure the deployment to download the package down to the client
-```js
 </details>
-
 
