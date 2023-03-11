@@ -38,11 +38,15 @@ Each of the dashboards are based on Azure Workbooks, so if you want to drill dow
 
 ![Dashboards](img/Dashboards-screen.jpg)
 
+![Antivirus](img/Sample-Bitlocker-2.png)
+
+![Bluescreens](img/Sample-Bluescreens.png)
+
 ### Azure Workbooks
 As mentioned the data can be viewed with Azure Workbooks deployed as part of the solution.
 
 <details>
-  <summary>Sample views included in provided Azure Workbooks</summary>
+  <summary>More sample views included in provided Azure Workbooks</summary>
 
 ![Antivirus](img/Sample-Antivirus-1.png)
 
@@ -52,37 +56,37 @@ As mentioned the data can be viewed with Azure Workbooks deployed as part of the
 
 ![Antivirus](img/Sample-Applications.png)
 
-![Antivirus](img/Sample-Bitlocker-1.png)
+![Bitlocker](img/Sample-Bitlocker-1.png)
 
-![Antivirus](img/Sample-Bitlocker-2.png)
+![Bitlocker](img/Sample-Bitlocker-2.png)
 
-![Antivirus](img/Sample-Bluescreens.png)
+![Bluescreens](img/Sample-Bluescreens.png)
 
-![Antivirus](img/Sample-ComputerInfo-1.png)
+![ComputerInfo](img/Sample-ComputerInfo-1.png)
 
-![Antivirus](img/Sample-ComputerInfo-2.png)
+![ComputerInfo](img/Sample-ComputerInfo-2.png)
 
-![Antivirus](img/Sample-ComputerInfo-3.png)
+![ComputerInfo](img/Sample-ComputerInfo-3.png)
 
-![Antivirus](img/Sample-ComputerInfo-4.png)
+![ComputerInfo](img/Sample-ComputerInfo-4.png)
 
-![Antivirus](img/Sample-Defender.png)
+![Defender](img/Sample-Defender.png)
 
-![Antivirus](img/Sample-Office-1.png)
+![Office](img/Sample-Office-1.png)
 
-![Antivirus](img/Sample-Office-2.png)
+![Office](img/Sample-Office-2.png)
 
-![Antivirus](img/Sample-Office-3.png)
+![Office](img/Sample-Office-3.png)
 
-![Antivirus](img/Sample-Office-3.png)
+![Office](img/Sample-Office-3.png)
 
-![Antivirus](img/Sample-WindowsUpdate-1.png)
+![WU](img/Sample-WindowsUpdate-1.png)
 
-![Antivirus](img/Sample-WindowsUpdate-2.png)
+![WU](img/Sample-WindowsUpdate-2.png)
 
-![Antivirus](img/Sample-WindowsUpdate-3.png)
+![WU](img/Sample-WindowsUpdate-3.png)
 
-![Antivirus](img/Sample-WinFw.png)
+![Winfw](img/Sample-WinFw.png)
   
 </details>
 
