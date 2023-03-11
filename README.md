@@ -287,9 +287,9 @@ NOTE: For remediation script, use the **ClientInspector.ps1** file
 
 <details>
   <summary>How to deploy using ConfigMgr (or any other tool running a CMD-file) ?</summary>
-<br />  
+<br />
 You will run the inventory script by a traditional package / deployment.
-
+<br />
 1. [Download the CMD-file ClientInspector.cmd](https://raw.githubusercontent.com/KnudsenMorten/ClientInspectorV2/ConfigMgr/ClientInspector.cmd)
 2. [Download the latest version of ClientInspector.ps1](https://raw.githubusercontent.com/KnudsenMorten/ClientInspectorV2/ClientInspector.ps1)
 3. Create a source structure on your ConfigMgr package source directory for example called ClientInspector. 
