@@ -46,7 +46,7 @@ Each of the dashboards are based on Azure Workbooks, so if you want to drill dow
 As mentioned the data can be viewed with Azure Workbooks deployed as part of the solution.
 
 <details>
-  <summary>More sample views included in provided Azure Workbooks</summary>
+  <summary>More sample workbooks views</summary>
 
 ![Antivirus](img/Sample-Antivirus-1.png)
 
@@ -91,8 +91,6 @@ As mentioned the data can be viewed with Azure Workbooks deployed as part of the
 </details>
 
 
-
-
 [Link to see the complete list of provided Azure Workbooks](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-workbooks-part-of-deployment)
 
 ### Azure Dashboards
@@ -102,7 +100,9 @@ When deployed by ClientInSpectorV2-DeploymentKit, you will have access to sample
 
 ### Can I make my own workbooks & dashboards - yes !!
 
-If you want to add more views (or workbooks), you can start by investigating the collected data in the custom logs tables using KQL quries. Then make your new views in the workbooks - and pin your favorites to your dashboards.
+If you want to add more views (or workbooks), you can start by investigating the collected data in the custom logs tables using KQL quries. 
+
+Then make your new views in the workbooks - and pin your favorites to your dashboards.
 
 ### Sample query 1: Advanced hunting using Kusto (KQL) query
 If you want to do advanced hunting, you can use traditional Kusto (KQL) queries in the tables
