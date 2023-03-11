@@ -116,6 +116,9 @@ The old ClientInspector (v1) was using the HTTP Data Collector API and custom lo
 ## Infrastructure setup (pre-requisite)
 ClientInspector requires some prerequisites to run, which can be deployed using the [ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit)
 
+<details>
+  <summary>Detailed information about Azure components used as part of ClientInspector - and their purpose?</summary>
+  ```js
 The following components are needed:
 
 | Azure Resource                | Purpose                                           | More information |
@@ -128,6 +131,8 @@ The following components are needed:
 | Azure Workbooks               | As part of the deployment, sample workbooks will be deployed  | https://learn.microsoft.com/en-us/azure/azure-monitor/visualize/workbooks-overview |
 | Azure Dashboards              | As part of the deployment, sample workbooks will be deployed  | https://learn.microsoft.com/en-us/azure/azure-monitor/visualize/tutorial-logs-dashboards |
 | Kusto (KQL)                   | Data can be analyzed using Kust (KQL) queries | https://learn.microsoft.com/en-us/azure/azure-monitor/logs/get-started-queries |
+  ```
+</details>
 
 
 ## Powershell function AzLogDcringestPS (pre-requisite)
@@ -159,9 +164,6 @@ The source data sent by ClientInSpector is formatted in JSON and must match the 
 It doesn't necessarily need to match the structure of the target table because the DCR can include a transformation to convert the data to match the table's structure.
 
 ClientInspector uses several functions within the Powershell module, **AzLogDcIngestPS**, to handle source data adjustsments to **remove "noice" in data**, to **remove prohibited colums in tables/DCR** - and support needs for **transparancy** with extra insight like **UserLoggedOn**, **CollectionTime**, **Computer**:
-
-
-
 
 <details>
   <summary>Sample with usage of functions **Convert-CimArrayToObjectFixStructure**, **Add-CollectionTimeToAllEntriesInArray**, **Add-ColumnDataToAllEntriesInArray**, **ValidateFix-AzLogAnalyticsTableSchemaColumnNames**, **Build-DataArrayToAlignWithSchema**, **Filter-ObjectExcludeProperty**</summary>
@@ -211,6 +213,9 @@ You can verify the source object by running this command
 
 ## Initial configuration of ClientInspector - creation of tables/DCRs from reference computer
 
+<details>
+  <summary>How to configure the initial setup of Azure LogAnalytics tables and Data Collection Rules (first-time)</summary>
+  ```js
 I recommend to have a reference computer, which is used for table/DCR management. This way it is a controlled process, if changes must be made for example change of data structure
 
 Configuration:
@@ -240,6 +245,8 @@ C:\ClientInspector\ClientInspector.ps1 -PsFunctionLibrary LocalPath_Import -verb
 7. It wil now run for 10-15 min and create the necessary tables & Data Collection Rules - based on the actual structure in your environment
 8. When first run of the script has completed, then run it again. Now data will be sent into the solution.
 9. Verify data is coming in using Kusto queries in the different tables. NOTE: In can take up approx 10 min for the first upload of data, as the pipeline needs to be created in backend
+  ```
+</details>
 
 ## How to run ClientInspector after initial setup has completed?
 You can run the ClientInspector script using your favorite deployment tool. 
