@@ -31,6 +31,9 @@ Drop me an email on mok@mortenknudsen.net with your code, so I can include it.
 ### How to access the data ?
 All the data can be accessed using Kusto (KQL) queries in Azure LogAnalytics - or by the provided Azure Workbooks and Azure Dashboards
 
+![Dashboards](img/Dashboards-screen.jpg)
+
+
 <details>
   <summary>Sample query</summary>
   
@@ -338,13 +341,13 @@ You will run the inventory script by a traditional package / deployment
 
 </details>
 
-## Azure Workbook
-As mentioned the data can be viewed with Azure Workbooks and Azure Dashboards deployed as part of the solution.
+## Azure Workbooks
+As mentioned the data can be viewed with Azure Workbooks deployed as part of the solution.
 
 [Link to see the provided Azure Workbooks](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-workbooks-part-of-deployment)
 
 
 ## Azure Dashboards
-As mentioned the data can be viewed with Azure Dashboards (built on Azure Workbooks) deployed as part of the solution.
+When deployed by ClientInSpectorV2-DeploymentKit, you will have access to sample Azure Dashboards to get you started. They are created based on pinned parts from Azure Workbooks.
 
 [Link to see the provided Azure Dashboards](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-dashboards-part-of-deployment)
