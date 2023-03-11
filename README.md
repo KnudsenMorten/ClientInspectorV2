@@ -113,7 +113,39 @@ If you want to add more views (or workbooks), you can start by investigating the
 
 The old ClientInspector (v1) was using the HTTP Data Collector API and custom logs (MMA-format).
 
-## How to run ClientInspector ?
+## Initial configuration of ClientInspector - creation of tables/DCRs from reference computer
+
+I recommend to have a reference computer, which is used for table/DCR management. This way it is a controlled process, if changes must be made for example change of data structure
+
+Configuration:
+1. Create a folder on a reference machine for example C:\ClientInspectorV2. It can easily be your own computer
+2. [Download the latest version of ClientInspector.ps1](https://raw.githubusercontent.com/KnudsenMorten/ClientInspectorV2/ClientInspector.ps1) - and place it in the folder created
+3. Open the file ClientInspector.ps1 - and insert the variables that was the output the deployment using **ClientInSpectorV2-DeploymentKit**
+```
+$TenantId                                   = "xxxx" 
+$LogIngestAppId                             = "xxxx" 
+$LogIngestAppSecret                         = "xxxx" 
+
+$DceName                                    = "xxxx" 
+$LogAnalyticsWorkspaceResourceId            = "xxxx"
+
+$AzDcrPrefixClient                          = "xxx" 
+$AzDcrSetLogIngestApiAppPermissionsDcrLevel = $false
+$AzDcrLogIngestServicePrincipalObjectId     = "xxx" 
+$AzDcrDceTableCreateFromReferenceMachine    = @()
+$AzDcrDceTableCreateFromAnyMachine          = $true
+```
+4. [Download the latest version of AzLogDcringestPS.ps1](https://raw.githubusercontent.com/KnudsenMorten/AzLogDcrIngestPS/main/AzLogDcrIngestPS.psm1) - and place it in the folder created
+5. Start Powershell as local admin
+6. Start the script using this command
+```
+C:\ClientInspector\ClientInspector.ps1 -PsFunctionLibrary LocalPath_Import -verbose:$true
+```
+7. It wil now run for 10-15 min and create the necessary tables & Data Collection Rules - based on the actual structure in your environment
+8. When first run of the script has completed, then run it again. Now data will be sent into the solution.
+9. Verify data is coming in using Kusto queries in the different tables. NOTE: In can take up approx 10 min for the first upload of data, as the pipeline needs to be created in backend
+
+## How to run ClientInspector after initial setup has completed?
 You can run the ClientInspector script using your favorite deployment tool. 
 Scripts for Microsoft Intune and ConfigMgr (or any other tool running a CMD-file) are provided. 
 
@@ -121,8 +153,9 @@ Scripts for Microsoft Intune and ConfigMgr (or any other tool running a CMD-file
   <summary>How to deploy using Microsoft Intune ?</summary>
   You will run the inventory script using the method remediation script in Microsoft Intune.
   
-1. [Download the detection script](https://raw.githubusercontent.com/KnudsenMorten/ClientInspectorV2/main/Intune/ClientInspector_Detection.ps1)
-2. [Download the latest version of **ClientInspector.ps1**](https://raw.githubusercontent.com/KnudsenMorten/ClientInspectorV2/ClientInspector.ps1)
+1. [Download the detection script ClientInspector_Detection.ps1](https://raw.githubusercontent.com/KnudsenMorten/ClientInspectorV2/main/Intune/ClientInspector_Detection.ps1)
+
+
 3. Open the file with your favorite editor. Adjust the frequency on how often you want the inventory to run
 ```
 ##################################
