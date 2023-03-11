@@ -52,7 +52,7 @@ When deployed by ClientInSpectorV2-DeploymentKit, you will have access to sample
 
 If you want to add more views (or workbooks), you can start by investigating the collected data in the custom logs tables using KQL quries. Then make your new views in the workbooks - and pin your favorites to your dashboards.
 
-### Advanced hunting
+### Sample query 1: Advanced hunting using Kusto (KQL) query
 If you want to do advanced hunting, you can use traditional Kusto (KQL) queries in the tables
 <details>
   <summary>Sample query</summary>
@@ -124,8 +124,11 @@ InvClientDefenderAvV2_CL
   ```
 </details>
 
-### Example: Kusto query to merge data from 3 tables
-```
+### Sample query 2: Kusto query to merge data from 3 tables
+<details>
+  <summary>Sample query</summary>
+  
+  ```js
 InvClientComputerInfoBiosV2_CL 
 | summarize TimeGenerated = arg_max(TimeGenerated,*) by Computer
 	| join (InvClientComputerInfoSystemV2_CL
@@ -136,9 +139,13 @@ InvClientComputerInfoBiosV2_CL
 	   on $left.Computer == $right.Computer
 | project Computer, UserLoggedOn, SerialNumber, Manufacturer, PCSystemType, SystemFamily, Model, Windows=Caption2, WindowsVersion=Version1, TimeGenerated
 ```
+</details>
 
-### Example: Here is an example of doing same query from Powershell against LogAnalytics
-```
+### Sample query 3: Query LogAnalytics data from Powershell
+<details>
+  <summary>Sample query</summary>
+  
+  ```js
 Connect-AzAccount
 
 #----------------------------------------------------------------------------------------------------------------------
@@ -167,12 +174,14 @@ $Query = Invoke-AzOperationalInsightsQuery -WorkspaceId $LogAnalyticsWorkspaceId
 $ComputerInfoArray = $Query.Results
 $ComputerInfoArray
 ```
-### Integrating the data with other sources (warrantycheck against Lenovo warranty-database)
+</details>
+
+### Sample query4: Integrating data with other sources (warrantycheck against Lenovo warranty-database)
 When we have the data in Azure LogAnalytics, we can start to integrate the data with other sources, like Dell or Lenovo warranty data via REST api lookup.
 
 Here is an example of output, which was auto-created by a powershell script - extracting a list of computers & serial number - and then doing lookup to Lenovo warranty database to retrieve information about when the computer was purchased - and its warranty state.
 
-[Sample warranty output (PDF), based on data collected by ClientInspector](https://github.com/KnudsenMorten/ClientInspectorV2/blob/main/img/WarrantyInfo.pdf)
+[Sample warranty output (Excel), based on data collected by ClientInspector](https://github.com/KnudsenMorten/ClientInspectorV2/blob/main/img/WarrantyInfo.xlsx)
    
 ## Archicture & flow
 ClientInspector (v2) is uploading the collected data into **custom logs** in **Azure LogAnalytics workspace** - using **Log ingestion API**, **Azure Data Collection Rules (DCR)** and **Azure Data Collection Endpoints (DCE)**. 
