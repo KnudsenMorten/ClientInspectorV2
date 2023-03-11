@@ -26,9 +26,12 @@ The script collects the following information (settings, information, configurat
 ### How to access the data ?
 All the data can be accessed using Kusto (KQL) queries in Azure LogAnalytics - or by the provided Azure Workbooks and Azure Dashboards
 
-Sample query
-```
+<details>
+  <summary>Sample query</summary>
+  
+  ```js
 InvClientDefenderAvV2_CL 
+| where TimeGenerated > ago(31d)
 | summarize CollectionTime = arg_max(CollectionTime, *) by Computer
 | where ((AMRunningMode == "Not running") or 
     (parse_version(AMProductVersion) < parse_version("4.18.2203")) or 
@@ -90,7 +93,9 @@ InvClientDefenderAvV2_CL
     SignatureUpdateInterval,
     SubmitSamplesConsent,
     TamperProtectionSource 
-```
+  ```
+</details>
+
 
 If you use the [ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit), you will also get access to **13 ready-to-use workbooks** and **14 ready-to-use dashboards**.
 
