@@ -172,8 +172,7 @@ When we have the data in Azure LogAnalytics, we can start to integrate the data 
 
 Here is an example of output, which was auto-created by a powershell script - extracting a list of computers & serial number - and then doing lookup to Lenovo warranty database to retrieve information about when the computer was purchased - and its warranty state.
 
-[Sample warranty output (PDF), based on data collected by ClientInspector](https://github.com/KnudsenMorten/ClientInspectorV2/img/WarrantyInfo.pdf)
-
+[Sample warranty output (PDF), based on data collected by ClientInspector](https://github.com/KnudsenMorten/ClientInspectorV2/blob/main/img/WarrantyInfo.pdf){target="_blank"}
    
 ## Archicture & flow
 ClientInspector (v2) is uploading the collected data into **custom logs** in **Azure LogAnalytics workspace** - using **Log ingestion API**, **Azure Data Collection Rules (DCR)** and **Azure Data Collection Endpoints (DCE)**. 
