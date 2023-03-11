@@ -468,3 +468,11 @@ You will run the inventory script by a traditional package / deployment
 
 </details>
 
+## Disclaimer
+It is important for me to state that I'm NOT trying to build a separate management tool, which will compete with Microsoft security and management stack.
+
+This is just an example of how you can built cool solutions - with the power of the Microsoft Azure stack - which can help you on day-to-day basis - and for a low price. 
+
+**Data from 5000 clients with daily inventory will cost you approx USD 100 per month with this solution.**
+
+Happy hunting :-)
