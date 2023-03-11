@@ -120,7 +120,7 @@ The steps to setup ClientInspector in your environment are:
 
 2. [Run ClientInspector the first time (initial setup)](#initial-configuration-of-clientinspector---creation-of-tablesdcrs-from-reference-computer). This step reads the source data - and creates the necessary custom log tables and DCR with the correct schema to understand the data
 
-3. [Setup deployment job to let ClientInspector run every day to collect the inventory] (#how-to-run-clientinspector-after-initial-setup-has-completed)
+3. [Setup deployment job to let ClientInspector run every day to collect the inventory](#how-to-run-clientinspector-after-initial-setup-has-completed)
 
 
 ## Infrastructure setup (pre-requisite)
