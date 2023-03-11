@@ -117,13 +117,13 @@ The old ClientInspector (v1) was using the HTTP Data Collector API and custom lo
 You can run the ClientInspector script using your favorite deployment tool. 
 Scripts for Microsoft Intune and ConfigMgr (or any other tool running a CMD-file) are provided. 
 
-### How to deploy using Microsoft Intune ?
 <details>
   <summary>How to deploy using Microsoft Intune ?</summary>
   You will run the inventory script using the method remediation script in Microsoft Intune.
   
-1. Start by downloading the [detection script](https://raw.githubusercontent.com/KnudsenMorten/ClientInspectorV2/main/Intune/ClientInspector_Detection.ps1)
-2. Open the file with your favorite editor. Adjust the frequency on how often you want the inventory to run
+1. [Download the detection script](https://raw.githubusercontent.com/KnudsenMorten/ClientInspectorV2/main/Intune/ClientInspector_Detection.ps1)
+2. [Download the latest version of **ClientInspector.ps1**](https://raw.githubusercontent.com/KnudsenMorten/ClientInspectorV2/ClientInspector.ps1)
+3. Open the file with your favorite editor. Adjust the frequency on how often you want the inventory to run
 ```
 ##################################
 # VARIABLES
@@ -134,6 +134,8 @@ Scripts for Microsoft Intune and ConfigMgr (or any other tool running a CMD-file
     $LastRun_RegKey   = "ClientInSpector_System"
 ```
 3. Now we need to create the remediation job. Go into Microsoft Intune portal -> Reports -> Endpoint Analysis --> Proactive remediations - and create a script package as shown below
+
+   NOTE: For remediation script, use the **ClientInspector.ps1** file
 
 ![Flow](img/Intune-remediation-1.png)
 
@@ -147,7 +149,18 @@ Scripts for Microsoft Intune and ConfigMgr (or any other tool running a CMD-file
 
 </details>
 
-### How to deploy using ConfigMgr (or any other tool running a CMD-file) ?
+
+<details>
+  <summary>How to deploy using ConfigMgr (or any other tool running a CMD-file) ?</summary>
+  You will run the inventory script by a traditional package / deployment.
+  
+1. [Download the CMD-file](https://raw.githubusercontent.com/KnudsenMorten/ClientInspectorV2/ConfigMgr/ClientInspector.cmd)
+2. [Download the latest version of **ClientInspector.ps1**](https://raw.githubusercontent.com/KnudsenMorten/ClientInspectorV2/ClientInspector.ps1)
+3. Create a source structure on your ConfigMgr package source directory for example called ClientInspector. 
+4. Copy the 2 needed files **ClientInspector.cmd** and **ClientInspector.ps1** into the directory
+5. Make a package - and point the package to run **ClientInspector.cmd**
+6. Make a deployment. NOTE: Make source to configure the deployment to download the package down to the client
+</details>
 
 
 
