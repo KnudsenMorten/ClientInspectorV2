@@ -23,6 +23,11 @@ The script collects the following information (settings, information, configurat
 17. Group Policy - last refresh
 18. TPM information - relavant to detect machines with/without TPM
 
+Feel free to add more cool data-collections to suit your needs. 
+I would love to hear what you are collection. Maybe we can include your ideas into ClientInspector so the whole community can gain access to smart ideas.
+Drop me an email on mok@mortenknudsen.net
+
+
 ### How to access the data ?
 All the data can be accessed using Kusto (KQL) queries in Azure LogAnalytics - or by the provided Azure Workbooks and Azure Dashboards
 
@@ -127,7 +132,7 @@ Scripts for Microsoft Intune and ConfigMgr (or any other tool running a CMD-file
 
 
 
-## Infrastructure setup
+## Infrastructure setup (pre-requisite)
 ClientInspector requires some prerequisites to run, which can be deployed using the [ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit)
 
 The following components are needed:
@@ -144,7 +149,7 @@ The following components are needed:
 | Kusto (KQL)                   | Data can be analyzed using Kust (KQL) queries | https://learn.microsoft.com/en-us/azure/azure-monitor/logs/get-started-queries |
 
 
-## Powershell function AzLogDcringestPS
+## Powershell function AzLogDcringestPS (pre-requisite)
 ClientInspector requires the Powershell module, **AzLogDcrIngestPS**, also developed by [Morten Knudsen, Microsoft MVP](https://mvp.microsoft.com/en-us/PublicProfile/5005156?fullName=Morten%20Knudsen).
 
 Core features of AzLogDcrIngestPS:
@@ -163,3 +168,63 @@ You can download latest version here:
 [AzLogDcringestPS (Github)](https://github.com/KnudsenMorten/AzLogDcrIngestPS)
   - or -
 [AzLogDcringestPS (Powershell Gallery)](https://www.powershellgallery.com/packages/AzLogDcrIngestPS)
+
+### Authentication
+Authentication for the Logs Ingestion API is performed at the DCE, which uses standard Azure Resource Manager authentication. 
+A common strategy is to use an application ID and application key which is also the method used in ClientInspector.
+
+### Source data
+The source data sent by ClientInSpector is formatted in JSON and must match the structure expected by the DCR. 
+It doesn't necessarily need to match the structure of the target table because the DCR can include a transformation to convert the data to match the table's structure.
+
+ClientInspector uses several functions within the Powershell module, **AzLogDcIngestPS**, to handle source data adjustsments to **remove "noice" in data**, to **remove prohibited colums in tables/DCR** - and support needs for **transparancy** with extra insight like **UserLoggedOn**, **CollectionTime**, **Computer**:
+
+
+
+
+<details>
+  <summary>Sample with usage of functions **Convert-CimArrayToObjectFixStructure**, **Add-CollectionTimeToAllEntriesInArray**, **Add-ColumnDataToAllEntriesInArray**, **ValidateFix-AzLogAnalyticsTableSchemaColumnNames**, **Build-DataArrayToAlignWithSchema**, **Filter-ObjectExcludeProperty**</summary>
+  
+  ```js
+#-------------------------------------------------------------------------------------------
+# Collecting data (in)
+#-------------------------------------------------------------------------------------------
+	
+	Write-Output ""
+	Write-Output "Collecting Bios information ... Please Wait !"
+
+	$DataVariable = Get-CimInstance -ClassName Win32_BIOS
+
+#-------------------------------------------------------------------------------------------
+# Preparing data structure
+#-------------------------------------------------------------------------------------------
+
+	# convert CIM array to PSCustomObject and remove CIM class information
+	$DataVariable = Convert-CimArrayToObjectFixStructure -data $DataVariable -Verbose:$Verbose
+
+	# add CollectionTime to existing array
+	$DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
+
+	# add Computer & UserLoggedOn info to existing array
+	$DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn -Verbose:$Verbose
+
+	# Remove unnecessary columns in schema
+	$DataVariable = Filter-ObjectExcludeProperty -Data $DataVariable -ExcludeProperty __*,SystemProperties,Scope,Qualifiers,Properties,ClassPath,Class,Derivation,Dynasty,Genus,Namespace,Path,Property_Count,RelPath,Server,Superclass -Verbose:$Verbose
+
+	# Validating/fixing schema data structure of source data
+	$DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
+
+	# Aligning data structure with schema (requirement for DCR)
+	$DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
+  }
+  ```
+</details>
+
+
+You can verify the source object by running this command
+````
+	# Get insight about the schema structure of an object BEFORE changes. Command is only needed to verify columns in schema
+	Get-ObjectSchemaAsArray -Data $DataVariable -Verbose:$Verbose
+````
+
+
