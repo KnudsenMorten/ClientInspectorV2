@@ -342,7 +342,7 @@ You will run the inventory script by a traditional package / deployment
 <details>
   <summary>See dashboards which are deployed as part of the solution?</summary>
 
-[link]https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-workbooks-part-of-deployment
+[link](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-workbooks-part-of-deployment)
 
 </details>
 
