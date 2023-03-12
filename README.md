@@ -178,6 +178,8 @@ If you want to add more views (or workbooks), you can start by investigating the
 
 Then make your new views in the workbooks - and pin your favorites to your dashboards.
 
+<br>
+
 # How do I query the data? - Kusto (KQL) is the answer
 If you don't know Kusto language, I recommend you to start playing around with it, as it is a really powerful language.
 
@@ -331,10 +333,10 @@ You have 2 options for connectivity to Azure for data upload: **public access** 
 ![Networking](docs/Networking.jpg)
 
 You need to allow the following endpoints in your firewall:
-|Endpoint|Purpose|Port|Direction|Bypass HTTPS Inspection|Example|
+|Endpoint|Purpose|Port|Direction|Bypass HTTPS Inspection|
 |:-------|:------|:----|:-------|:----------------------|:------|
-|global.handler.control.monitor.azure.com|Access control service|Port 443|Outbound|Yes|-|
-|dce logs ingestion uri|Ingest logs data|Port 443|Outbound|Yes|https://dce-log-platform-management-client-demo-p-iur0.westeurope-1.ingest.monitor.azure.com|
+|global.handler.control.monitor.azure.com|Access control service|Port 443|Outbound|Yes|
+|dce logs ingestion uri<br><br>sample<br>https://dce-log-platform-management-client-demo-p-iur0.westeurope-1.ingest.monitor.azure.com|Ingest logs data|Port 443|Outbound|Yes|
 
 <br>
 
