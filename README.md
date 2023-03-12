@@ -254,7 +254,7 @@ $ComputerInfoArray
 ```
 </details>
 
-### Sample query4: Integrating data with other sources (warrantycheck against Lenovo warranty-database)
+### Sample query 4: Integrating data with other sources (warrantycheck against Lenovo warranty-database)
 When we have the data in Azure LogAnalytics, we can start to integrate the data with other sources, like Dell or Lenovo warranty data via REST api lookup.
 
 Here is an example of output, which was auto-created by a powershell script - extracting a list of computers & serial number - and then doing lookup to Lenovo warranty database to retrieve information about when the computer was purchased - and its warranty state.
@@ -268,22 +268,12 @@ ClientInspector (v2) is uploading the collected data into **custom logs** in **A
 
 The old ClientInspector (v1) was using the HTTP Data Collector API and custom logs (MMA-format).
 
-## Implementation (high-level steps)
+## Implementation
 The steps to setup ClientInspector in your environment are:
 1. [Setup environment using ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit)
 
-    [Click here to learn more about the Azure components in the solution](#infrastructure-setup-pre-requisite)
-
-2. [Run ClientInspector the first time (initial setup)](#initial-configuration-of-clientinspector---creation-of-tablesdcrs-from-reference-computer). This step reads the source data - and creates the necessary custom log tables and DCR with the correct schema to understand the data
-
-3. [Setup deployment job to let ClientInspector run every day to collect the inventory](#how-to-run-clientinspector-after-initial-setup-has-completed)
-
-
-## Infrastructure setup (pre-requisite)
-ClientInspector requires some prerequisites to run, which can be deployed using the [ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit)
-
 <details>
-  <summary>Detailed information about Azure components used as part of ClientInspector - and their purpose?</summary>
+  <summary>Azure components used as part of ClientInspector - and their purpose?</summary>
 
 <br>
 
@@ -302,87 +292,7 @@ The following components are needed:
 
 </details>
 
-
-## Powershell function AzLogDcringestPS (pre-requisite)
-ClientInspector requires the Powershell module, **AzLogDcrIngestPS**, developed by [Morten Knudsen, Microsoft MVP](https://mvp.microsoft.com/en-us/PublicProfile/5005156?fullName=Morten%20Knudsen).
-
-Core features of Powershell module **AzLogDcrIngestPS**:
-* create/update the DCRs and tables automatically - based on the source object schema
-* validate the schema for naming convention issues. If exist found, it will mitigate the issues
-* update schema of DCRs and tables, if the structure of the source object changes
-* auto-fix if something goes wrong with a DCR or table
-* can remove data from the source object, if there are colums of data you don't want to send
-* can convert source objects based on CIM or PS objects into PSCustomObjects/array
-* can add relevant information to each record like UserLoggedOn, Computer, CollectionTime
-
-ClientInspector supports to include the Powershell functions in various ways:
-
-You can download latest version here:
-
-[AzLogDcringestPS (Github)](https://github.com/KnudsenMorten/AzLogDcrIngestPS)
-
-[AzLogDcringestPS (Powershell Gallery)](https://www.powershellgallery.com/packages/AzLogDcrIngestPS)
-
-### Authentication
-Authentication for the Logs Ingestion API is performed at the DCE, which uses standard Azure Resource Manager authentication. 
-
-A common strategy is to use an application ID and application key which is also the method used in ClientInspector.
-
-### Source data
-The source data sent by ClientInSpector is formatted in JSON and must match the structure expected by the DCR. 
-It doesn't necessarily need to match the structure of the target table because the DCR can include a transformation to convert the data to match the table's structure.
-
-ClientInspector uses several functions within the Powershell module, **AzLogDcIngestPS**, to handle source data adjustsments to **remove "noice" in data**, to **remove prohibited colums in tables/DCR** - and support needs for **transparency** with extra insight like **UserLoggedOn**, **CollectionTime**, **Computer**:
-
-<details>
-  <summary>Examples of how to use functions Convert-CimArrayToObjectFixStructure, Add-CollectionTimeToAllEntriesInArray, Add-ColumnDataToAllEntriesInArray, ValidateFix-AzLogAnalyticsTableSchemaColumnNames, Build-DataArrayToAlignWithSchema, Filter-ObjectExcludeProperty</summary>
-
-```js
-#-------------------------------------------------------------------------------------------
-# Collecting data (in)
-#-------------------------------------------------------------------------------------------
-	
-Write-Output ""
-Write-Output "Collecting Bios information ... Please Wait !"
-
-$DataVariable = Get-CimInstance -ClassName Win32_BIOS
-
-#-------------------------------------------------------------------------------------------
-# Preparing data structure
-#-------------------------------------------------------------------------------------------
-
-# convert CIM array to PSCustomObject and remove CIM class information
-$DataVariable = Convert-CimArrayToObjectFixStructure -data $DataVariable -Verbose:$Verbose
-
-# add CollectionTime to existing array
-$DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
-
-# add Computer & UserLoggedOn info to existing array
-$DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn -Verbose:$Verbose
-
-# Remove unnecessary columns in schema
-$DataVariable = Filter-ObjectExcludeProperty -Data $DataVariable -ExcludeProperty __*,SystemProperties,Scope,Qualifiers,Properties,ClassPath,Class,Derivation,Dynasty,Genus,Namespace,Path,Property_Count,RelPath,Server,Superclass -Verbose:$Verbose
-
-# Validating/fixing schema data structure of source data
-$DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
-
-# Aligning data structure with schema (requirement for DCR)
-$DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
-````
-
-You can verify the source object by running this command
-````
-# Get insight about the schema structure of an object BEFORE changes. Command is only needed to verify columns in schema
-Get-ObjectSchemaAsArray -Data $DataVariable -Verbose:$Verbose
-````
-</details>
-
-[Please see more details about available functions in AzLogDcrIngestPS - and how to use them here](https://github.com/KnudsenMorten/AzLogDcrIngestPS)
-
-
-## Initial configuration of ClientInspector - creation of tables/DCRs from reference computer
-
-<details>
+2. [Run ClientInspector the first time (initial setup)]<details>
   <summary>How to configure the initial setup of Azure LogAnalytics tables and Data Collection Rules (first-time)</summary>
 
 <br>
@@ -434,8 +344,7 @@ $AzDcrDceTableCreateFromAnyMachine          = $false    # important so changes c
 
 </details>
 
-## How to run ClientInspector after initial setup has completed?
-You can run the ClientInspector script using your favorite deployment tool. 
+3. [Setup deployment job to let ClientInspector run every day to collect the inventory]You can run the ClientInspector script using your favorite deployment tool. 
 Scripts for Microsoft Intune and ConfigMgr (or any other tool running a CMD-file) are provided. 
 
 <details>
@@ -493,19 +402,97 @@ You will run the inventory script by a traditional package / deployment
 
 </details>
 
-## Usage of 3rd party module(s)
+## Dependencies
+<details>
+  <summary>Powershell function AzLogDcringestPS</summary>
+
+ClientInspector requires the Powershell module, **AzLogDcrIngestPS**, which is also developed by [Morten Knudsen, Microsoft MVP](https://mvp.microsoft.com/en-us/PublicProfile/5005156?fullName=Morten%20Knudsen).
+
+Core features of Powershell module **AzLogDcrIngestPS**:
+* create/update the DCRs and tables automatically - based on the source object schema
+* validate the schema for naming convention issues. If exist found, it will mitigate the issues
+* update schema of DCRs and tables, if the structure of the source object changes
+* auto-fix if something goes wrong with a DCR or table
+* can remove data from the source object, if there are colums of data you don't want to send
+* can convert source objects based on CIM or PS objects into PSCustomObjects/array
+* can add relevant information to each record like UserLoggedOn, Computer, CollectionTime
+
+ClientInspector supports to include the Powershell functions in various ways:
+
+You can download latest version here:
+
+[AzLogDcringestPS (Github)](https://github.com/KnudsenMorten/AzLogDcrIngestPS)
+
+[AzLogDcringestPS (Powershell Gallery)](https://www.powershellgallery.com/packages/AzLogDcrIngestPS)
+
+</details>
+
+### 3rd party Powershell module
 |ModuleName|Purpose|More info|Credit|
 |:---------|:------|:--------|:-----|
-|PSWindowsUpdate|Collection of Windows Update information (pending updates, installed updates, etc.)|[Link](https://www.powershellgallery.com/packages/PSWindowsUpdate)|Michal Gajda
+|NuGet|Common Package provider used to deploy many Powershell modules<br><br>Package Provider will automatically be installed on computer when script runs|[Link](https://www.nuget.org/packages|
+|PSWindowsUpdate|Collection of Windows Update information (pending updates, installed updates, etc.)<br><br>Module will automatically be installed on computer when script runs|[Link](https://www.powershellgallery.com/packages/PSWindowsUpdate)|Michal Gajda
+
+
+## Source data - what data can I use ?
+You can use **any source data** which can be retrieved by Powershell into an object (wmi, cim, external data, rest api, xml-format, json-format, csv-format, etc.)
+
+ClientInspector uses several functions within the Powershell module, **AzLogDcIngestPS**, to handle source data adjustsments to **remove "noice" in data**, to **remove prohibited colums in tables/DCR** - and support needs for **transparency** with extra insight like **UserLoggedOn**, **CollectionTime**, **Computer**:
+
+<details>
+  <summary>Examples of how to use functions Convert-CimArrayToObjectFixStructure, Add-CollectionTimeToAllEntriesInArray, Add-ColumnDataToAllEntriesInArray, ValidateFix-AzLogAnalyticsTableSchemaColumnNames, Build-DataArrayToAlignWithSchema, Filter-ObjectExcludeProperty</summary>
+
+```js
+#-------------------------------------------------------------------------------------------
+# Collecting data (in)
+#-------------------------------------------------------------------------------------------
+	
+Write-Output ""
+Write-Output "Collecting Bios information ... Please Wait !"
+
+$DataVariable = Get-CimInstance -ClassName Win32_BIOS
+
+#-------------------------------------------------------------------------------------------
+# Preparing data structure
+#-------------------------------------------------------------------------------------------
+
+# convert CIM array to PSCustomObject and remove CIM class information
+$DataVariable = Convert-CimArrayToObjectFixStructure -data $DataVariable -Verbose:$Verbose
+
+# add CollectionTime to existing array
+$DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
+
+# add Computer & UserLoggedOn info to existing array
+$DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn -Verbose:$Verbose
+
+# Remove unnecessary columns in schema
+$DataVariable = Filter-ObjectExcludeProperty -Data $DataVariable -ExcludeProperty __*,SystemProperties,Scope,Qualifiers,Properties,ClassPath,Class,Derivation,Dynasty,Genus,Namespace,Path,Property_Count,RelPath,Server,Superclass -Verbose:$Verbose
+
+# Validating/fixing schema data structure of source data
+$DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
+
+# Aligning data structure with schema (requirement for DCR)
+$DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
+````
+
+You can verify the source object by running this command
+````
+# Get insight about the schema structure of an object BEFORE changes. Command is only needed to verify columns in schema
+Get-ObjectSchemaAsArray -Data $DataVariable -Verbose:$Verbose
+````
+</details>
+
+[Please see more details about available functions in AzLogDcrIngestPS - and how to use them here](https://github.com/KnudsenMorten/AzLogDcrIngestPS)
 
 
 ## Security
 The security of **ClientInspector** are divided into 4 layers: **data-in (collection**, **data-upload** (send to backend) and **data-view** (dashboards) - and **schema-management**
 
+
 | Phase | Security Implementation |Delegations / Permissions|
 |:------|:------------------------|:------------------------|
 |data-in (collection)|This phase is controlled by the method you choose to do the actual collection (Intune, ConfigMg or other 3rd party)|Script needs to run as local admin (system context) to be able to collect core data from hardware & Windows
-|data-upload|Azure app & secret stored in the header of ClientInspector for simplicity purpose<br><br>It is also possible to use Azure Keyvault for storing the AppId and Secret|[Details covered in ClientInspectV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#security-1)
+|data-upload|Authentication for the Logs Ingestion API is performed at the DCE, which uses standard Azure Resource Manager authentication. A common strategy is to use an application ID and application key which is also the method used in ClientInspector. Azure AppId & Secret are stored in the header of ClientInspector for simplicity purpose<br><br>It is also possible to use Azure Keyvault for storing the AppId and Secret|[Details covered in ClientInspectV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#security-1)
 |data-view|Azure RCAC permissions|Give access to your Azure LogAnalytics, Azure Workbooks and Azure Dashboards|
 |schema-management|Method 1: Azure RBAC (recommended)<br><br>Method 2:Azure app with secret or certificate|[Details covered in ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-rbac-security-adjustment-separation-of-permissions-between-log-ingestion-and-tabledcr-management)
 
