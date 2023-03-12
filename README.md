@@ -1,14 +1,20 @@
 # Introduction to ClientInspector (v2)
 Check out **ClientInspector**, which can help you get **great insight** to your complete **client environment**.
 
-**Are you in control?** - or are some of your core infrastructure processes like **patching, antivirus, bitlocker enablement drifting**? Or would you like to do **advanced inventory**, where you can lookup your **warranty state** against Lenovo or Dell warranty, then keep reading.
+**Are you in control?** - or are some of your core infrastructure processes like **patching, antivirus, bitlocker enablement** drifting? Or would you like to do **advanced inventory**, where you can lookup your **warranty state** against Lenovo or Dell warranty, then keep reading.
 
 ![Antivirus](img/Sample-Bitlocker-2.png)
 
 ![Bluescreens](img/Sample-Bluescreens.png)
 
-**Disclaimer**
-It is important for me to state that I'm NOT trying to build a separate management tool, which will compete with Microsoft security and management stack. This is just an **great showcase** of how you can built **cool solutions** - with the power of the **Microsoft Azure stack** including **Azure Loganalytics, Azure Data Collection Rules, Azure Data Collection Endpoints, Azure Workbooks, Azure Dashboards**. Nothing beats Microsoft Azure and M365 management and security stack. They are rock star solutions. But I'm really **passioned** about the **logging capabilities** and the power to bring data back from clients, servers and cloud - and getting **cool valueable information out of the data**.
+** Disclaimer **
+It is important for me to state that I'm not trying to build a separate management tool, which will compete with Microsoft security and management stack. 
+
+This is just an **great showcase** of how you can built **cool solutions** - with the power of the **Microsoft Azure stack** including **Azure Loganalytics, Azure Data Collection Rules, Azure Data Collection Endpoints, Azure Workbooks, Azure Dashboards**. 
+
+Nothing beats Microsoft Azure and M365 management and security stack. They are rock star solutions. 
+
+But I'm really **passioned** about the **logging capabilities** and the power of being able to data back from clients, servers and cloud - and getting **cool valueable information out of the data** - view dashboards, alerting .
 
 I have a similar solution for Servers; **ServerInspector**. Unfortunately, it is not public.
 
@@ -319,6 +325,7 @@ Here is an example of output, which was auto-created by a powershell script - ex
 ClientInspector (v2) is uploading the collected data into **custom logs** in **Azure LogAnalytics workspace** - using **Log ingestion API**, **Azure Data Collection Rules (DCR)** and **Azure Data Collection Endpoints (DCE)**. 
 
 ![Archicture](docs/Architecture.jpg)
+![Archicture](docs/Architecture.png)
 
 ## Networking
 You have 2 options for connectivity to Azure for data upload: **public access** or **private access**
