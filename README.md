@@ -508,6 +508,7 @@ The security of **ClientInspector** are divided into 4 layers: **data-in**, **da
 |Data-view|Azure RCAC permissions|Give access to your Azure LogAnalytics, Azure Workbooks and Azure Dashboards|
 |Schema-management|Method 1: Azure RBAC (recommended)<br><br>Method 2:Azure app with secret or certificate|[Details covered in ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-rbac-security-adjustment-separation-of-permissions-between-log-ingestion-and-tabledcr-management)
 
+<br>
 
 # Cost - How much does it cost to store these data ?
 Data from **5000** clients doing **daily** ClientInspector inventory will cost you approx **USD 100 per month**
