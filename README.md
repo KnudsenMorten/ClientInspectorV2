@@ -30,7 +30,7 @@ If you want to take part in the community, please send me your collections, if y
 Drop me an email on mok@mortenknudsen.net with your code, then I will include it - for the benefit of the whole community.
 
 
-## Dashboards - How to get insight of my environment from the data (desired state)?
+## Desired State Dashboards - How to get insight of my environment from the data ?
 Initially, you will have access to Azure Dashboards installed by the [ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit)
 
 The idea of the dashboards are that they will show where your infrastucture if drifting from best practice. Think of them as KPIs, where we might not be in control.
