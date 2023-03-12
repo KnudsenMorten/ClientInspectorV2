@@ -1,7 +1,9 @@
 # Introduction to ClientInspector (v2)
+**Are you in control?** - or are some of your core infrastructure processes like **patching, antivirus, bitlocker enablement** drifting? Or would you like to do **advanced inventory**, where you can lookup your **warranty state** against Lenovo or Dell warranty, then keep reading.
+
 Check out **ClientInspector**, which can help you get **great insight** to your complete **client environment**.
 
-**Are you in control?** - or are some of your core infrastructure processes like **patching, antivirus, bitlocker enablement** drifting? Or would you like to do **advanced inventory**, where you can lookup your **warranty state** against Lenovo or Dell warranty, then keep reading.
+ClientInspector is **free** to the community - built to be a **cool showcase** of how you can bring back **data** from your clients using **Azure Log Ingestion Pipeline**, **Azure Data Collection Rules**, **Azure LogAnalytics**; view them with **Azure Monitor & Azure Dashboards** - and get "drift-alerts" using **Microsoft Sentinel**.
 
 ![KPIs](img/KPI-Dashboard.png)
 
@@ -12,11 +14,9 @@ Check out **ClientInspector**, which can help you get **great insight** to your 
 #### Disclaimer
 It is important for me to state that I'm not trying to build a separate management tool, which will compete with Microsoft security and management stack. 
 
-This is just an **great showcase** of how you can built **cool solutions** - with the power of the **Microsoft Azure stack** including **Azure Loganalytics, Azure Data Collection Rules, Azure Data Collection Endpoints, Azure Workbooks, Azure Dashboards**. 
-
 Nothing beats Microsoft Azure and M365 management and security stack. They are rock star solutions. 
 
-But I'm really **passioned** about the **logging capabilities** and the power of being able to data back from clients, servers and cloud - and getting **cool valueable information out of the data** - view dashboards, alerting .
+But I'm really **passioned** about the **logging capabilities** and the power of being able to data back from clients, servers and cloud - and getting **cool valueable information out of the data**.
 
 I have a similar solution for Servers; **ServerInspector**. Unfortunately, it is not public.
 
