@@ -324,13 +324,12 @@ Here is an example of output, which was auto-created by a powershell script - ex
 # Archicture & flow of ClientInspector ?
 ClientInspector (v2) is uploading the collected data into **custom logs** in **Azure LogAnalytics workspace** - using **Log ingestion API**, **Azure Data Collection Rules (DCR)** and **Azure Data Collection Endpoints (DCE)**. 
 
-![Archicture](docs/Architecture.jpg)
 ![Archicture](docs/Architecture.png)
 
 ## Networking
 You have 2 options for connectivity to Azure for data upload: **public access** or **private access**
 
-![Networking](docs/Networking.jpg)
+![Networking](docs/Networking.png)
 
 You need to allow the following endpoints in your firewall:
 |Endpoint|Purpose|Port|Direction|Bypass HTTPS Inspection|
