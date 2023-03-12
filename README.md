@@ -11,8 +11,6 @@ Instead of having a task with patching and managing antivirus, we will have KPIs
 
 ![Bluescreens](img/Sample-Bluescreens.png)
 
-It is important for me to state that I'm NOT trying to build a separate management tool, which will compete with Microsoft security and management stack. This is just an great example of how you can built **cool solutions** - with the power of the **Microsoft Azure stack** including **Azure Loganalytics, Azure Data Collection Rules, Azure Data Collection Endpoints, Azure Workbooks, Azure Dashboards**.
-
 And it can help you ensure you are in control with core infratructure processes for a low price. **Data from 5000 clients doing daily ClientInspector inventory will cost you approx USD 100 per month **
 
 Feel free to add more cool data-collections to suit your needs. 
@@ -20,6 +18,8 @@ If you want to take part in the community, please send me your collections, if y
 Drop me an email on mok@mortenknudsen.net with your code, then I will include it - for the benefit of the whole community.
 
 I have a similar solution for Servers; **ServerInspector**. Unfortunately, it is not public.
+
+It is important for me to state that I'm NOT trying to build a separate management tool, which will compete with Microsoft security and management stack. This is just an **great example** of how you can built **cool solutions** - with the power of the **Microsoft Azure stack** including **Azure Loganalytics, Azure Data Collection Rules, Azure Data Collection Endpoints, Azure Workbooks, Azure Dashboards**. Nothing beats Microsoft Azure and M365 management and security stack. They are rock star solutions.
 
 Happy hunting :-)
 
