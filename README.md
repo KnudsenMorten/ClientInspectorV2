@@ -19,9 +19,11 @@ Drop me an email on mok@mortenknudsen.net with your code, then I will include it
 
 I have a similar solution for Servers; **ServerInspector**. Unfortunately, it is not public.
 
-It is important for me to state that I'm NOT trying to build a separate management tool, which will compete with Microsoft security and management stack. This is just an **great example** of how you can built **cool solutions** - with the power of the **Microsoft Azure stack** including **Azure Loganalytics, Azure Data Collection Rules, Azure Data Collection Endpoints, Azure Workbooks, Azure Dashboards**. Nothing beats Microsoft Azure and M365 management and security stack. They are rock star solutions.
+It is important for me to state that I'm NOT trying to build a separate management tool, which will compete with Microsoft security and management stack. This is just an **great showcase** of how you can built **cool solutions** - with the power of the **Microsoft Azure stack** including **Azure Loganalytics, Azure Data Collection Rules, Azure Data Collection Endpoints, Azure Workbooks, Azure Dashboards**. Nothing beats Microsoft Azure and M365 management and security stack. They are rock star solutions. But I'm really **passioned** about the **logging capabilities** and the power to bring data back from clients, servers and cloud - and getting **cool valueable information out of the data**.
 
-Happy hunting :-)
+[Thank You to the great people in Microsoft product teams](https://github.com/KnudsenMorten/AzLogDcrIngestPS#thank-you-to-the-great-people-in-microsoft-product-teams)
+
+Happy hunting :smile:
 
 ![ClientInspector](img/ClientInspector_300.jpg)
 
@@ -506,3 +508,34 @@ The security of **ClientInspector** are divided into 4 layers: **data-in (collec
 |data-view|Azure RCAC permissions|Give access to your Azure LogAnalytics, Azure Workbooks and Azure Dashboards|
 |schema-management|Method 1: Azure RBAC (recommended)<br><br>Method 2:Azure app with secret or certificate|[Details covered in ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-rbac-security-adjustment-separation-of-permissions-between-log-ingestion-and-tabledcr-management)
 
+## Thank You to the great people in Microsoft product teams
+I would like to give **big credits** to a few people, who I have worked together with on this:
+
+|Name|Role|
+|:---|:---|
+|Ivan Varnitski|Program Manager - Azure Pipeline|
+|Evgeny Ternovsky|Program Manager - Azure Pipeline|
+|Nick Kiest|Program Manager - Azure Data Collection Rules|
+|Oren Salzberg|Program Manager - Azure LogAnalytics|
+|Guy Wild|Technical Writer - Azure LogAnalytics|
+|John Gardner|Program Manager - Azure Workbooks|
+|Shikha Jain|Program Manager - Azure Workbooks|
+|Shayoni Seth|Program Manager - Azure Monitor Agent|
+|Jeff Wolford|Program Manager - Azure Monitor Agent|
+|Xema Pathak|Program Manager - Azure VMInsight (integration to Azure Monitor Agent)|
+
+
+**Ivan & Evgeny from Azure Pipeline**
+![AzurePipeline](img/AzurePipeline.jpg)
+
+
+**Program Managers from Azure LogAnalytics**
+![AzurePipeline](img/LogAnalytics.jpg)
+
+
+**Nick, Shayoni & Xema from Azure Data Collection Rules, Azure Monitor Agent and Azure VMInsight**
+![AzurePipeline](img/AzureDCR_AMA.jpg)
+
+
+**John & Shikha from Azure Workbooks**
+![AzurePipeline](img/AzureWorkbooks.jpg)
