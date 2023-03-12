@@ -315,7 +315,7 @@ Here is an example of output, which was auto-created by a powershell script - ex
 
 [Sample warranty output (Excel), based on data collected by ClientInspector](https://github.com/KnudsenMorten/ClientInspectorV2/raw/main/img/WarrantyInfo.xlsx)
    
-## Archicture & flow
+## Archicture & flow of ClientInspector ?
 ClientInspector (v2) is uploading the collected data into **custom logs** in **Azure LogAnalytics workspace** - using **Log ingestion API**, **Azure Data Collection Rules (DCR)** and **Azure Data Collection Endpoints (DCE)**. 
 
 ![Flow](img/flow.png)
