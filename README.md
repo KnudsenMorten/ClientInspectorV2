@@ -345,11 +345,7 @@ $AzDcrDceTableCreateFromAnyMachine          = $false    # important so changes c
 
 </details>
 
-3. Setup deployment job to let ClientInspector run every day to collect the inventory
-<br>
-You can run the ClientInspector script using your favorite deployment tool. 
-<br>
-Scripts for Microsoft Intune and ConfigMgr (or any other tool running a CMD-file) are provided. 
+3. Setup deployment job to let ClientInspector run every day to collect the inventory. You can run the ClientInspector script using your favorite deployment tool. Scripts for Microsoft Intune and ConfigMgr (or any other tool running a CMD-file) are provided. 
 <br>
 <details>
   <summary>How to deploy using Microsoft Intune ?</summary>
