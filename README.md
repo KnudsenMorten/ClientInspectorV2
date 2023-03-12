@@ -1,6 +1,24 @@
 # ClientInspector (v2)
+Check out **ClientInspector**, which can help you get **great insight** to your complete **client environment**.
 
-## Introduction
+**Are you in control?** - or are some of your core infrastructure processes like **patching, antivirus, bitlocker enablement drifting**? Or would you like to do **advanced inventory**, where you can lookup your **warranty state** against Lenovo or Dell warranty, then keep reading.
+
+The idea of the dashboards are that they will show where your infrastucture if drifting from best practice. Think of them as KPIs, where we might not be in control.
+
+Instead of having a task with patching and managing antivirus, we will have KPIs, which will show, where computers are **not** patched - or where realtime protection in anvirus is not running - or machines which has bluesceened during the last 24 hours.
+
+![Antivirus](img/Sample-Bitlocker-2.png)
+
+![Bluescreens](img/Sample-Bluescreens.png)
+
+It is important for me to state that I'm NOT trying to build a separate management tool, which will compete with Microsoft security and management stack. This is just an great example of how you can built **cool solutions** - with the power of the **Microsoft Azure stack** including **Azure Loganalytics, Azure Data Collection Rules, Azure Data Collection Endpoints, Azure Workbooks, Azure Dashboards**.
+
+And it can help you ensure you are in control with core infratructure processes for a low price. **Data from 5000 clients doing daily ClientInspector inventory will cost you approx USD 100 per month **
+
+Happy hunting :-)
+
+
+## Introduction to ClientInspector (v2)
 **ClientInspector** can be used to collect lots of great information of from your **Windows clients** - and send the data to **Azure LogAnalytics Custom Tables**.
 
 ![ClientInspector](img/ClientInspector_500.jpg)
@@ -28,6 +46,8 @@ The script collects the following information (settings, information, configurat
 Feel free to add more cool data-collections to suit your needs. 
 If you want to take part in the community, please send me your collections, if you think they can be of great great value to others.
 Drop me an email on mok@mortenknudsen.net with your code, then I will include it - for the benefit of the whole community.
+
+I have a similar solution for Servers; **ServerInspector**. Unfortunately, it is not public.
 
 
 ## Desired State Dashboards - How to get insight of my environment from the data ?
