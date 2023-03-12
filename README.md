@@ -3,7 +3,7 @@
 ## Introduction
 **ClientInspector** can be used to collect lots of great information of from your **Windows clients** - and send the data to **Azure LogAnalytics Custom Tables**.
 
-![Antivirus](img/ClientInspector_500.png)
+![ClientInspector](img/ClientInspector_500.jpg)
 
 The script collects the following information (settings, information, configuration, state):
 1.  User Logged On to Client
