@@ -292,7 +292,8 @@ The following components are needed:
 
 </details>
 
-2. [Run ClientInspector the first time (initial setup)]<details>
+2. Run ClientInspector the first time (initial setup)
+<details>
   <summary>How to configure the initial setup of Azure LogAnalytics tables and Data Collection Rules (first-time)</summary>
 
 <br>
@@ -344,7 +345,9 @@ $AzDcrDceTableCreateFromAnyMachine          = $false    # important so changes c
 
 </details>
 
-3. [Setup deployment job to let ClientInspector run every day to collect the inventory]You can run the ClientInspector script using your favorite deployment tool. 
+3. Setup deployment job to let ClientInspector run every day to collect the inventory
+<br>
+You can run the ClientInspector script using your favorite deployment tool. 
 Scripts for Microsoft Intune and ConfigMgr (or any other tool running a CMD-file) are provided. 
 
 <details>
