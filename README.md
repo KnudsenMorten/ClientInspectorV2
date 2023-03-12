@@ -7,7 +7,7 @@ Check out **ClientInspector**, which can help you get **great insight** to your 
 
 ![Bluescreens](img/Sample-Bluescreens.png)
 
-** Disclaimer **
+#### Disclaimer
 It is important for me to state that I'm not trying to build a separate management tool, which will compete with Microsoft security and management stack. 
 
 This is just an **great showcase** of how you can built **cool solutions** - with the power of the **Microsoft Azure stack** including **Azure Loganalytics, Azure Data Collection Rules, Azure Data Collection Endpoints, Azure Workbooks, Azure Dashboards**. 
