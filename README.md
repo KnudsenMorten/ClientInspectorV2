@@ -292,13 +292,13 @@ The following components are needed:
 
 </details>
 
-2. Run ClientInspector the first time (initial setup)
+2. Run ClientInspector the first time (initial setup) - see more below
 <details>
   <summary>How to configure the initial setup of Azure LogAnalytics tables and Data Collection Rules (first-time)</summary>
 
 <br>
 I recommend to have a reference computer, which is used for table/DCR management. This way it is a controlled process, if changes must be made for example change of data structure
-  
+<br>
 Configuration:
 
 1. Create a folder on a reference machine for example C:\ClientInspectorV2. It can easily be your own computer
@@ -348,8 +348,9 @@ $AzDcrDceTableCreateFromAnyMachine          = $false    # important so changes c
 3. Setup deployment job to let ClientInspector run every day to collect the inventory
 <br>
 You can run the ClientInspector script using your favorite deployment tool. 
+<br>
 Scripts for Microsoft Intune and ConfigMgr (or any other tool running a CMD-file) are provided. 
-
+<br>
 <details>
   <summary>How to deploy using Microsoft Intune ?</summary>
 
