@@ -54,7 +54,7 @@ The script collects the following information (settings, information, configurat
 Feel free to add more cool data-collections to suit your needs. 
 If you want to take part in the community, please send me your collections, if you think they can be of great great value to others.
 
-Drop me an email on mok@mortenknudsen.net with your code, then I will include it - for the benefit of the whole community.
+Drop me an email on mok @ mortenknudsen.net with your code, then I will include it - for the benefit of the whole community.
 
 <br>
 
@@ -557,3 +557,24 @@ Lastly, I would like to give **big credits** to a few people, who I have worked 
 
 **John & Shikha from Azure Workbooks**
 ![AzurePipeline](img/AzureWorkbooks.jpg)
+
+
+# Contact
+If you have comments to the solution - or just want to connect with me, here are my details - would love to connect:
+
+[Github](https://github.com/KnudsenMorten)
+
+[Twitter](https://twitter.com/knudsenmortendk)
+
+[Blog](https://mortenknudsen.net/)
+
+[LinkedIn](https://www.linkedin.com/in/mortenwaltorpknudsen/)
+
+[Microsoft MVP profile](https://mvp.microsoft.com/en-us/PublicProfile/5005156?fullName=Morten%20Knudsen)
+
+[Sessionize](https://sessionize.com/mortenknudsen/)
+
+[Mail](mok@mortenknudsen.net)
+
+
+
