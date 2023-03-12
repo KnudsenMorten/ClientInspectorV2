@@ -3,33 +3,23 @@ Check out **ClientInspector**, which can help you get **great insight** to your 
 
 **Are you in control?** - or are some of your core infrastructure processes like **patching, antivirus, bitlocker enablement drifting**? Or would you like to do **advanced inventory**, where you can lookup your **warranty state** against Lenovo or Dell warranty, then keep reading.
 
-The idea of the dashboards are that they will show where your infrastucture if drifting from best practice. Think of them as KPIs, where we might not be in control.
-
-Instead of having a task with patching and managing antivirus, we will have KPIs, which will show, where computers are **not** patched - or where realtime protection in anvirus is not running - or machines which has bluesceened during the last 24 hours.
-
 ![Antivirus](img/Sample-Bitlocker-2.png)
 
 ![Bluescreens](img/Sample-Bluescreens.png)
 
-And it can help you ensure you are in control with core infratructure processes for a low price. **Data from 5000 clients doing daily ClientInspector inventory will cost you approx USD 100 per month **
-
-Feel free to add more cool data-collections to suit your needs. 
-If you want to take part in the community, please send me your collections, if you think they can be of great great value to others.
-Drop me an email on mok@mortenknudsen.net with your code, then I will include it - for the benefit of the whole community.
-
-I have a similar solution for Servers; **ServerInspector**. Unfortunately, it is not public.
-
 **Disclaimer**
 It is important for me to state that I'm NOT trying to build a separate management tool, which will compete with Microsoft security and management stack. This is just an **great showcase** of how you can built **cool solutions** - with the power of the **Microsoft Azure stack** including **Azure Loganalytics, Azure Data Collection Rules, Azure Data Collection Endpoints, Azure Workbooks, Azure Dashboards**. Nothing beats Microsoft Azure and M365 management and security stack. They are rock star solutions. But I'm really **passioned** about the **logging capabilities** and the power to bring data back from clients, servers and cloud - and getting **cool valueable information out of the data**.
 
-[Thank You to the great people in Microsoft product teams - you are rock stars :smile:](#thank-you-to-the-great-people-in-microsoft-product-teams---you-are-rock-stars-smile)
+I have a similar solution for Servers; **ServerInspector**. Unfortunately, it is not public.
+
+[Big Thanks to the great people in Microsoft product teams - you are rock stars :smile:](#thank-you-to-the-great-people-in-microsoft-product-teams---you-are-rock-stars-smile)
 
 Happy hunting :smile:
 
 ![ClientInspector](img/ClientInspector_300.jpg)
 
 
-# What are being collected ?
+# What data is being collected ?
 **ClientInspector** can be used to collect lots of great information of from your **Windows clients** - and send the data to **Azure LogAnalytics Custom Tables**.
 
 The script collects the following information (settings, information, configuration, state):
@@ -51,6 +41,12 @@ The script collects the following information (settings, information, configurat
 16. Windows firewall - settings for all 3 modes
 17. Group Policy - last refresh
 18. TPM information - relavant to detect machines with/without TPM
+
+Feel free to add more cool data-collections to suit your needs. 
+If you want to take part in the community, please send me your collections, if you think they can be of great great value to others.
+
+Drop me an email on mok@mortenknudsen.net with your code, then I will include it - for the benefit of the whole community.
+
 
 # Source data - what data can I use ?
 You can use **any source data** which can be retrieved by Powershell into an object (wmi, cim, external data, rest api, xml-format, json-format, csv-format, etc.)
@@ -163,6 +159,10 @@ Instead of having a task with patching and managing antivirus, we will have KPIs
 
 ## Azure Dashboards
 When deployed by ClientInSpectorV2-DeploymentKit, you will have access to sample Azure Dashboards to get you started. They are created based on pinned parts from Azure Workbooks.
+
+The idea of the dashboards are that they will show where your infrastucture if drifting from best practice. Think of them as KPIs, where we might not be in control.
+
+Instead of having a task with patching and managing antivirus, we will have KPIs, which will show, where computers are **not** patched - or where realtime protection in anvirus is not running - or machines which has bluesceened during the last 24 hours.
 
 Each of the dashboards are based on Azure Workbooks, so if you want to drill down, you can click on a link and will get access to the detailed information.
 
@@ -509,6 +509,10 @@ The security of **ClientInspector** are divided into 4 layers: **data-in**, **da
 |Schema-management|Method 1: Azure RBAC (recommended)<br><br>Method 2:Azure app with secret or certificate|[Details covered in ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-rbac-security-adjustment-separation-of-permissions-between-log-ingestion-and-tabledcr-management)
 
 <br>
+
+#Cost - How must does it cost to store these data ?
+Data from **5000** clients doing **daily** ClientInspector inventory will cost you approx **USD 100 per month**
+
 
 # Big Thanks to the great people in Microsoft product teams - you are rock stars :smile:
 Lastly, I would like to give **big credits** to a few people, who I have worked together with on building **AzLogDcrIngestPS Powershell module** and **my daily work with the Azure log & viewing capabilities**:
