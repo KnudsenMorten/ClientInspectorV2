@@ -269,9 +269,6 @@ ClientInspector (v2) is uploading the collected data into **custom logs** in **A
 The old ClientInspector (v1) was using the HTTP Data Collector API and custom logs (MMA-format).
 
 ## Implementation
-The steps to setup ClientInspector in your environment are:
-1. [Setup environment using ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit)
-
 <details>
   <summary>Azure components used as part of ClientInspector - and their purpose?</summary>
 
@@ -291,6 +288,9 @@ The following components are needed:
 | Kusto (KQL)                   | Data can be analyzed using Kust (KQL) queries | https://learn.microsoft.com/en-us/azure/azure-monitor/logs/get-started-queries |
 
 </details>
+
+The steps to setup ClientInspector in your environment are:
+1. [Setup environment using ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit)
 
 2. Run ClientInspector the first time (initial setup) - see more below
 <details>
