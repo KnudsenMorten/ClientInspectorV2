@@ -26,7 +26,7 @@ Happy hunting :-)
 ![ClientInspector](img/ClientInspector_300.jpg)
 
 
-## Introduction to ClientInspector (v2)
+## What are being collected ?
 **ClientInspector** can be used to collect lots of great information of from your **Windows clients** - and send the data to **Azure LogAnalytics Custom Tables**.
 
 The script collects the following information (settings, information, configuration, state):
@@ -490,11 +490,13 @@ You will run the inventory script by a traditional package / deployment
 
 </details>
 
-## Disclaimer
-It is important for me to state that I'm NOT trying to build a separate management tool, which will compete with Microsoft security and management stack.
+## Security
+The security of **ClientInspector** are divided into 4 layers: **data-in (collection**, **data-upload** (send to backend) and **data-view** (dashboards) - and **schema-management**
 
-This is just an example of how you can built cool solutions - with the power of the Microsoft Azure stack - which can help you on day-to-day basis - and for a low price. 
+| Phase | Security Implementation |Delegations / Permissions|
+|:------|:------------------------|
+|data-in (collection)|This phase is controlled by the method you choose to do the actual collection (Intune, ConfigMg or other 3rd party)|
+|data-upload|Azure app & secret stored in the header of ClientInspector for simplicity purpose<br><br>It is also possible to use Azure Keyvault for storing the AppId and Secret|[Details covered in ClientInspectV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#security-1)
+|data-view|Azure RCAC permissions|Give access to your Azure LogAnalytics, Azure Workbooks and Azure Dashboards|
+|schema-management|Method 1: Azure RBAC (recommended)<br><br>Method 2:Azure app with secret or certificate|[Details covered in ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-rbac-security-adjustment-separation-of-permissions-between-log-ingestion-and-tabledcr-management)
 
-**Data from 5000 clients with daily inventory will cost you approx USD 100 per month with this solution.**
-
-Happy hunting :-)
