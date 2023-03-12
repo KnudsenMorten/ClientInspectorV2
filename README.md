@@ -512,7 +512,7 @@ The security of **ClientInspector** are divided into 4 layers: **data-in**, **da
 # Cost - How much does it cost to store these data ?
 Data from **5000** clients doing **daily** ClientInspector inventory will cost you approx **USD 100 per month**
 
-<br><br>
+<br>
 
 # Big Thanks to the great people in Microsoft product teams - you are rock stars :smile:
 Lastly, I would like to give **big credits** to a few people, who I have worked together with on building **AzLogDcrIngestPS Powershell module** and **my daily work with the Azure log & viewing capabilities**:
