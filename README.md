@@ -334,7 +334,7 @@ You have 2 options for connectivity to Azure for data upload: **public access** 
 
 You need to allow the following endpoints in your firewall:
 |Endpoint|Purpose|Port|Direction|Bypass HTTPS Inspection|
-|:-------|:------|:----|:-------|:----------------------|:------|
+|:-------|:------|:----|:-------|:----------------------|
 |global.handler.control.monitor.azure.com|Access control service|Port 443|Outbound|Yes|
 |dce logs ingestion uri<br><br>sample<br>https://dce-log-platform-management-client-demo-p-iur0.westeurope-1.ingest.monitor.azure.com|Ingest logs data|Port 443|Outbound|Yes|
 
