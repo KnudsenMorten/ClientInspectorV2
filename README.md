@@ -29,7 +29,7 @@ Happy hunting :smile:
 ![ClientInspector](img/ClientInspector_300.jpg)
 
 
-## What are being collected ?
+# What are being collected ?
 **ClientInspector** can be used to collect lots of great information of from your **Windows clients** - and send the data to **Azure LogAnalytics Custom Tables**.
 
 The script collects the following information (settings, information, configuration, state):
@@ -52,7 +52,7 @@ The script collects the following information (settings, information, configurat
 17. Group Policy - last refresh
 18. TPM information - relavant to detect machines with/without TPM
 
-## Source data - what data can I use ?
+# Source data - what data can I use ?
 You can use **any source data** which can be retrieved by Powershell into an object (wmi, cim, external data, rest api, xml-format, json-format, csv-format, etc.)
 
 ClientInspector uses several functions within the Powershell module, **AzLogDcIngestPS**, to handle source data adjustsments to **remove "noice" in data**, to **remove prohibited colums in tables/DCR** - and support needs for **transparency** with extra insight like **UserLoggedOn**, **CollectionTime**, **Computer**:
@@ -103,7 +103,7 @@ Get-ObjectSchemaAsArray -Data $DataVariable -Verbose:$Verbose
 [Please see more details about available functions in AzLogDcrIngestPS - and how to use them here](https://github.com/KnudsenMorten/AzLogDcrIngestPS)
 
 
-## Desired State Dashboards - How to get insight of my environment from the data ?
+# Desired State Dashboards - How to get insight of my environment from the data ?
 Initially, you will have access to Azure Dashboards installed by the [ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit)
 
 The idea of the dashboards are that they will show where your infrastucture if drifting from best practice. Think of them as KPIs, where we might not be in control.
@@ -161,7 +161,7 @@ Instead of having a task with patching and managing antivirus, we will have KPIs
 
 [Link to see the complete list of provided Azure Workbooks](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-workbooks-part-of-deployment)
 
-### Azure Dashboards
+## Azure Dashboards
 When deployed by ClientInSpectorV2-DeploymentKit, you will have access to sample Azure Dashboards to get you started. They are created based on pinned parts from Azure Workbooks.
 
 Each of the dashboards are based on Azure Workbooks, so if you want to drill down, you can click on a link and will get access to the detailed information.
@@ -170,12 +170,12 @@ Each of the dashboards are based on Azure Workbooks, so if you want to drill dow
 
 [Link to see the provided Azure Dashboards](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-dashboards-part-of-deployment)
 
-### Can I make my own workbooks & dashboards - yes you can :smile:
+## Can I make my own workbooks & dashboards - yes you can :smile:
 If you want to add more views (or workbooks), you can start by investigating the collected data in the custom logs tables using KQL quries. 
 
 Then make your new views in the workbooks - and pin your favorites to your dashboards.
 
-## How to query - Kusto (KQL) is the answer
+# How to query - Kusto (KQL) is the answer
 If you don't know Kusto language, I recommend you to start playing around with it, as it is a really powerful language.
 
 [Write your first query with Kusto Query Language](https://learn.microsoft.com/en-us/training/modules/write-first-query-kusto-query-language/)
@@ -184,7 +184,7 @@ If you don't know Kusto language, I recommend you to start playing around with i
 
 Below are 4 samples of queries to get you started - baed on the data from ClientInspector.
 
-### Sample query 1: Advanced hunting using Kusto (KQL) query
+## Sample query 1: Advanced hunting using Kusto (KQL) query
 If you want to do advanced hunting, you can use traditional Kusto (KQL) queries in the tables
 <details>
   <summary>Sample query</summary>
@@ -256,7 +256,7 @@ InvClientDefenderAvV2_CL
   ```
 </details>
 
-### Sample query 2: Kusto query to merge data from 3 tables
+## Sample query 2: Kusto query to merge data from 3 tables
 <details>
   <summary>Sample query</summary>
   
@@ -273,7 +273,7 @@ InvClientComputerInfoBiosV2_CL
 ```
 </details>
 
-### Sample query 3: Query LogAnalytics data from Powershell
+## Sample query 3: Query LogAnalytics data from Powershell
 <details>
   <summary>Sample query</summary>
   
@@ -308,19 +308,19 @@ $ComputerInfoArray
 ```
 </details>
 
-### Sample query 4: Integrating data with other sources (warrantycheck against Lenovo warranty-database)
+## Sample query 4: Integrating data with other sources (warrantycheck against Lenovo warranty-database)
 When we have the data in Azure LogAnalytics, we can start to integrate the data with other sources, like Dell or Lenovo warranty data via REST api lookup.
 
 Here is an example of output, which was auto-created by a powershell script - extracting a list of computers & serial number - and then doing lookup to Lenovo warranty database to retrieve information about when the computer was purchased - and its warranty state.
 
 [Sample warranty output (Excel), based on data collected by ClientInspector](https://github.com/KnudsenMorten/ClientInspectorV2/raw/main/img/WarrantyInfo.xlsx)
    
-## Archicture & flow of ClientInspector ?
+# Archicture & flow of ClientInspector ?
 ClientInspector (v2) is uploading the collected data into **custom logs** in **Azure LogAnalytics workspace** - using **Log ingestion API**, **Azure Data Collection Rules (DCR)** and **Azure Data Collection Endpoints (DCE)**. 
 
 ![Archicture](docs/Architecture.jpg)
 
-### Networking
+## Networking
 You have 2 options for connectivity to Azure for data upload: **public access** or **private access**
 
 ![Networking](docs/Networking.jpg)
@@ -332,7 +332,7 @@ You need to allow the following endpoints in your firewall:
 |dce logs ingestion uri|Ingest logs data|Port 443|Outbound|Yes|https://dce-log-platform-management-client-demo-p-iur0.westeurope-1.ingest.monitor.azure.com|
 
 
-## Implementation
+# Implementation
 <details>
   <summary>Azure components used as part of ClientInspector - and their purpose?</summary>
 
@@ -466,9 +466,9 @@ You will run the inventory script by a traditional package / deployment
 </details>
 
 
-## Dependencies
+# Dependencies
 
-### Powershell module AzLogDcringestPS - built by me (Morten Knudsen)
+## Powershell module AzLogDcringestPS - built by me (Morten Knudsen)
 
 ClientInspector requires the Powershell module, **AzLogDcrIngestPS**
 
@@ -490,14 +490,14 @@ You can download latest version here:
 </details>
 
 
-### 3rd party Powershell modules
+## 3rd party Powershell modules
 |ModuleName|Purpose|More info|Credit|
 |:---------|:------|:--------|:-----|
 |NuGet|Common Package provider used to deploy many Powershell modules<br><br>Package Provider will automatically be installed on computer when script runs|[Link](https://www.nuget.org/packages|
 |PSWindowsUpdate|Collection of Windows Update information (pending updates, installed updates, etc.)<br><br>Module will automatically be installed on computer when script runs|[Link](https://www.powershellgallery.com/packages/PSWindowsUpdate)|Michal Gajda
 
 
-## Security
+# Security
 The security of **ClientInspector** are divided into 4 layers: **data-in**, **data-upload** (send to backend) and **data-view** (dashboards) - and **schema-management**
 
 
@@ -510,7 +510,7 @@ The security of **ClientInspector** are divided into 4 layers: **data-in**, **da
 
 <br>
 
-## Big Thanks to the great people in Microsoft product teams - you are rock stars :smile:
+# Big Thanks to the great people in Microsoft product teams - you are rock stars :smile:
 Lastly, I would like to give **big credits** to a few people, who I have worked together with on building **AzLogDcrIngestPS Powershell module** and **my daily work with the Azure log & viewing capabilities**:
 
 |Name|Role|
