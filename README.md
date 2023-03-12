@@ -18,6 +18,7 @@ Happy hunting :smile:
 
 ![ClientInspector](img/ClientInspector_300.jpg)
 
+<br>
 
 # What data is being collected ?
 **ClientInspector** can be used to collect lots of great information of from your **Windows clients** - and send the data to **Azure LogAnalytics Custom Tables**.
@@ -47,6 +48,7 @@ If you want to take part in the community, please send me your collections, if y
 
 Drop me an email on mok@mortenknudsen.net with your code, then I will include it - for the benefit of the whole community.
 
+<br>
 
 # Source data - what data can I use ?
 You can use **any source data** which can be retrieved by Powershell into an object (wmi, cim, external data, rest api, xml-format, json-format, csv-format, etc.)
@@ -98,6 +100,7 @@ Get-ObjectSchemaAsArray -Data $DataVariable -Verbose:$Verbose
 
 [Please see more details about available functions in AzLogDcrIngestPS - and how to use them here](https://github.com/KnudsenMorten/AzLogDcrIngestPS)
 
+<br>
 
 # Desired State Dashboards - How to get insight of my environment from the data ?
 Initially, you will have access to Azure Dashboards installed by the [ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit)
@@ -314,6 +317,8 @@ When we have the data in Azure LogAnalytics, we can start to integrate the data 
 Here is an example of output, which was auto-created by a powershell script - extracting a list of computers & serial number - and then doing lookup to Lenovo warranty database to retrieve information about when the computer was purchased - and its warranty state.
 
 [Sample warranty output (Excel), based on data collected by ClientInspector](https://github.com/KnudsenMorten/ClientInspectorV2/raw/main/img/WarrantyInfo.xlsx)
+
+<br>
    
 # Archicture & flow of ClientInspector ?
 ClientInspector (v2) is uploading the collected data into **custom logs** in **Azure LogAnalytics workspace** - using **Log ingestion API**, **Azure Data Collection Rules (DCR)** and **Azure Data Collection Endpoints (DCE)**. 
@@ -331,6 +336,7 @@ You need to allow the following endpoints in your firewall:
 |global.handler.control.monitor.azure.com|Access control service|Port 443|Outbound|Yes|-|
 |dce logs ingestion uri|Ingest logs data|Port 443|Outbound|Yes|https://dce-log-platform-management-client-demo-p-iur0.westeurope-1.ingest.monitor.azure.com|
 
+<br>
 
 # Implementation
 <details>
@@ -465,6 +471,7 @@ You will run the inventory script by a traditional package / deployment
 
 </details>
 
+<br>
 
 # Dependencies
 
@@ -496,10 +503,11 @@ You can download latest version here:
 |NuGet|Common Package provider used to deploy many Powershell modules<br><br>Package Provider will automatically be installed on computer when script runs|[Link](https://www.nuget.org/packages|
 |PSWindowsUpdate|Collection of Windows Update information (pending updates, installed updates, etc.)<br><br>Module will automatically be installed on computer when script runs|[Link](https://www.powershellgallery.com/packages/PSWindowsUpdate)|Michal Gajda
 
+<br>
+
 
 # Security
 The security of **ClientInspector** are divided into 4 layers: **data-in**, **data-upload** (send to backend) and **data-view** (dashboards) - and **schema-management**
-
 
 | Phase | Security Implementation |Delegations / Permissions|
 |:------|:------------------------|:------------------------|
