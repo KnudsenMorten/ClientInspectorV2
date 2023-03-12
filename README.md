@@ -508,11 +508,10 @@ The security of **ClientInspector** are divided into 4 layers: **data-in**, **da
 |Data-view|Azure RCAC permissions|Give access to your Azure LogAnalytics, Azure Workbooks and Azure Dashboards|
 |Schema-management|Method 1: Azure RBAC (recommended)<br><br>Method 2:Azure app with secret or certificate|[Details covered in ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-rbac-security-adjustment-separation-of-permissions-between-log-ingestion-and-tabledcr-management)
 
-<br>
 
 # Cost - How much does it cost to store these data ?
 Data from **5000** clients doing **daily** ClientInspector inventory will cost you approx **USD 100 per month**
-
+<br>
 
 # Big Thanks to the great people in Microsoft product teams - you are rock stars :smile:
 Lastly, I would like to give **big credits** to a few people, who I have worked together with on building **AzLogDcrIngestPS Powershell module** and **my daily work with the Azure log & viewing capabilities**:
