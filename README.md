@@ -320,10 +320,17 @@ ClientInspector (v2) is uploading the collected data into **custom logs** in **A
 
 ![Archicture](docs/Architecture.jpg)
 
-The old ClientInspector (v1) was using the HTTP Data Collector API and custom logs (MMA-format).
+### Networking
+You have 2 options for connectivity to Azure for data upload: **public access** or **private access**
+
+You need to allow the following endpoints in your firewall:
+|Endpoint|Purpose|Port|Direction|Bypass HTTPS Inspection|Example|
+|:-------|:------|:----|:-------|:----------------------|:------|
+|global.handler.control.monitor.azure.com|Access control service|Port 443|Outbound|Yes|-|
+|<dce logs ingestion uri>|Ingest logs data|Port 443|Outbound|Yes|https://dce-log-platform-management-client-demo-p-iur0.westeurope-1.ingest.monitor.azure.com|
+
 
 ![Networking](docs/Networking.jpg)
-
 
 ## Implementation
 <details>
