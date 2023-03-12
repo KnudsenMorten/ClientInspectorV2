@@ -170,12 +170,12 @@ Each of the dashboards are based on Azure Workbooks, so if you want to drill dow
 
 [Link to see the provided Azure Dashboards](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-dashboards-part-of-deployment)
 
-## Can I make my own workbooks & dashboards - yes you can :smile:
+## Can I make my own workbooks & dashboards - yes, you can :smile:
 If you want to add more views (or workbooks), you can start by investigating the collected data in the custom logs tables using KQL quries. 
 
 Then make your new views in the workbooks - and pin your favorites to your dashboards.
 
-# How to query - Kusto (KQL) is the answer
+# How do I query the data? - Kusto (KQL) is the answer
 If you don't know Kusto language, I recommend you to start playing around with it, as it is a really powerful language.
 
 [Write your first query with Kusto Query Language](https://learn.microsoft.com/en-us/training/modules/write-first-query-kusto-query-language/)
@@ -510,7 +510,7 @@ The security of **ClientInspector** are divided into 4 layers: **data-in**, **da
 
 <br>
 
-#Cost - How must does it cost to store these data ?
+# Cost - How much does it cost to store these data ?
 Data from **5000** clients doing **daily** ClientInspector inventory will cost you approx **USD 100 per month**
 
 
