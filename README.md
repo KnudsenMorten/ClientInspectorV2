@@ -401,11 +401,10 @@ You will run the inventory script by a traditional package / deployment
 
 </details>
 
-<br>
 
 ## Dependencies
 
-### Powershell module AzLogDcringestPS - built by same developer, Morten Knudsen, Microsoft MVP
+### Powershell module AzLogDcringestPS - built by me
 
 ClientInspector requires the Powershell module, **AzLogDcrIngestPS**, which is also developed by [Morten Knudsen, Microsoft MVP](https://mvp.microsoft.com/en-us/PublicProfile/5005156?fullName=Morten%20Knudsen).
 
@@ -428,7 +427,6 @@ You can download latest version here:
 
 </details>
 
-<br>
 
 ### 3rd party Powershell modules
 |ModuleName|Purpose|More info|Credit|
