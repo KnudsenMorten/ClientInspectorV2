@@ -22,7 +22,7 @@ I have a similar solution for Servers; **ServerInspector**. Unfortunately, it is
 **Disclaimer**
 It is important for me to state that I'm NOT trying to build a separate management tool, which will compete with Microsoft security and management stack. This is just an **great showcase** of how you can built **cool solutions** - with the power of the **Microsoft Azure stack** including **Azure Loganalytics, Azure Data Collection Rules, Azure Data Collection Endpoints, Azure Workbooks, Azure Dashboards**. Nothing beats Microsoft Azure and M365 management and security stack. They are rock star solutions. But I'm really **passioned** about the **logging capabilities** and the power to bring data back from clients, servers and cloud - and getting **cool valueable information out of the data**.
 
-[Thank You to the great people in Microsoft product teams](https://github.com/KnudsenMorten/AzLogDcrIngestPS#thank-you-to-the-great-people-in-microsoft-product-teams)
+[Thank You to the great people in Microsoft product teams - you are rock stars :smile:](#thank-you-to-the-great-people-in-microsoft-product-teams)
 
 Happy hunting :smile:
 
@@ -509,8 +509,8 @@ The security of **ClientInspector** are divided into 4 layers: **data-in (collec
 |data-view|Azure RCAC permissions|Give access to your Azure LogAnalytics, Azure Workbooks and Azure Dashboards|
 |schema-management|Method 1: Azure RBAC (recommended)<br><br>Method 2:Azure app with secret or certificate|[Details covered in ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-rbac-security-adjustment-separation-of-permissions-between-log-ingestion-and-tabledcr-management)
 
-## Thank You to the great people in Microsoft product teams
-I would like to give **big credits** to a few people, who I have worked together with on this:
+## Thank You to the great people in Microsoft product teams - you are rock stars :smile:
+I would like to give **big credits** to a few people, who I have worked together with on building **AzLogDcrIngestPS Powershell module** and **my daily work with the Azure log & viewing capabilities**:
 
 |Name|Role|
 |:---|:---|
