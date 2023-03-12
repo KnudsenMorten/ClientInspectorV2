@@ -323,14 +323,14 @@ ClientInspector (v2) is uploading the collected data into **custom logs** in **A
 ### Networking
 You have 2 options for connectivity to Azure for data upload: **public access** or **private access**
 
+![Networking](docs/Networking.jpg)
+
 You need to allow the following endpoints in your firewall:
 |Endpoint|Purpose|Port|Direction|Bypass HTTPS Inspection|Example|
 |:-------|:------|:----|:-------|:----------------------|:------|
 |global.handler.control.monitor.azure.com|Access control service|Port 443|Outbound|Yes|-|
-|<dce logs ingestion uri>|Ingest logs data|Port 443|Outbound|Yes|https://dce-log-platform-management-client-demo-p-iur0.westeurope-1.ingest.monitor.azure.com|
+|dce logs ingestion uri|Ingest logs data|Port 443|Outbound|Yes|https://dce-log-platform-management-client-demo-p-iur0.westeurope-1.ingest.monitor.azure.com|
 
-
-![Networking](docs/Networking.jpg)
 
 ## Implementation
 <details>
@@ -498,15 +498,16 @@ You can download latest version here:
 
 
 ## Security
-The security of **ClientInspector** are divided into 4 layers: **data-in (collection**, **data-upload** (send to backend) and **data-view** (dashboards) - and **schema-management**
+The security of **ClientInspector** are divided into 4 layers: **data-in**, **data-upload** (send to backend) and **data-view** (dashboards) - and **schema-management**
 
 
 | Phase | Security Implementation |Delegations / Permissions|
 |:------|:------------------------|:------------------------|
-|data-in (collection)|This phase is controlled by the method you choose to do the actual collection (Intune, ConfigMg or other 3rd party)|Script needs to run as local admin (system context) to be able to collect core data from hardware & Windows
-|data-upload|Authentication for the Logs Ingestion API is performed at the DCE, which uses standard Azure Resource Manager authentication. A common strategy is to use an application ID and application key which is also the method used in ClientInspector. Azure AppId & Secret are stored in the header of ClientInspector for simplicity purpose<br><br>It is also possible to use Azure Keyvault for storing the AppId and Secret|[Details covered in ClientInspectV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#security-1)
-|data-view|Azure RCAC permissions|Give access to your Azure LogAnalytics, Azure Workbooks and Azure Dashboards|
-|schema-management|Method 1: Azure RBAC (recommended)<br><br>Method 2:Azure app with secret or certificate|[Details covered in ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-rbac-security-adjustment-separation-of-permissions-between-log-ingestion-and-tabledcr-management)
+|Data-in (collection)|This phase is controlled by the method you choose to do the actual collection (Intune, ConfigMg or other 3rd party)|Script needs to run as local admin (system context) to be able to collect core data from hardware & Windows
+|Data-upload|Authentication for the Logs Ingestion API is performed at the DCE, which uses standard Azure Resource Manager authentication.<br><br>A common strategy is to use an application ID and application key which is also the method used in ClientInspector.<br><br>Azure AppId & Secret are stored in the header of ClientInspector for simplicity purpose<br><br>It is also possible to use Azure Keyvault for storing the AppId and Secret|[Details covered in ClientInspectV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#security-1)
+|Data-view|Azure RCAC permissions|Give access to your Azure LogAnalytics, Azure Workbooks and Azure Dashboards|
+|Schema-management|Method 1: Azure RBAC (recommended)<br><br>Method 2:Azure app with secret or certificate|[Details covered in ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-rbac-security-adjustment-separation-of-permissions-between-log-ingestion-and-tabledcr-management)
+
 
 
 ## Thank You to the great people in Microsoft product teams - you are rock stars :smile:
