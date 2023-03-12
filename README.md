@@ -318,9 +318,12 @@ Here is an example of output, which was auto-created by a powershell script - ex
 ## Archicture & flow of ClientInspector ?
 ClientInspector (v2) is uploading the collected data into **custom logs** in **Azure LogAnalytics workspace** - using **Log ingestion API**, **Azure Data Collection Rules (DCR)** and **Azure Data Collection Endpoints (DCE)**. 
 
-![Flow](img/flow.png)
+![Archicture](docs/Architecture.jpg)
 
 The old ClientInspector (v1) was using the HTTP Data Collector API and custom logs (MMA-format).
+
+![Networking](docs/Networking.jpg)
+
 
 ## Implementation
 <details>
