@@ -3,6 +3,8 @@ Check out **ClientInspector**, which can help you get **great insight** to your 
 
 **Are you in control?** - or are some of your core infrastructure processes like **patching, antivirus, bitlocker enablement** drifting? Or would you like to do **advanced inventory**, where you can lookup your **warranty state** against Lenovo or Dell warranty, then keep reading.
 
+![KPIs](img/KPI-dashboard.png)
+
 ![Antivirus](img/Sample-Bitlocker-2.png)
 
 ![Bluescreens](img/Sample-Bluescreens.png)
