@@ -1,8 +1,6 @@
 # Introduction to ClientInspector (v2)
 Check out **ClientInspector**, which can help you get **great insight** to your complete **client environment**.
 
-![ClientInspector](img/ClientInspector_300.jpg)
-
 **Are you in control?** - or are some of your core infrastructure processes like **patching, antivirus, bitlocker enablement drifting**? Or would you like to do **advanced inventory**, where you can lookup your **warranty state** against Lenovo or Dell warranty, then keep reading.
 
 The idea of the dashboards are that they will show where your infrastucture if drifting from best practice. Think of them as KPIs, where we might not be in control.
@@ -24,6 +22,8 @@ Drop me an email on mok@mortenknudsen.net with your code, then I will include it
 I have a similar solution for Servers; **ServerInspector**. Unfortunately, it is not public.
 
 Happy hunting :-)
+
+![ClientInspector](img/ClientInspector_300.jpg)
 
 
 ## Introduction to ClientInspector (v2)
