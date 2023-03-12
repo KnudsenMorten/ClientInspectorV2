@@ -574,7 +574,7 @@ If you have comments to the solution - or just want to connect with me, here are
 
 [Sessionize](https://sessionize.com/mortenknudsen/)
 
-[Mail](mok@mortenknudsen.net)
+[Mail](mailto:mok@mortenknudsen.net)
 
 
 
