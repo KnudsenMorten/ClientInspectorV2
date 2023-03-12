@@ -107,14 +107,14 @@ Initially, you will have access to Azure Dashboards installed by the [ClientInSp
 
 The idea of the dashboards are that they will show where your infrastucture if drifting from best practice. Think of them as KPIs, where we might not be in control.
 
-Instead of having a task with patching and managing antivirus, we will have KPIs, which will show, where computers are **not** patched - or where realtime protection in anvirus is not running - or machines which has bluesceened during the last 24 hours.
+Instead of having a task with patching and managing antivirus, we will have KPIs, which will show, where computers are **not** patched - or where realtime protection in anvirus is **not** running - or machines which **has bluescreened** during the last 24 hours.
 
 ![Antivirus](img/Sample-Bitlocker-2.png)
 
 ![Bluescreens](img/Sample-Bluescreens.png)
 
 <details>
-  <summary>More sample workbooks views included in solution</summary>
+  <summary>More sample views included in solution</summary>
 
 ![Antivirus](img/Sample-Antivirus-1.png)
 
@@ -160,12 +160,7 @@ Instead of having a task with patching and managing antivirus, we will have KPIs
 
 [Link to see the complete list of provided Azure Workbooks](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-workbooks-part-of-deployment)
 
-## Azure Dashboards
 When deployed by ClientInSpectorV2-DeploymentKit, you will have access to sample Azure Dashboards to get you started. They are created based on pinned parts from Azure Workbooks.
-
-The idea of the dashboards are that they will show where your infrastucture if drifting from best practice. Think of them as KPIs, where we might not be in control.
-
-Instead of having a task with patching and managing antivirus, we will have KPIs, which will show, where computers are **not** patched - or where realtime protection in anvirus is not running - or machines which has bluesceened during the last 24 hours.
 
 Each of the dashboards are based on Azure Workbooks, so if you want to drill down, you can click on a link and will get access to the detailed information.
 
