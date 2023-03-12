@@ -490,12 +490,18 @@ You will run the inventory script by a traditional package / deployment
 
 </details>
 
+## Usage of 3rd party module(s)
+|ModuleName|Purpose|More info|Credit|
+|:---------|:------|:--------|:-----|
+|PSWindowsUpdate|Collection of Windows Update information (pending updates, installed updates, etc.)|[Link](https://www.powershellgallery.com/packages/PSWindowsUpdate)|Michal Gajda
+
+
 ## Security
 The security of **ClientInspector** are divided into 4 layers: **data-in (collection**, **data-upload** (send to backend) and **data-view** (dashboards) - and **schema-management**
 
 | Phase | Security Implementation |Delegations / Permissions|
-|:------|:------------------------|
-|data-in (collection)|This phase is controlled by the method you choose to do the actual collection (Intune, ConfigMg or other 3rd party)|
+|:------|:------------------------|:------------------------|
+|data-in (collection)|This phase is controlled by the method you choose to do the actual collection (Intune, ConfigMg or other 3rd party)|Script needs to run as local admin (system context) to be able to collect core data from hardware & Windows
 |data-upload|Azure app & secret stored in the header of ClientInspector for simplicity purpose<br><br>It is also possible to use Azure Keyvault for storing the AppId and Secret|[Details covered in ClientInspectV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#security-1)
 |data-view|Azure RCAC permissions|Give access to your Azure LogAnalytics, Azure Workbooks and Azure Dashboards|
 |schema-management|Method 1: Azure RBAC (recommended)<br><br>Method 2:Azure app with secret or certificate|[Details covered in ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-rbac-security-adjustment-separation-of-permissions-between-log-ingestion-and-tabledcr-management)
