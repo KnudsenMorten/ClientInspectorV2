@@ -6,23 +6,75 @@
     ClientInspector
 
     .SYNOPSIS
-    This script will collect lots of informations from the client. Data is sent to Azure LogAnalytics Custom Tables.
-    The upload happens via Log Ingestion API, Azure Data Collection Rules (DCR) and Azure Data Collection Endpoints
-
-    .NOTES
-    VERSION: 230309
-    Developed by Morten Knudsen, Microsoft MVP
-
-    .COPYRIGHT
-    @mortenknudsendk on Twitter
-    Blog: https://mortenknudsen.net
+    This script will collect lots of information from the client - and send the data Azure LogAnalytics Custom Tables.
+    The upload happens via Log Ingestion API, Azure Data Collection Rules (DCR) and Azure Data Collection Endpoints.
     
+    The script collects the following information (settings, information, configuration, state):
+        (1)   User Logged On to Client
+        (2)   Computer information - bios, processor, hardware info, Windows OS info, OS information, last restart
+        (3)   Installed applications, both using WMI and registry
+        (4)   Antivirus Security Center from Windows - default antivirus, state, configuration
+        (5)   Microsoft Defender Antivirus - all settings including ASR, exclusions, realtime protection, etc
+        (6)   Office - version, update channel config, SKUs
+        (7)   VPN client - version, product
+        (8)   LAPS - version
+        (9)   Admin By Request (3rd party) - version
+        (10)  Windows Update - last result (when), windows update source information (where), pending updates, last installations (what)
+        (11)  Bitlocker - configuration
+        (12)  Eventlog - look for specific events including logon events, blue screens, etc.
+        (13)  Network adapters - configuration, installed adapters
+        (14)  IP information for all adapters
+        (15)  Local administrators group membership
+        (16)  Windows firewall - settings for all 3 modes
+        (17)  Group Policy - last refresh
+        (18)  TPM information - relavant to detect machines with/without TPM
+
+    Core features included:
+        - create/update the DCRs and tables automatically - based on the source object schema
+        - validate the schema for naming convention issues. If exist found, it will mitigate the issues
+        - update schema of DCRs and tables, if the structure of the source object changes
+        - auto-fix if something goes wrong with a DCR or table
+        - can remove data from the source object, if there are colums of data you don't want to send
+        - can convert source objects based on CIM or PS objects into PSCustomObjects/array
+        - can add relevant information to each record like UserLoggedOn, Computer, CollectionTime
+    
+    .VERSION
+        1.0.0
+    
+    .AUTHOR
+    Morten Knudsen, Microsoft MVP - https://mortenknudsen.net
+
     .LICENSE
     Licensed under the MIT license.
+
+    .PROJECTURI
+    https://github.com/KnudsenMorten/CientInspectorV2
+
+    .EXAMPLE
+    .\ClientInspector.ps1 -function:localpath
+
+    .EXAMPLE
+    .\ClientInspector.ps1 -function:download
+
+    .EXAMPLE
+    .\ClientInspector.ps1 -function:localpath -verbose:$true
+
+    .EXAMPLE
+    .\ClientInspector.ps1 -verbose:$false -function:psgallery -Scope:currentuser
 
     .WARRANTY
     Use at your own risk, no warranty given!
 #>
+
+param(
+      [parameter(Mandatory=$false)]
+          [ValidateSet("Download","LocalPath","DevMode","PsGallery")]
+          [string]$Function = "Download",        # it will default to download if not specified
+      [parameter(Mandatory=$false)]
+          [ValidateSet("CurrentUser","AllUsers")]
+          [string]$Scope = "CurrentUser"        # it will default to download if not specified
+     )
+
 
 $LogFile = [System.Environment]::GetEnvironmentVariable('TEMP','Machine') + "\ClientInspector.txt"
 Try
@@ -32,9 +84,13 @@ Try
     }
 Catch
     {
-        Write-output "Could not start transscript logging"
     }
 
+
+Write-Output ""
+Write-Output "ClientInspector | Inventory of Operational & Security-related information"
+Write-Output "Developed by Morten Knudsen, Microsoft MVP - for free community use"
+Write-Output ""
   
 ##########################################
 # VARIABLES
@@ -42,66 +98,130 @@ Catch
 
 <# ----- onboarding lines ----- BEGIN #>
 
-<#
-    $TenantId                                   = "xxxx" 
-    $LogIngestAppId                             = "xxxx" 
-    $LogIngestAppSecret                         = "xxxx" 
-
-    $DceName                                    = "xxxx" 
-    $LogAnalyticsWorkspaceResourceId            = "xxxx"
-
-    $AzDcrPrefixClient                          = "clt" 
-    $AzDcrSetLogIngestApiAppPermissionsDcrLevel = $false
-    $AzDcrLogIngestServicePrincipalObjectId     = "xxxx" 
-    $AzDcrDceTableCreateFromReferenceMachine    = @()
-    $AzDcrDceTableCreateFromAnyMachine          = $false
-
-#>
+    # here you insert the lines from the DeploymentKit
 
 <#  ----- onboading lines -----  END  #>
 
     # latest run info - needed for Intune detection to work
-    $LastRun_RegPath                                 = "HKLM:\SOFTWARE\2LINKIT"
+    $LastRun_RegPath                                 = "HKLM:\SOFTWARE\ClientInspector"
     $LastRun_RegKey                                  = "ClientInspector_System"
 
     # default variables
-    $VerbosePreference                               = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyContinue
     $DNSName                                         = (Get-CimInstance win32_computersystem).DNSHostName +"." + (Get-CimInstance win32_computersystem).Domain
     $ComputerName                                    = (Get-CimInstance win32_computersystem).DNSHostName
     [datetime]$CollectionTime                        = ( Get-date ([datetime]::Now.ToUniversalTime()) -format "yyyy-MM-ddTHH:mm:ssK" )
+
+    # script run mode - normal or verbose
+    If ($psBoundParameters['verbose'] -eq $true)
+        {
+            Write-Output "Verbose mode ON"
+            $global:Verbose = $true
+            $VerbosePreference = "Continue"  # Stop, Inquire, Continue, SilentlyContinue
+        }
+    Else
+        {
+            $global:Verbose = $false
+            $VerbosePreference = "SilentlyContinue"  # Stop, Inquire, Continue, SilentlyContinue
+        }
 
 
 ############################################################################################################################################
 # FUNCTIONS
 ############################################################################################################################################
 
+    # directory where the script was started
     $ScriptDirectory = $PSScriptRoot
 
-    # Needed funtions found in local path - for example if deployed through ConfigMgr, where we don't need to download the functions each time
-    If (Test-Path "$($ScriptDirectory)\AzLogDcrIngestPS.psm1")
-        {
-            Import-module "$($ScriptDirectory)\AzLogDcrIngestPS.psm1" -Global -force -DisableNameChecking  -WarningAction SilentlyContinue
-        }
-    
-    # Used by Morten Knudsen for development
-    ElseIf ("$Env:OneDrive\Documents\GitHub\AzLogDcrIngestPS-Dev\AzLogDcrIngestPS.psm1")
-        {
-            Import-module "$Env:OneDrive\Documents\GitHub\AzLogDcrIngestPS-Dev\AzLogDcrIngestPS.psm1" -Global -Force -DisableNameChecking
-        }
+    switch ($Function)
+        {   
+            "Download"            # Typically used in Microsoft Intune environments
+                {
+                    # force download using Github. This is needed for Intune remediations, since the functions library are large, and Intune only support 200 Kb at the moment
+                    Write-Output "Downloading latest version of module AzLogDcrIngestPS from https://github.com/KnudsenMorten/CientInspectorV2"
+                    Write-Output "into local path $($ScriptDirectory)"
 
-    # force download using Github. This is needed for Intune remediations, since the functions library are large, and Intune only support 200 Kb at the moment
-    Else   
-        {
-            Write-Output ""
-            Write-Output "Downloading latest version of needed Powershell functions from Morten Knudsen Github .... Please Wait !"
-            Write-Output ""
-            Write-Output "The Powershell functions, AzLogDcrIngestPS, are developed and maintained by Morten Knudsen, Microsoft MVP"
-            Write-Output ""
-            Write-Output "Please send feedback or comments to mok@mortenknudsen.net. Also feel free to pull findings/issues in Github."
-            Write-Output ""
+                    # delete existing file if found to download newest version
+                    If (Test-Path "$($ScriptDirectory)\AzLogDcrIngestPS.psm1")
+                        {
+                            Remove-Item -Path "$($ScriptDirectory)\AzLogDcrIngestPS.psm1"
+                        }
 
-            $Download = (New-Object System.Net.WebClient).DownloadFile("https://raw.githubusercontent.com/KnudsenMorten/AzLogDcrIngestPS/main/AzLogDcrIngestPS.psm1", "$($ScriptDirectory)\AzLogDcrIngestPS.psm1")  
-            Import-module "$($ScriptDirectory)\AzLogDcrIngestPS.psm1" -Global -force -DisableNameChecking  -WarningAction SilentlyContinue
+                     # download newest version
+                    $Download = (New-Object System.Net.WebClient).DownloadFile("https://raw.githubusercontent.com/KnudsenMorten/AzLogDcrIngestPS/main/AzLogDcrIngestPS.psm1", "$($ScriptDirectory)\AzLogDcrIngestPS.psm1")
+                    
+                    Start-Sleep -s 3
+                    
+                    # load file if found - otherwise terminate
+                    If (Test-Path "$($ScriptDirectory)\AzLogDcrIngestPS.psm1")
+                        {
+                            Import-module "$($ScriptDirectory)\AzLogDcrIngestPS.psm1" -Global -force -DisableNameChecking  -WarningAction SilentlyContinue
+                        }
+                    Else
+                        {
+                            Write-Output "Powershell module AzLogDcrIngestPS was NOT found .... terminating !"
+                            break
+                        }
+                }
+
+            "PsGallery"   # Can be used on any machine, where you want to install the PS module for continuesly usage
+                {
+
+                    $ModuleCheck = Get-Module -Name AzLogDcrIngestPS -ListAvailable -ErrorAction SilentlyContinue
+                        If (!($ModuleCheck))
+                            {
+                                Write-Output "Powershell module was not found !"
+                                Write-Output "Installing in scope $Scope .... Please Wait !"
+                                Install-module -Name AzLogDcrIngestPS -Repository PSGallery -Force -Scope $Scope
+                            }
+
+                        Elseif ($ModuleCheck)
+                            {
+                                Write-Output "Checking latest version at PsGallery for AzLogDcrIngestPS module"
+                                $online = Find-Module -Name AzLogDcrIngestPS -Repository PSGallery
+
+                                #compare versions
+                                if ( ([version]$online.version) -gt ([version]$ModuleCheck.version) ) 
+                                    {
+                                        Write-Output "Newer version ($($online.version)) detected"
+                                        Write-Output "Installing in scope $ScopePsGalleryInstall .... Please Wait !"
+                                        Update-module -Name AzLogDcrIngestPS -Repository PSGallery -Scope $Scope -Force
+                                        import-module -Name AzLogDcrIngestPS
+                                    }
+                                else
+                                    {
+                                        # No new version detected ... continuing !
+                                        Write-Output "OK - Running latest version"
+                                        $UpdateAvailable = $False
+                                    }
+                            }
+                }
+            "LocalPath"        # Typucaly used in ConfigMgr environment (or similar) where you run the script locally
+                {
+                    If (Test-Path "$($ScriptDirectory)\AzLogDcrIngestPS.psm1")
+                        {
+                            Write-Output "Using AzLogDcrIngestPS module from local path $($ScriptDirectory)"
+                            Import-module "$($ScriptDirectory)\AzLogDcrIngestPS.psm1" -Global -force -DisableNameChecking  -WarningAction SilentlyContinue
+                        }
+                    Else
+                        {
+                            Write-Output "Required Powershell function was NOT found .... terminating !"
+                            Exit
+                        }
+                }
+
+            # Used by Morten Knudsen for development
+            "DevMode"
+                {
+                    If (Test-Path "$Env:OneDrive\Documents\GitHub\AzLogDcrIngestPS-Dev\AzLogDcrIngestPS.psm1")
+                        {
+                            Import-module "$Env:OneDrive\Documents\GitHub\AzLogDcrIngestPS-Dev\AzLogDcrIngestPS.psm1" -Global -force -DisableNameChecking  -WarningAction SilentlyContinue
+                        }
+                    Else
+                        {
+                            Write-Output "Required Powershell function was NOT found .... terminating !"
+                            break
+                        }
+                }
         }
 
 
@@ -113,10 +233,10 @@ Catch
 ###############################################################
 
     # building global variable with all DCEs, which can be viewed by Log Ingestion app
-    $global:AzDceDetails = Get-AzDceListAll -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+    $global:AzDceDetails = Get-AzDceListAll -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
     
     # building global variable with all DCRs, which can be viewed by Log Ingestion app
-    $global:AzDcrDetails = Get-AzDcrListAll -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+    $global:AzDcrDetails = Get-AzDcrListAll -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 
 
 ############################################################################################################################################
@@ -179,7 +299,7 @@ Catch
 
     Write-output ""
     Write-output "#########################################################################################"
-    Write-output "Collecting User information [1]"
+    Write-output "User information [1]"
     Write-output ""
 
     #-------------------------------------------------------------------------------------------
@@ -193,6 +313,9 @@ Catch
     # Collecting data (in)
     #-------------------------------------------------------------------------------------------
 
+        Write-Output ""
+        Write-Output "Collecting Bios information ... Please Wait !"
+
         $UserLoggedOnRaw = Get-Process -IncludeUserName -Name explorer | Select-Object UserName -Unique
         $UserLoggedOn    = $UserLoggedOnRaw.UserName
 
@@ -204,30 +327,37 @@ Catch
         $DataVariable = [pscustomobject]@{
                                             UserLoggedOn         = $UserLoggedOn
                                          }
-
         # add CollectionTime to existing array
-        $DataVariable1 = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+        $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
         # add Computer info to existing array
-        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName
+        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName 
 
         # Validating/fixing schema data structure of source data
-        $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+        $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
         # Aligning data structure with schema (requirement for DCR)
-        $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+        $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
 
     #-------------------------------------------------------------------------------------------
     # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
     #-------------------------------------------------------------------------------------------
 
-        CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
-                                             -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
+        CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId `
+                                             -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
                                              -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                              -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                              -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
                                              -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
                                              -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
+        
+    #-----------------------------------------------------------------------------------------------
+    # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
+    #-----------------------------------------------------------------------------------------------
+
+        Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                                           -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
+
 
 
 ###############################################################
@@ -255,7 +385,7 @@ Catch
         #-------------------------------------------------------------------------------------------
             
             Write-Output ""
-            Write-Output "Collecting Bios information"
+            Write-Output "Collecting Bios information ... Please Wait !"
 
             $DataVariable = Get-CimInstance -ClassName Win32_BIOS
 
@@ -264,26 +394,26 @@ Catch
         #-------------------------------------------------------------------------------------------
 
             # convert CIM array to PSCustomObject and remove CIM class information
-            $DataVariable = Convert-CimArrayToObjectFixStructure -data $DataVariable
+            $DataVariable = Convert-CimArrayToObjectFixStructure -data $DataVariable -Verbose:$Verbose
     
             # add CollectionTime to existing array
-            $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+            $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
             # add Computer & UserLoggedOn info to existing array
-            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn -Verbose:$Verbose
 
             # Validating/fixing schema data structure of source data
-            $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+            $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
             # Aligning data structure with schema (requirement for DCR)
-            $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+            $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
 
     #-------------------------------------------------------------------------------------------
     # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
     #-------------------------------------------------------------------------------------------
 
         CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId `
-                                             -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
+                                             -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
                                              -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                              -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                              -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
@@ -294,8 +424,8 @@ Catch
     # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
     #-----------------------------------------------------------------------------------------------
 
-        Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable `
-                                                           -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+        Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                                           -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 
 
     ####################################
@@ -314,7 +444,7 @@ Catch
         #-------------------------------------------------------------------------------------------
             
             Write-Output ""
-            Write-Output "Collecting Processor information"
+            Write-Output "Collecting Processor information ... Please Wait !"
             $DataVariable = Get-CimInstance -ClassName Win32_Processor | Select-Object -ExcludeProperty "CIM*"
 
         #-------------------------------------------------------------------------------------------
@@ -322,26 +452,26 @@ Catch
         #-------------------------------------------------------------------------------------------
 
             # convert CIM array to PSCustomObject and remove CIM class information
-            $DataVariable = Convert-CimArrayToObjectFixStructure -data $DataVariable
+            $DataVariable = Convert-CimArrayToObjectFixStructure -data $DataVariable -Verbose:$Verbose
     
             # add CollectionTime to existing array
-            $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+            $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
             # add Computer & UserLoggedOn info to existing array
-            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
 
             # Validating/fixing schema data structure of source data
-            $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+            $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
             # Aligning data structure with schema (requirement for DCR)
-            $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+            $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
 
         #-------------------------------------------------------------------------------------------
         # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
         #-------------------------------------------------------------------------------------------
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
-                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
+                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
                                                  -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
@@ -352,8 +482,8 @@ Catch
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
         #-----------------------------------------------------------------------------------------------
 
-            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable `
-                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 
 
     ####################################
@@ -372,7 +502,7 @@ Catch
         #-------------------------------------------------------------------------------------------
             
             Write-Output ""
-            Write-Output "Collecting Computer system information"
+            Write-Output "Collecting Computer system information ... Please Wait !"
 
             $DataVariable = Get-CimInstance -ClassName Win32_ComputerSystem
 
@@ -381,26 +511,26 @@ Catch
         #-------------------------------------------------------------------------------------------
 
             # convert CIM array to PSCustomObject and remove CIM class information
-            $DataVariable = Convert-CimArrayToObjectFixStructure -data $DataVariable
+            $DataVariable = Convert-CimArrayToObjectFixStructure -data $DataVariable -Verbose:$Verbose
     
             # add CollectionTime to existing array
-            $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+            $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
             # add Computer & UserLoggedOn info to existing array
-            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
 
             # Validating/fixing schema data structure of source data
-            $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+            $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
             # Aligning data structure with schema (requirement for DCR)
-            $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+            $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
 
         #-------------------------------------------------------------------------------------------
         # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
         #-------------------------------------------------------------------------------------------
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
-                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
+                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
                                                  -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
@@ -411,8 +541,8 @@ Catch
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
         #-----------------------------------------------------------------------------------------------
 
-            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable `
-                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 
     ####################################
     # Computer Info
@@ -430,7 +560,7 @@ Catch
         #-------------------------------------------------------------------------------------------
             
             Write-Output ""
-            Write-Output "Collecting computer information"
+            Write-Output "Collecting computer information ... Please Wait !"
 
             $DataVariable = Get-ComputerInfo
 
@@ -439,26 +569,26 @@ Catch
         #-------------------------------------------------------------------------------------------
 
             # convert CIM array to PSCustomObject and remove CIM class information
-            $DataVariable = Convert-CimArrayToObjectFixStructure -data $DataVariable
+            $DataVariable = Convert-CimArrayToObjectFixStructure -data $DataVariable -Verbose:$Verbose
     
             # add CollectionTime to existing array
-            $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+            $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
             # add Computer & UserLoggedOn info to existing array
-            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
 
             # Validating/fixing schema data structure of source data
-            $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+            $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
             # Aligning data structure with schema (requirement for DCR)
-            $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+            $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
 
         #-------------------------------------------------------------------------------------------
         # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
         #-------------------------------------------------------------------------------------------
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
-                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
+                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
                                                  -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
@@ -469,8 +599,8 @@ Catch
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
         #-----------------------------------------------------------------------------------------------
 
-            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable `
-                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 
 
     ####################################
@@ -489,7 +619,7 @@ Catch
         #-------------------------------------------------------------------------------------------
             
             Write-Output ""
-            Write-Output "Collecting OS information"
+            Write-Output "Collecting OS information ... Please Wait !"
 
             $DataVariable = Get-CimInstance -ClassName Win32_OperatingSystem
 
@@ -498,26 +628,26 @@ Catch
         #-------------------------------------------------------------------------------------------
 
             # convert CIM array to PSCustomObject and remove CIM class information
-            $DataVariable = Convert-CimArrayToObjectFixStructure -data $DataVariable
+            $DataVariable = Convert-CimArrayToObjectFixStructure -data $DataVariable -Verbose:$Verbose
     
             # add CollectionTime to existing array
-            $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+            $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
             # add Computer & UserLoggedOn info to existing array
-            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
 
             # Validating/fixing schema data structure of source data
-            $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+            $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
             # Aligning data structure with schema (requirement for DCR)
-            $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+            $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
 
         #-------------------------------------------------------------------------------------------
         # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
         #-------------------------------------------------------------------------------------------
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
-                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
+                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
                                                  -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
@@ -528,8 +658,8 @@ Catch
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
         #-----------------------------------------------------------------------------------------------
 
-            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable `
-                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 
 
     ####################################
@@ -548,7 +678,7 @@ Catch
         #-------------------------------------------------------------------------------------------
             
             Write-Output ""
-            Write-Output "Collecting Last restart information"
+            Write-Output "Collecting Last restart information ... Please Wait !"
 
             $LastRestart = Get-CimInstance -ClassName win32_operatingsystem | Select lastbootuptime
             $LastRestart = (Get-date $LastRestart.LastBootUpTime)
@@ -566,23 +696,23 @@ Catch
                                              }
 
             # add CollectionTime to existing array
-            $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+            $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
             # add Computer & UserLoggedOn info to existing array
-            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
 
             # Validating/fixing schema data structure of source data
-            $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+            $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
             # Aligning data structure with schema (requirement for DCR)
-            $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+            $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
 
         #-------------------------------------------------------------------------------------------
         # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
         #-------------------------------------------------------------------------------------------
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
-                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
+                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
                                                  -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
@@ -593,8 +723,8 @@ Catch
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
         #-----------------------------------------------------------------------------------------------
 
-            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable `
-                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 
 
 ###############################################################
@@ -604,8 +734,6 @@ Catch
     Write-output ""
     Write-output "#########################################################################################"
     write-output "INSTALLED APPLICATIONS INFORMATION [3]"
-    Write-output ""
-    write-output "WMI information about installed applications"
     Write-output ""
 
     #------------------------------------------------
@@ -623,7 +751,7 @@ Catch
         # Collecting data (in)
         #-------------------------------------------------------------------------------------------
             
-            Write-Output "Collecting installed application information via WMI (slow)"
+            Write-Output "Collecting installed application information via WMI (slow) ... Please Wait !"
 
             $DataVariable = Get-CimInstance -Class Win32_Product
 
@@ -632,32 +760,32 @@ Catch
         #-------------------------------------------------------------------------------------------
     
         # convert Cim object and remove PS class information
-        $DataVariable = Convert-CimArrayToObjectFixStructure -Data $DataVariable
+        $DataVariable = Convert-CimArrayToObjectFixStructure -data $DataVariable -Verbose:$Verbose
 
         # add CollectionTime to existing array
-        $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+        $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
         # add Computer & UserLoggedOn info to existing array
-        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn -Verbose:$Verbose
 
         # Get insight about the schema structure of an object BEFORE changes. Command is only needed to verify columns in schema
-        # $SchemaBefore = Get-ObjectSchemaAsArray -Data $DataVariable
+        # $SchemaBefore = Get-ObjectSchemaAsArray -Data $DataVariable -Verbose:$Verbose
         
         # Remove unnecessary columns in schema
-        $DataVariable = Filter-ObjectExcludeProperty -Data $DataVariable -ExcludeProperty __*,SystemProperties,Scope,Qualifiers,Properties,ClassPath,Class,Derivation,Dynasty,Genus,Namespace,Path,Property_Count,RelPath,Server,Superclass
+        $DataVariable = Filter-ObjectExcludeProperty -Data $DataVariable -ExcludeProperty __*,SystemProperties,Scope,Qualifiers,Properties,ClassPath,Class,Derivation,Dynasty,Genus,Namespace,Path,Property_Count,RelPath,Server,Superclass -Verbose:$Verbose
 
         # Validating/fixing schema data structure of source data
-        $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+        $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
         # Aligning data structure with schema (requirement for DCR)
-        $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+        $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
 
         #-------------------------------------------------------------------------------------------
         # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
         #-------------------------------------------------------------------------------------------
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
-                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
+                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
                                                  -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
@@ -668,8 +796,8 @@ Catch
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
         #-----------------------------------------------------------------------------------------------
 
-            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable `
-                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 
 
 ###############################################################
@@ -679,8 +807,6 @@ Catch
     Write-output ""
     Write-output "#########################################################################################"
     write-output "INSTALLED APPLICATIONS INFORMATION [3]"
-    Write-output ""
-    write-output "Registry information about installed applications"
     Write-output ""
 
     #-------------------------------------------------------------------------------------------
@@ -694,7 +820,8 @@ Catch
     # Collecting data (in)
     #-------------------------------------------------------------------------------------------
             
-        Write-Output "Collecting installed applications information via registry"
+        Write-Output ""
+        Write-Output "Collecting installed applications information via registry ... Please Wait !"
 
         $UninstallValuesX86 = Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\* -ErrorAction SilentlyContinue
         $UninstallValuesX64 = Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* -ErrorAction SilentlyContinue
@@ -710,32 +837,32 @@ Catch
         $DataVariable = $DataVariable | Where-Object { $_.DisplayName -ne $null }
 
         # convert PS object and remove PS class information
-        $DataVariable = Convert-PSArrayToObjectFixStructure -Data $DataVariable
+        $DataVariable = Convert-PSArrayToObjectFixStructure -Data $DataVariable -Verbose:$Verbose
 
         # add CollectionTime to existing array
-        $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+        $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
         # add Computer & UserLoggedOn info to existing array
-        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn -Verbose:$Verbose
 
         # Get insight about the schema structure of an object BEFORE changes. Command is only needed to verify columns in schema
         # $SchemaBefore = Get-ObjectSchemaAsArray -Data $DataVariable
         
         # Remove unnecessary columns in schema
-        $DataVariable = Filter-ObjectExcludeProperty -Data $DataVariable -ExcludeProperty Memento*,Inno*,'(default)',1033
+        $DataVariable = Filter-ObjectExcludeProperty -Data $DataVariable -ExcludeProperty Memento*,Inno*,'(default)',1033 -Verbose:$Verbose
 
         # Validating/fixing schema data structure of source data
-        $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+        $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
         # Aligning data structure with schema (requirement for DCR)
-        $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+        $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
 
         #-------------------------------------------------------------------------------------------
         # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
         #-------------------------------------------------------------------------------------------
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
-                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
+                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
                                                  -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
@@ -746,8 +873,8 @@ Catch
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
         #-----------------------------------------------------------------------------------------------
 
-            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable `
-                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 
 
 ###############################################################
@@ -770,7 +897,8 @@ Catch
     # Collecting data (in)
     #-------------------------------------------------------------------------------------------
             
-        Write-Output "Collecting antivirus information"
+        Write-Output ""
+        Write-Output "Collecting antivirus information ... Please Wait !"
 
         $PrimaryAntivirus                           = 'NOT FOUND'
         $Alternative1Antivirus                      = 'NOT FOUND'
@@ -880,23 +1008,23 @@ Catch
                                           }
     
         # add CollectionTime to existing array
-        $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+        $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
         # add Computer & UserLoggedOn info to existing array
-        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
 
         # Validating/fixing schema data structure of source data
-        $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+        $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
         # Aligning data structure with schema (requirement for DCR)
-        $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+        $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
 
         #-------------------------------------------------------------------------------------------
         # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
         #-------------------------------------------------------------------------------------------
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
-                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
+                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
                                                  -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
@@ -907,8 +1035,8 @@ Catch
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
         #-----------------------------------------------------------------------------------------------
 
-            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable `
-                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 
 
 ###############################################################
@@ -931,7 +1059,8 @@ Catch
     # Collecting data (in)
     #-------------------------------------------------------------------------------------------
             
-        Write-Output "Collecting Microsoft Defender Antivirus information"
+        Write-Output ""
+        Write-Output "Collecting Microsoft Defender Antivirus information ... Please Wait !"
 
         $MPComputerStatus = Get-MpComputerStatus
         $MPPreference = Get-MpPreference
@@ -1132,23 +1261,23 @@ Catch
         }
     
         # add CollectionTime to existing array
-        $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+        $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
         # add Computer & UserLoggedOn info to existing array
-        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
 
         # Validating/fixing schema data structure of source data
-        $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+        $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
         # Aligning data structure with schema (requirement for DCR)
-        $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+        $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
 
         #-------------------------------------------------------------------------------------------
         # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
         #-------------------------------------------------------------------------------------------
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
-                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
+                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
                                                  -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
@@ -1159,8 +1288,8 @@ Catch
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
         #-----------------------------------------------------------------------------------------------
 
-            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable `
-                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 
 
 ###############################################################
@@ -1184,6 +1313,9 @@ Catch
     # Collecting data (in)
     #-------------------------------------------------------------------------------------------
             
+        Write-Output ""
+        Write-Output "Collecting Office information ... Please Wait !"
+
         # Default Values
         $OfficeDescription = ""
         $OfficeProductSKU = ""
@@ -1211,19 +1343,19 @@ Catch
                         $DataVariable = $OfficeVersion
 
                         # convert PS array to PSCustomObject and remove PS class information
-                        $DataVariable = Convert-PSArrayToObjectFixStructure -data $DataVariable
+                        $DataVariable = Convert-PSArrayToObjectFixStructure -Data $DataVariable -Verbose:$Verbose
 
                         # add CollectionTime to existing array
-                        $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+                        $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
                         # add Computer & UserLoggedOn info to existing array
-                        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+                        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
 
                         # Validating/fixing schema data structure of source data
-                        $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+                        $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
                         # Aligning data structure with schema (requirement for DCR)
-                        $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+                        $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
                     }
 
         #-----------------------------------------
@@ -1259,16 +1391,16 @@ Catch
                         $DataVariable = $DataArray
 
                         # add CollectionTime to existing array
-                        $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+                        $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
                         # add Computer & UserLoggedOn info to existing array
-                        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+                        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
 
                         # Validating/fixing schema data structure of source data
-                        $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+                        $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
                         # Aligning data structure with schema (requirement for DCR)
-                        $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+                        $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
                     }
 
         #-----------------------------------------
@@ -1307,16 +1439,16 @@ Catch
                         $DataVariable = $DataArray
 
                         # add CollectionTime to existing array
-                        $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+                        $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
                         # add Computer & UserLoggedOn info to existing array
-                        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+                        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
 
                         # Validating/fixing schema data structure of source data
-                        $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+                        $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
                         # Aligning data structure with schema (requirement for DCR)
-                        $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+                        $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
                     }
 
         #-------------------------------------------------------------------------------------------
@@ -1324,7 +1456,7 @@ Catch
         #-------------------------------------------------------------------------------------------
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
-                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
+                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
                                                  -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
@@ -1335,8 +1467,8 @@ Catch
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
         #-----------------------------------------------------------------------------------------------
 
-            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable `
-                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 
 
 ###############################################################
@@ -1359,7 +1491,8 @@ Catch
     # Collecting data (in)
     #-------------------------------------------------------------------------------------------
             
-        Write-Output "Collecting VPN information"
+        Write-Output ""
+        Write-Output "Collecting VPN information ... Please Wait !"
 
         # Default Values
             $VPNSoftware = ""
@@ -1398,23 +1531,23 @@ Catch
 
             
         # add CollectionTime to existing array
-        $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+        $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
         # add Computer & UserLoggedOn info to existing array
-        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
 
         # Validating/fixing schema data structure of source data
-        $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+        $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
         # Aligning data structure with schema (requirement for DCR)
-        $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+        $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
 
         #-------------------------------------------------------------------------------------------
         # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
         #-------------------------------------------------------------------------------------------
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
-                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
+                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
                                                  -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
@@ -1425,8 +1558,8 @@ Catch
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
         #-----------------------------------------------------------------------------------------------
 
-            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable `
-                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 
 
 ###############################################################
@@ -1449,7 +1582,8 @@ Catch
     # Collecting data (in)
     #-------------------------------------------------------------------------------------------
             
-        Write-Output "Collecting LAPS information"
+        Write-Output ""
+        Write-Output "Collecting LAPS information ... Please Wait !"
 
         # Default Values
             $LAPSSoftware = ""
@@ -1478,23 +1612,23 @@ Catch
                                          }
 
         # add CollectionTime to existing array
-        $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+        $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
         # add Computer & UserLoggedOn info to existing array
-        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
 
         # Validating/fixing schema data structure of source data
-        $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+        $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
         # Aligning data structure with schema (requirement for DCR)
-        $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+        $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
 
         #-------------------------------------------------------------------------------------------
         # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
         #-------------------------------------------------------------------------------------------
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
-                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
+                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
                                                  -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
@@ -1505,8 +1639,8 @@ Catch
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
         #-----------------------------------------------------------------------------------------------
 
-            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable `
-                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 
 
 ###############################################################
@@ -1529,7 +1663,8 @@ Catch
     # Collecting data (in)
     #-------------------------------------------------------------------------------------------
             
-        Write-Output "Collecting Admin By Request information"
+        Write-Output ""
+        Write-Output "Collecting Admin By Request information ... Please Wait !"
 
         # Default Values
         $ABRSoftware = ""
@@ -1559,16 +1694,16 @@ Catch
                                                  }
     
                 # add CollectionTime to existing array
-                $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+                $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
                 # add Computer & UserLoggedOn info to existing array
-                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
 
                 # Validating/fixing schema data structure of source data
-                $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+                $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
                 # Aligning data structure with schema (requirement for DCR)
-                $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+                $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
             }
 
         #-------------------------------------------------------------------------------------------
@@ -1576,7 +1711,7 @@ Catch
         #-------------------------------------------------------------------------------------------
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
-                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
+                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
                                                  -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
@@ -1587,8 +1722,8 @@ Catch
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
         #-----------------------------------------------------------------------------------------------
 
-            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable `
-                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 
 
 ###############################################################
@@ -1616,7 +1751,8 @@ Catch
         # Collecting data (in)
         #-------------------------------------------------------------------------------------------
             
-            Write-Output "Collecting Windows Update Last Results information"
+            Write-Output ""
+            Write-Output "Collecting Windows Update Last Results information ... Please Wait !"
 
             $DataVariable = Get-WULastResults
 
@@ -1625,26 +1761,26 @@ Catch
         #-------------------------------------------------------------------------------------------
 
             # convert CIM array to PSCustomObject and remove CIM class information
-            $DataVariable = Convert-CimArrayToObjectFixStructure -data $DataVariable
+            $DataVariable = Convert-CimArrayToObjectFixStructure -data $DataVariable -Verbose:$Verbose
     
             # add CollectionTime to existing array
-            $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+            $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
             # add Computer & UserLoggedOn info to existing array
-            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
 
             # Validating/fixing schema data structure of source data
-            $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+            $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
             # Aligning data structure with schema (requirement for DCR)
-            $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+            $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
 
         #-------------------------------------------------------------------------------------------
         # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
         #-------------------------------------------------------------------------------------------
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
-                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
+                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
                                                  -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
@@ -1655,8 +1791,8 @@ Catch
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
         #-----------------------------------------------------------------------------------------------
 
-            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable `
-                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 
 
     #################################################
@@ -1674,7 +1810,8 @@ Catch
         # Collecting data (in)
         #-------------------------------------------------------------------------------------------
             
-            Write-Output "Collecting Windows Update Source Information"
+            Write-Output ""
+            Write-Output "Collecting Windows Update Source information ... Please Wait !"
 
             $DataVariable = Get-WUServiceManager | Where-Object { $_.IsDefaultAUService -eq $true }
 
@@ -1683,26 +1820,26 @@ Catch
         #-------------------------------------------------------------------------------------------
 
             # convert CIM array to PSCustomObject and remove CIM class information
-            $DataVariable = Convert-CimArrayToObjectFixStructure -data $DataVariable
+            $DataVariable = Convert-CimArrayToObjectFixStructure -data $DataVariable -Verbose:$Verbose
     
             # add CollectionTime to existing array
-            $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+            $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
             # add Computer & UserLoggedOn info to existing array
-            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
 
             # Validating/fixing schema data structure of source data
-            $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+            $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
             # Aligning data structure with schema (requirement for DCR)
-            $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+            $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
 
         #-------------------------------------------------------------------------------------------
         # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
         #-------------------------------------------------------------------------------------------
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
-                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
+                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
                                                  -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
@@ -1713,8 +1850,8 @@ Catch
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
         #-----------------------------------------------------------------------------------------------
 
-            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable `
-                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 
 
     #################################################
@@ -1732,7 +1869,8 @@ Catch
         # Collecting data (in)
         #-------------------------------------------------------------------------------------------
             
-            Write-Output "Collecting Pending Windows Updates Information"
+            Write-Output ""
+            Write-Output "Collecting information about pending Windows Updates ... Please Wait !"
 
             $WU_ServiceManager = Get-WUServiceManager | Where-Object { $_.IsDefaultAUService -eq $true }
 
@@ -1766,23 +1904,23 @@ Catch
             If ($WU_PendingUpdates)
                 {
                     # convert CIM array to PSCustomObject and remove CIM class information
-                    $DataVariable = Convert-CimArrayToObjectFixStructure -data $WU_PendingUpdates
+                    $DataVariable = Convert-CimArrayToObjectFixStructure -data $WU_PendingUpdates -Verbose:$Verbose
 
                     # add CollectionTime to existing array
-                    $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $WU_PendingUpdates
+                    $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $WU_PendingUpdates -Verbose:$Verbose
 
                     # add Computer & UserLoggedOn info to existing array
-                    $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+                    $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn -Verbose:$Verbose
 
                     # Remove unnecessary columns in schema
                     $DataVariable = Filter-ObjectExcludeProperty -Data $DataVariable -ExcludeProperty BundledUpdates, Categories, CveIds, DownloadContents, Identity, InstallationBehavior, UninstallationSteps, `
-                                                                                                      KBArticleIDs, Languages, MoreInfoUrls, SecurityBulletinIDs, SuperSededUpdateIds, UninstallationBehavior, WindowsDriverUpdateEntries
+                                                                                                      KBArticleIDs, Languages, MoreInfoUrls, SecurityBulletinIDs, SuperSededUpdateIds, UninstallationBehavior, WindowsDriverUpdateEntries -Verbose:$Verbose
 
                     # Validating/fixing schema data structure of source data
-                    $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+                    $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
                     # Aligning data structure with schema (requirement for DCR)
-                    $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+                    $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
                 }
 
         #-------------------------------------------------------------------------------------------
@@ -1790,7 +1928,7 @@ Catch
         #-------------------------------------------------------------------------------------------
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
-                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
+                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
                                                  -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
@@ -1801,8 +1939,8 @@ Catch
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
         #-----------------------------------------------------------------------------------------------
 
-            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable `
-                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 
 
     #############################################################
@@ -1820,7 +1958,8 @@ Catch
         # Collecting data (in)
         #-------------------------------------------------------------------------------------------
             
-            Write-Output "Collecting Last Installations of Windows Updates information"
+            Write-Output ""
+            Write-Output "Collecting information about last installations of Windows Updates ... Please Wait !"
 
             $WU_LastInstallations = Get-WuHistory -MaxDate ((Get-date).AddDays(-31))
 
@@ -1850,19 +1989,19 @@ Catch
                     Until ($PosDataVariable -eq $CountVar)
 
                     # convert CIM array to PSCustomObject and remove CIM class information
-                    $DataVariable = Convert-CimArrayToObjectFixStructure -data $WU_LastInstallations
+                    $DataVariable = Convert-CimArrayToObjectFixStructure -data $WU_LastInstallations -Verbose:$Verbose
 
                     # add CollectionTime to existing array
-                    $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+                    $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
                     # add Computer & UserLoggedOn info to existing array
-                    $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+                    $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
 
                     # Validating/fixing schema data structure of source data
-                    $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+                    $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
                     # Aligning data structure with schema (requirement for DCR)
-                    $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+                    $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
             }
         Else
             {
@@ -1874,7 +2013,7 @@ Catch
         #-------------------------------------------------------------------------------------------
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
-                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
+                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
                                                  -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
@@ -1885,8 +2024,8 @@ Catch
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
         #-----------------------------------------------------------------------------------------------
 
-            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable `
-                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 
 
 ###############################################################
@@ -1909,7 +2048,8 @@ Catch
     # Collecting data (in)
     #-------------------------------------------------------------------------------------------
             
-        Write-Output "Collecting Bitlocker information"
+        Write-Output ""
+        Write-Output "Collecting information about Bitlocker ... Please Wait !"
 
         # Default Values
         $OSDisk_DriveLetter = ""
@@ -1959,26 +2099,26 @@ Catch
                                          }
 
         # convert CIM array to PSCustomObject and remove CIM class information
-        $DataVariable = Convert-CimArrayToObjectFixStructure -data $DataVariable
+        $DataVariable = Convert-CimArrayToObjectFixStructure -data $DataVariable -Verbose:$Verbose
     
         # add CollectionTime to existing array
-        $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+        $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
         # add Computer & UserLoggedOn info to existing array
-        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
 
         # Validating/fixing schema data structure of source data
-        $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+        $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
         # Aligning data structure with schema (requirement for DCR)
-        $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+        $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
 
         #-------------------------------------------------------------------------------------------
         # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
         #-------------------------------------------------------------------------------------------
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
-                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
+                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
                                                  -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
@@ -1989,8 +2129,8 @@ Catch
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
         #-----------------------------------------------------------------------------------------------
 
-            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable `
-                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 
 
 ###############################################################
@@ -2013,7 +2153,8 @@ Catch
     # Collecting data (in)
     #-------------------------------------------------------------------------------------------
             
-        Write-Output "Collecting Eventlog information"
+        Write-Output ""
+        Write-Output "Collecting Eventlog information ... Please Wait !"
 
         $FilteredEvents      = @()
         $Appl_Events_ALL     = @()
@@ -2089,26 +2230,26 @@ Catch
     #-------------------------------------------------------------------------------------------
 
         # convert CIM array to PSCustomObject and remove CIM class information
-        $DataVariable = Convert-CimArrayToObjectFixStructure -data $FilteredEvents
+        $DataVariable = Convert-CimArrayToObjectFixStructure -data $FilteredEvents -Verbose:$Verbose
     
         # add CollectionTime to existing array
-        $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+        $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
         # add Computer & UserLoggedOn info to existing array
-        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn -Verbose:$Verbose
 
         # Validating/fixing schema data structure of source data
-        $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+        $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
         # Aligning data structure with schema (requirement for DCR)
-        $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+        $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
 
         #-------------------------------------------------------------------------------------------
         # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
         #-------------------------------------------------------------------------------------------
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
-                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
+                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
                                                  -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
@@ -2119,8 +2260,8 @@ Catch
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
         #-----------------------------------------------------------------------------------------------
 
-            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable `
-                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 
 
 ###############################################################
@@ -2143,7 +2284,8 @@ Catch
     # Collecting data (in)
     #-------------------------------------------------------------------------------------------
             
-        Write-Output "Collecting Network Adapter information"
+        Write-Output ""
+        Write-Output "Collecting Network Adapter information ... Please Wait !"
 
         $NetworkAdapter = Get-NetAdapter
 
@@ -2153,28 +2295,28 @@ Catch
         If ($NetworkAdapter)
             {
                 # convert CIM array to PSCustomObject and remove CIM class information
-                $DataVariable = Convert-CimArrayToObjectFixStructure -data $NetworkAdapter
+                $DataVariable = Convert-CimArrayToObjectFixStructure -data $NetworkAdapter -Verbose:$Verbose
     
                 # add CollectionTime to existing array
-                $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+                $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
                 # add Computer & UserLoggedOn info to existing array
-                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn -Verbose:$Verbose
 
                 # Get insight about the schema structure of an object BEFORE changes. Command is only needed to verify schema - can be disabled
-                $SchemaBefore = Get-ObjectSchemaAsArray -Data $DataVariable
+                $SchemaBefore = Get-ObjectSchemaAsArray -Data $DataVariable -Verbose:$Verbose
         
                 # Remove unnecessary columns in schema
-                $DataVariable = Filter-ObjectExcludeProperty -Data $DataVariable -ExcludeProperty Memento*,Inno*,'(default)',1033
+                $DataVariable = Filter-ObjectExcludeProperty -Data $DataVariable -ExcludeProperty Memento*,Inno*,'(default)',1033 -Verbose:$Verbose
 
                 # Get insight about the schema structure of an object AFTER changes. Command is only needed to verify schema - can be disabled
-                $Schema = Get-ObjectSchemaAsArray -Data $DataVariable
+                $Schema = Get-ObjectSchemaAsArray -Data $DataVariable -Verbose:$Verbose
 
                 # Validating/fixing schema data structure of source data
-                $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+                $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
                 # Aligning data structure with schema (requirement for DCR)
-                $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable            }
+                $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose            }
         Else
             {
 
@@ -2187,16 +2329,16 @@ Catch
                                                  }
 
                 # add CollectionTime to existing array
-                $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+                $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
                 # add Computer & UserLoggedOn info to existing array
-                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn -Verbose:$Verbose
 
                 # Validating/fixing schema data structure of source data
-                $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+                $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
                 # Aligning data structure with schema (requirement for DCR)
-                $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+                $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
             }         
 
         #-------------------------------------------------------------------------------------------
@@ -2204,7 +2346,7 @@ Catch
         #-------------------------------------------------------------------------------------------
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
-                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
+                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
                                                  -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
@@ -2215,8 +2357,8 @@ Catch
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
         #-----------------------------------------------------------------------------------------------
 
-            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable `
-                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 
 
 ###############################################################
@@ -2239,7 +2381,8 @@ Catch
     # Collecting data (in)
     #-------------------------------------------------------------------------------------------
             
-        Write-Output "Collecting IPv4 information"
+        Write-Output ""
+        Write-Output "Collecting IPv4 information ... Please Wait !"
 
         $IPv4Status = Get-NetIPAddress -AddressFamily IPv4
 
@@ -2249,19 +2392,19 @@ Catch
         If ($IPv4Status)
             {
                 # convert CIM array to PSCustomObject and remove CIM class information
-                $DataVariable = Convert-CimArrayToObjectFixStructure -data $IPv4Status
+                $DataVariable = Convert-CimArrayToObjectFixStructure -data $IPv4Status -Verbose:$Verbose
     
                 # add CollectionTime to existing array
-                $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+                $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
                 # add Computer & UserLoggedOn info to existing array
-                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn -Verbose:$Verbose
 
                 # Validating/fixing schema data structure of source data
-                $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+                $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
                 # Aligning data structure with schema (requirement for DCR)
-                $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+                $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
             }
         Else
             {
@@ -2275,16 +2418,16 @@ Catch
                                                  }
 
                 # add CollectionTime to existing array
-                $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+                $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
                 # add Computer & UserLoggedOn info to existing array
-                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn -Verbose:$Verbose
 
                 # Validating/fixing schema data structure of source data
-                $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+                $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
                 # Aligning data structure with schema (requirement for DCR)
-                $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+                $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
             }         
 
         #-------------------------------------------------------------------------------------------
@@ -2292,7 +2435,7 @@ Catch
         #-------------------------------------------------------------------------------------------
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
-                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
+                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
                                                  -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
@@ -2303,8 +2446,8 @@ Catch
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
         #-----------------------------------------------------------------------------------------------
 
-            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable `
-                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 
 
 ###############################################################
@@ -2327,10 +2470,17 @@ Catch
     # Collecting data (in)
     #-------------------------------------------------------------------------------------------
             
-        Write-Output "Collecting Local Admin information"
+        Write-Output ""
+        Write-Output "Collecting Local Admin information ... Please Wait !"
 
         $LocalAdminGroupname = (Get-localgroup -Sid S-1-5-32-544).name       # SID S-1-5-32-544 = local computer Administrators group
-        $LocalAdmins = Get-LocalGroupMember -Group  $LocalAdminGroupname
+        Try
+            {
+                $LocalAdmins = Get-LocalGroupMember -Group  $LocalAdminGroupname
+            }
+        Catch
+            {
+            }
 
     #-------------------------------------------------------------------------------------------
     # Preparing data structure
@@ -2366,19 +2516,19 @@ Catch
         Else
             {
                 # convert PS array to PSCustomObject and remove PS class information
-                $DataVariable = Convert-PSArrayToObjectFixStructure -data $LocalAdmins
+                $DataVariable = Convert-PSArrayToObjectFixStructure -data $LocalAdmins -Verbose:$Verbose
     
                 # add CollectionTime to existing array
-                $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+                $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
                 # add Computer & UserLoggedOn info to existing array
-                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn -Verbose:$Verbose
 
                 # Validating/fixing schema data structure of source data
-                $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+                $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
                 # Aligning data structure with schema (requirement for DCR)
-                $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+                $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
             }
 
         #-------------------------------------------------------------------------------------------
@@ -2386,7 +2536,7 @@ Catch
         #-------------------------------------------------------------------------------------------
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
-                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
+                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
                                                  -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
@@ -2397,8 +2547,8 @@ Catch
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
         #-----------------------------------------------------------------------------------------------
 
-            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable `
-                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 
 
 #####################################################################
@@ -2421,7 +2571,8 @@ Catch
         # Collecting data (in)
         #-------------------------------------------------------------------------------------------
             
-            Write-Output "Collecting Windows Firewall information"
+            Write-Output ""
+            Write-Output "Collecting Windows Firewall information ... Please Wait !"
 
             $WinFw = Get-NetFirewallProfile -policystore activestore
 
@@ -2431,19 +2582,19 @@ Catch
         If ($WinFw)
             {
                 # convert CIM array to PSCustomObject and remove CIM class information
-                $DataVariable = Convert-CimArrayToObjectFixStructure -data $WinFw
+                $DataVariable = Convert-CimArrayToObjectFixStructure -data $WinFw -Verbose:$Verbose
     
                 # add CollectionTime to existing array
-                $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+                $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
                 # add Computer & UserLoggedOn info to existing array
-                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
 
                 # Validating/fixing schema data structure of source data
-                $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+                $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
                 # Aligning data structure with schema (requirement for DCR)
-                $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+                $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
             }
         Else
             {
@@ -2457,16 +2608,16 @@ Catch
                                                  }
 
                 # add CollectionTime to existing array
-                $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+                $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
                 # add Computer & UserLoggedOn info to existing array
-                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn -Verbose:$Verbose
 
                 # Validating/fixing schema data structure of source data
-                $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+                $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
                 # Aligning data structure with schema (requirement for DCR)
-                $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+                $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
             }         
 
         #-------------------------------------------------------------------------------------------
@@ -2474,7 +2625,7 @@ Catch
         #-------------------------------------------------------------------------------------------
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
-                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
+                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
                                                  -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
@@ -2485,8 +2636,8 @@ Catch
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
         #-----------------------------------------------------------------------------------------------
 
-            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable `
-                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 
 
 ###############################################################
@@ -2509,7 +2660,8 @@ Catch
     # Collecting data (in)
     #-------------------------------------------------------------------------------------------
             
-        Write-Output "Collecting Group Policy information"
+        Write-Output ""
+        Write-Output "Collecting Group Policy information ... Please Wait !"
 
         # Get StartTimeHi Int32 value
         $startTimeHi = (Get-ItemProperty -Path "Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Group Policy\State\Machine\Extension-List\{00000000-0000-0000-0000-000000000000}").startTimeHi
@@ -2535,16 +2687,16 @@ Catch
                                               }
    
                 # add CollectionTime to existing array
-                $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataArray
+                $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataArray -Verbose:$Verbose
 
                 # add Computer & UserLoggedOn info to existing array
-                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn -Verbose:$Verbose
 
                 # Validating/fixing schema data structure of source data
-                $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+                $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
                 # Aligning data structure with schema (requirement for DCR)
-                $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+                $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
             }
 
         #-------------------------------------------------------------------------------------------
@@ -2552,7 +2704,7 @@ Catch
         #-------------------------------------------------------------------------------------------
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
-                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
+                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
                                                  -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
@@ -2563,8 +2715,8 @@ Catch
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
         #-----------------------------------------------------------------------------------------------
 
-            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable `
-                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 
 
 ###############################################################
@@ -2587,7 +2739,8 @@ Catch
     # Collecting data (in)
     #-------------------------------------------------------------------------------------------
             
-        Write-Output "Collecting TPM information"
+        Write-Output ""
+        Write-Output "Collecting TPM information ... Please Wait !"
 
         $TPM = Get-TPM -ErrorAction SilentlyContinue -WarningVariable SilentlyContinue
 
@@ -2629,13 +2782,13 @@ Catch
                 Until ($PosDataVariable -eq $CountDataVariable)
 
                 # add CollectionTime to existing array
-                $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $TPM
+                $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $TPM -Verbose:$Verbose
 
                 # add Computer & UserLoggedOn info to existing array
-                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn -Verbose:$Verbose
 
                 # Validating/fixing schema data structure of source data
-                $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+                $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
             }
         Else
             {
@@ -2644,16 +2797,16 @@ Catch
                                                     }
 
                 # add CollectionTime to existing array
-                $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable
+                $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
                 # add Computer & UserLoggedOn info to existing array
-                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn -Verbose:$Verbose
 
                 # Validating/fixing schema data structure of source data
-                $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable
+                $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
 
                 # Aligning data structure with schema (requirement for DCR)
-                $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable
+                $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
             }
 
         #-------------------------------------------------------------------------------------------
@@ -2661,7 +2814,7 @@ Catch
         #-------------------------------------------------------------------------------------------
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
-                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId `
+                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
                                                  -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
@@ -2672,8 +2825,8 @@ Catch
         # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
         #-----------------------------------------------------------------------------------------------
 
-            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable `
-                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId
+            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 
 
 ##################################

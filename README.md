@@ -498,11 +498,11 @@ You can find more detailed information about the module using links below:
 [AzLogDcringestPS (Powershell Gallery)](https://www.powershellgallery.com/packages/AzLogDcrIngestPS)
 
 
-### Switch starting ClientInspector.ps1 for **AzLogDcrIngestPS** automatic deployment/integration
+### Switch starting ClientInspector.ps1 for **AzLogDcrIngestPS** implementation
 ClientInspector supports 3 ways to install/update/import the needed Powershell module: **Download**, **PsGallery**, **LocalPath**
 
 #### .\ClientInspector.ps1 -function:LocalPath
-ClientInspector will look for AzLogDcrIngest.psm1 file in the directory where the script will run from. 
+ClientInspector will look for **AzLogDcrIngest.psm1** file in the directory where the script will run from. 
 If AzLogDcrIngest.psm1 is missing, script will terminate - otherwise it will do an import-module.
 
 Example
@@ -516,7 +516,7 @@ Using AzLogDcrIngestPS module from local path D:\scripts\ClientInspectorV2
 ```
 
 #### .\ClientInspector.ps1 -function:Download
-ClientInspector will download latest version into the local path each time it runs (approx 300 kb)
+ClientInspector will download latest version from my Github repo and store it in the local path each time it runs (approx 300 kb)
 
 Example
 ```
@@ -533,8 +533,9 @@ into local path D:\scripts\ClientInspectorV2
 #### .\ClientInspector.ps1 -function:PsGallery -scope [AllUsers|CurrentUser]
 This parameter requires another parameter: -scope [AllUsers | CurrentUser]
 
-ClientInspector will check if download latest version into the local path each time (approx 300 kb)
-If AzLogDcrIngest.psm1 is missing, script will terminate
+ClientInspector will check if the module is installed in the chosen scope.
+If not installed, it will automatically download latest version from Powershell Gallery and import-module.
+If client is running latest version, it will continue.
 
 Example
 ```
