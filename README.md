@@ -498,8 +498,8 @@ You can find more detailed information about the module using links below:
 [AzLogDcringestPS (Powershell Gallery)](https://www.powershellgallery.com/packages/AzLogDcrIngestPS)
 
 
-### Switch to ClientInspector for function integration
-ClientInspector supports 3 ways to use the needed Powershell module: **Download**, **PsGallery**, **LocalPath**
+### Switch starting ClientInspector.ps1 for **AzLogDcrIngestPS** automatic deployment/integration
+ClientInspector supports 3 ways to install/update/import the needed Powershell module: **Download**, **PsGallery**, **LocalPath**
 
 #### -function:LocalPath
 ClientInspector will look for AzLogDcrIngest.psm1 file in the directory where the script will run from. 
@@ -581,6 +581,10 @@ The security of **ClientInspector** are divided into 4 layers: **data-in**, **da
 |Schema-management|Method 1: Azure RBAC (recommended)<br><br>Method 2:Azure app with secret or certificate|[Details covered in ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-rbac-security-adjustment-separation-of-permissions-between-log-ingestion-and-tabledcr-management)
 
 <br>
+
+## Sample output running ClientInspector
+
+### Fir
 
 # Cost - How much does it cost to store these data ?
 Data from **5000** clients doing **daily** ClientInspector inventory will cost you approx **USD 100 per month**
