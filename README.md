@@ -778,6 +778,7 @@ RELATED LINKS
 
 <details>
   <summary>Normal mode - .\ClientInspector -function:download -verbose:$false</summary>
+
 ```
 PS C:\ClientInspector> .\ClientInspector.ps1 -function:download -verbose:$false
 
@@ -957,6 +958,7 @@ RawContentLength  : 2682
 
 <details>
   <summary>Verbose mode - .\ClientInspector -function:download -verbose:$true</summary>
+
 ```
 PS C:\ClientInspector> .\ClientInspector.ps1 -function:download -verbose:$true
 
