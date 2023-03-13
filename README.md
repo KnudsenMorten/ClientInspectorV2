@@ -491,11 +491,72 @@ Core features of Powershell module **AzLogDcrIngestPS**:
 * can convert source objects based on CIM or PS objects into PSCustomObjects/array
 * can add relevant information to each record like UserLoggedOn, Computer, CollectionTime
 
-You can download latest version here:
+You can find more detailed information about the module using links below:
 
 [AzLogDcringestPS (Github)](https://github.com/KnudsenMorten/AzLogDcrIngestPS)
 
 [AzLogDcringestPS (Powershell Gallery)](https://www.powershellgallery.com/packages/AzLogDcrIngestPS)
+
+
+### Switch to ClientInspector for function integration
+ClientInspector supports 3 ways to use the needed Powershell module: **Download**, **PsGallery**, **LocalPath**
+
+#### -function:LocalPath
+ClientInspector will look for AzLogDcrIngest.psm1 file in the directory where the script will run from. 
+If AzLogDcrIngest.psm1 is missing, script will terminate - otherwise it will do an import-module.
+
+Example
+```
+.\ClientInspector.ps1 -verbose:$false -function:localpath
+
+ClientInspector | Inventory of Operational & Security-related information
+Developed by Morten Knudsen, Microsoft MVP - for free community use
+
+Using AzLogDcrIngestPS module from local path D:\scripts\ClientInspectorV2
+```
+
+#### -function:Download
+ClientInspector will download latest version into the local path each time it runs (approx 300 kb)
+
+Example
+```
+.\ClientInspector.ps1 -verbose:$false -function:download
+
+ClientInspector | Inventory of Operational & Security-related information
+Developed by Morten Knudsen, Microsoft MVP - for free community use
+
+Downloading latest version of module AzLogDcrIngestPS from https://github.com/KnudsenMorten/CientInspectorV2
+into local path D:\scripts\ClientInspectorV2
+
+```
+
+#### -function:PsGallery
+This parameter requires another parameter: -scope (AllUsers | CurrentUser)
+
+ClientInspector will check if download latest version into the local path each time (approx 300 kb)
+If AzLogDcrIngest.psm1 is missing, script will terminate
+
+Example
+```
+.\ClientInspector.ps1 -verbose:$false -function:PSGallery -scope:CurrentUser
+
+ClientInspector | Inventory of Operational & Security-related information
+Developed by Morten Knudsen, Microsoft MVP - for free community use
+
+Powershell module was not found !
+Installing in scope currentuser .... Please Wait !
+
+```
+
+```
+.\ClientInspector.ps1 -verbose:$false -function:PsGallery -scope:currentuser
+
+ClientInspector | Inventory of Operational & Security-related information
+Developed by Morten Knudsen, Microsoft MVP - for free community use
+
+Checking latest version at PsGallery for AzLogDcrIngestPS module
+OK - Running latest version
+```
 
 </details>
 
