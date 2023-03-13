@@ -501,7 +501,7 @@ You can find more detailed information about the module using links below:
 ### Switch starting ClientInspector.ps1 for **AzLogDcrIngestPS** automatic deployment/integration
 ClientInspector supports 3 ways to install/update/import the needed Powershell module: **Download**, **PsGallery**, **LocalPath**
 
-#### -function:LocalPath
+#### .\ClientInspector.ps1 -function:LocalPath
 ClientInspector will look for AzLogDcrIngest.psm1 file in the directory where the script will run from. 
 If AzLogDcrIngest.psm1 is missing, script will terminate - otherwise it will do an import-module.
 
@@ -515,7 +515,7 @@ Developed by Morten Knudsen, Microsoft MVP - for free community use
 Using AzLogDcrIngestPS module from local path D:\scripts\ClientInspectorV2
 ```
 
-#### -function:Download
+#### .\ClientInspector.ps1 -function:Download
 ClientInspector will download latest version into the local path each time it runs (approx 300 kb)
 
 Example
@@ -530,8 +530,8 @@ into local path D:\scripts\ClientInspectorV2
 
 ```
 
-#### -function:PsGallery
-This parameter requires another parameter: -scope (AllUsers | CurrentUser)
+#### .\ClientInspector.ps1 -function:PsGallery -scope [AllUsers|CurrentUser]
+This parameter requires another parameter: -scope [AllUsers | CurrentUser]
 
 ClientInspector will check if download latest version into the local path each time (approx 300 kb)
 If AzLogDcrIngest.psm1 is missing, script will terminate
