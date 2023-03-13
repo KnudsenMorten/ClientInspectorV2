@@ -411,8 +411,8 @@ C:\ClientInspector\ClientInspector.ps1 -PsFunctionLibrary LocalPath_Import -verb
 
 10. As the last change, we need to change 2 parameters in the parameters to tell ClientInspector to only make schema changes when run from the reference machine
 ```js
-$AzDcrDceTableCreateFromReferenceMachine    = @("<<MyReferenceMachineComputerName>>")   # sample @("ComputerName")
-$AzDcrDceTableCreateFromAnyMachine          = $false    # important so changes can only happen on reference machine
+$AzLogDcrTableCreateFromReferenceMachine    = @("<<MyReferenceMachineComputerName>>")   # sample @("ComputerName")
+$AzLogDcrTableCreateFromAnyMachine          = $false    # important so changes can only happen on reference machine
 ```
 11. You are now ready to deploy it to your test group
 
