@@ -1029,12 +1029,6 @@ Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $D
 
 ## step 4/4 - Data Out (send to LogAnalytics) - detailed functions - "under the hood"
 ```
-#-------------------------------------------------------------------------------------------
-# Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
-#-------------------------------------------------------------------------------------------
-
-If ( ($AzAppId) -and ($AzAppSecret) )
-{
 #-----------------------------------------------------------------------------------------------
 # Check if table and DCR exist - or schema must be updated due to source object schema changes
 #-----------------------------------------------------------------------------------------------
@@ -1054,43 +1048,34 @@ $StructureCheck = Get-AzLogAnalyticsTableAzDataCollectionRuleStatus -AzLogWorksp
 # Structure check = $true -> Create/update table & DCR with necessary schema
 #-----------------------------------------------------------------------------------------------
 
-If ($StructureCheck -eq $true)
-	{
-		If ( ( $env:COMPUTERNAME -in $AzLogDcrTableCreateFromReferenceMachine) -or ($AzLogDcrTableCreateFromAnyMachine -eq $true) )    # manage table creations
-			{
-				# build schema to be used for LogAnalytics Table
-				$Schema = Get-ObjectSchemaAsHash -Data $Data `
-												 -ReturnType Table `
-												 -Verbose:$Verbose
+# build schema to be used for LogAnalytics Table
+$Schema = Get-ObjectSchemaAsHash -Data $Data `
+								 -ReturnType Table `
+								 -Verbose:$Verbose
 
-				CreateUpdate-AzLogAnalyticsCustomLogTableDcr -AzLogWorkspaceResourceId $AzLogWorkspaceResourceId `
-															 -SchemaSourceObject $Schema `
-															 -TableName $TableName `
-															 -AzAppId $AzAppId `
-															 -AzAppSecret $AzAppSecret `
-															 -TenantId $TenantId `
-															 -Verbose:$Verbose 
+CreateUpdate-AzLogAnalyticsCustomLogTableDcr -AzLogWorkspaceResourceId $AzLogWorkspaceResourceId `
+											 -SchemaSourceObject $Schema `
+											 -TableName $TableName `
+											 -AzAppId $AzAppId `
+											 -AzAppSecret $AzAppSecret `
+											 -TenantId $TenantId `
+											 -Verbose:$Verbose 
 
 
-				# build schema to be used for DCR
-				$Schema = Get-ObjectSchemaAsHash -Data $Data -ReturnType DCR
+# build schema to be used for DCR
+$Schema = Get-ObjectSchemaAsHash -Data $Data -ReturnType DCR
 
-				CreateUpdate-AzDataCollectionRuleLogIngestCustomLog -AzLogWorkspaceResourceId $AzLogWorkspaceResourceId `
-																	-SchemaSourceObject $Schema `
-																	-DceName $DceName `
-																	-DcrName $DcrName `
-																	-TableName $TableName `
-																	-LogIngestServicePricipleObjectId $LogIngestServicePricipleObjectId `
-																	-AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
-																	-AzAppId $AzAppId `
-																	-AzAppSecret $AzAppSecret `
-																	-TenantId $TenantId `
-																	-Verbose:$Verbose
-			}
-	}
-
-} # create table/DCR
-
+CreateUpdate-AzDataCollectionRuleLogIngestCustomLog -AzLogWorkspaceResourceId $AzLogWorkspaceResourceId `
+													-SchemaSourceObject $Schema `
+													-DceName $DceName `
+													-DcrName $DcrName `
+													-TableName $TableName `
+													-LogIngestServicePricipleObjectId $LogIngestServicePricipleObjectId `
+													-AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+													-AzAppId $AzAppId `
+													-AzAppSecret $AzAppSecret `
+													-TenantId $TenantId `
+													-Verbose:$Verbose
 
 $AzDcrDceDetails = Get-AzDcrDceDetails  -DcrName $DcrName `
 										-DceName $DceName `
@@ -1109,9 +1094,6 @@ Post-AzLogAnalyticsLogIngestCustomLogDcrDce  -DceUri $AzDcrDceDetails[2] `
 											 -AzAppSecret $AzAppSecret `
 											 -TenantId $TenantId `
 											 -Verbose:$Verbose
-
-# Write result to screen
-$DataVariable | Out-String | Write-Verbose 
 ```
 
 <br>
