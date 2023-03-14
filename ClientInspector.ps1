@@ -315,7 +315,7 @@ Write-Output ""
     #-------------------------------------------------------------------------------------------
 
         Write-Output ""
-        Write-Output "Collecting Bios information ... Please Wait !"
+        Write-Output "Collecting UserLoggedOn information ... Please Wait !"
 
         $UserLoggedOnRaw = Get-Process -IncludeUserName -Name explorer | Select-Object UserName -Unique
         $UserLoggedOn    = $UserLoggedOnRaw.UserName
