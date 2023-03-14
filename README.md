@@ -498,10 +498,17 @@ You can find more detailed information about the module using links below:
 [AzLogDcringestPS (Powershell Gallery)](https://www.powershellgallery.com/packages/AzLogDcrIngestPS)
 
 
-### Running ClientInspector.ps1 - **AzLogDcrIngestPS** integration
+## 3rd party Powershell modules
+|ModuleName|Purpose|More info|Credit|
+|:---------|:------|:--------|:-----|
+|NuGet|Common Package provider used to deploy many Powershell modules<br><br>Package Provider will automatically be installed on computer when script runs|[Link](https://www.nuget.org/packages|
+|PSWindowsUpdate|Collection of Windows Update information (pending updates, installed updates, etc.)<br><br>Module will automatically be installed on computer when script runs|[Link](https://www.powershellgallery.com/packages/PSWindowsUpdate)|Michal Gajda
+
+
+# Running ClientInspector.ps1 - **AzLogDcrIngestPS** integration
 ClientInspector supports 3 ways to install/update/import the needed Powershell module: **Download**, **PsGallery**, **LocalPath**
 
-#### .\ClientInspector.ps1 -function:LocalPath
+## .\ClientInspector.ps1 -function:LocalPath
 ClientInspector will look for **AzLogDcrIngest.psm1** file in the directory where the script will run from. 
 If AzLogDcrIngest.psm1 is missing, script will terminate - otherwise it will do an import-module.
 
@@ -515,7 +522,7 @@ Developed by Morten Knudsen, Microsoft MVP - for free community use
 Using AzLogDcrIngestPS module from local path D:\scripts\ClientInspectorV2
 ```
 
-#### .\ClientInspector.ps1 -function:Download
+## .\ClientInspector.ps1 -function:Download
 ClientInspector will download latest version from my Github repo and store it in the local path each time it runs (approx 300 kb)
 
 Example
@@ -530,7 +537,7 @@ into local path D:\scripts\ClientInspectorV2
 
 ```
 
-#### .\ClientInspector.ps1 -function:PsGallery -scope [AllUsers|CurrentUser]
+## .\ClientInspector.ps1 -function:PsGallery -scope [AllUsers|CurrentUser]
 This parameter requires another parameter: -scope [AllUsers | CurrentUser]
 
 ClientInspector will check if the module is installed in the chosen scope.
@@ -561,15 +568,7 @@ OK - Running latest version
 
 </details>
 
-
-## 3rd party Powershell modules
-|ModuleName|Purpose|More info|Credit|
-|:---------|:------|:--------|:-----|
-|NuGet|Common Package provider used to deploy many Powershell modules<br><br>Package Provider will automatically be installed on computer when script runs|[Link](https://www.nuget.org/packages|
-|PSWindowsUpdate|Collection of Windows Update information (pending updates, installed updates, etc.)<br><br>Module will automatically be installed on computer when script runs|[Link](https://www.powershellgallery.com/packages/PSWindowsUpdate)|Michal Gajda
-
 <br>
-
 
 # Security
 The security of **ClientInspector** are divided into 4 layers: **data-in**, **data-upload** (send to backend) and **data-view** (dashboards) - and **schema-management**
