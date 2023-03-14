@@ -584,7 +584,7 @@ The security of **ClientInspector** are divided into 4 layers: **data-in**, **da
 <br>
 
 # Layout of ClientInspector data-set
-Each of the data-sets (bios, applications, bitlocker, etc.) are built with the same header:
+Each of the data-sets (bios, applications, bitlocker, etc.) are built with the same 4-phased structure:
 
 ## step 1/4 - Variables (naming - where to send the data)
 ```
