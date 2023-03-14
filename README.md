@@ -30,18 +30,31 @@ Happy hunting :smile:
 
 ## Quick Links
 [What data is being collected ?](#what-data-is-being-collected-)
+
 [Desired State Dashboards - How to get insight of my environment from the data ?](#desired-state-dashboards---how-to-get-insight-of-my-environment-from-the-data-)
+
 [How do I query the data? - Kusto (KQL) is the answer](#how-do-i-query-the-data---kusto-kql-is-the-answer)
+
 [Archicture & flow of ClientInspector](#archicture--flow-of-clientinspector)
+
 [Networking](#networking)
+
 [Implementation](#implementation)
+
 [Dependencies](#dependencies)
+
 [Running ClientInspector.ps1 - 3 modes](#running-clientinspectorps1---3-modes)
+
 [Sample output of ClientInspector](#sample-output-of-clientinspector)
+
 [Security](#security)
+
 [Layout of ClientInspector data-set](#layout-of-clientinspector-data-set)
+
 [Verbose-mode & More help](#verbose-mode--more-help)
+
 [Cost - How much does it cost to store these data ?](#cost---how-much-does-it-cost-to-store-these-data-)
+
 [Contact](#contact)
 
 <br>
