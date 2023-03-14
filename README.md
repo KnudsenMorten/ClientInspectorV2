@@ -723,7 +723,7 @@ Post-AzLogAnalyticsLogIngestCustomLogDcrDce -DceUri $AzDcrDceDetails[2] `
 
 <br>
 
-## Verbose-mode & More help
+# Verbose-mode & More help
 If you want to get more detailed information about that is happening, you can enable verbose mode (-verbose:$true)
 ```
 .\ClientInspector.ps1 -verbose:$true -function:localpath
