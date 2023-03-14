@@ -583,6 +583,147 @@ The security of **ClientInspector** are divided into 4 layers: **data-in**, **da
 
 <br>
 
+# Layout of ClientInspector data-set
+Each of the data-sets (bios, applications, bitlocker, etc.) are built with the same header:
+
+## step 1/4 - Variables (naming - where to send the data)
+```
+#-------------------------------------------------------------------------------------------
+# Variables
+#-------------------------------------------------------------------------------------------
+	
+$TableName  = 'InvClientComputerInfoSystemV2'   # must not contain _CL
+$DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+```
+
+
+## step 2/4 - Data Collection (ensure data is in correct format and any "noice" was removed and relevant information has been added
+```
+#-------------------------------------------------------------------------------------------
+# Collecting data (in)
+#-------------------------------------------------------------------------------------------
+	
+Write-Output ""
+Write-Output "Collecting Computer system information ... Please Wait !"
+
+$DataVariable = Get-CimInstance -ClassName Win32_ComputerSystem
+```
+
+## step 3/4 - Data Manipulation
+```
+#-------------------------------------------------------------------------------------------
+# Preparing data structure
+#-------------------------------------------------------------------------------------------
+
+# convert CIM array to PSCustomObject and remove CIM class information
+$DataVariable = Convert-CimArrayToObjectFixStructure -data $DataVariable -Verbose:$Verbose
+
+# add CollectionTime to existing array
+$DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
+
+# add Computer & UserLoggedOn info to existing array
+$DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+
+# Validating/fixing schema data structure of source data
+$DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
+
+# Aligning data structure with schema (requirement for DCR)
+$DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
+```
+
+## step 4/4 - Data Out (send to LogAnalytics) - combined functions
+```
+#-------------------------------------------------------------------------------------------
+# Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
+#-------------------------------------------------------------------------------------------
+
+CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
+                                     -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
+                                     -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
+                                     -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
+                                     -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                     -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                     -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
+
+#-----------------------------------------------------------------------------------------------
+# Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
+#-----------------------------------------------------------------------------------------------
+
+Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                                   -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
+```
+
+## step 4/4 - Data Out (send to LogAnalytics) - detailed functions - "under the hood"
+```
+#-----------------------------------------------------------------------------------------------
+# Check if table and DCR exist - or schema must be updated due to source object schema changes
+#-----------------------------------------------------------------------------------------------
+	
+# Get insight about the schema structure
+$Schema = Get-ObjectSchemaAsArray -Data $Data
+$StructureCheck = Get-AzLogAnalyticsTableAzDataCollectionRuleStatus -AzLogWorkspaceResourceId $AzLogWorkspaceResourceId `
+                                                                    -TableName $TableName `
+                                                                    -DcrName $DcrName `
+                                                                    -SchemaSourceObject $Schema `
+                                                                    -AzAppId $AzAppId `
+                                                                    -AzAppSecret $AzAppSecret `
+                                                                    -TenantId $TenantId `
+                                                                    -Verbose:$Verbose
+
+#-----------------------------------------------------------------------------------------------
+# Structure check = $true -> Create/update table & DCR with necessary schema
+#-----------------------------------------------------------------------------------------------
+
+# build schema to be used for LogAnalytics Table
+$Schema = Get-ObjectSchemaAsHash -Data $Data `
+                                 -ReturnType Table `
+                                 -Verbose:$Verbose
+
+CreateUpdate-AzLogAnalyticsCustomLogTableDcr -AzLogWorkspaceResourceId $AzLogWorkspaceResourceId `
+                                             -SchemaSourceObject $Schema `
+                                             -TableName $TableName `
+                                             -AzAppId $AzAppId `
+                                             -AzAppSecret $AzAppSecret `
+                                             -TenantId $TenantId `
+                                             -Verbose:$Verbose 
+
+
+# build schema to be used for DCR
+$Schema = Get-ObjectSchemaAsHash -Data $Data -ReturnType DCR
+
+CreateUpdate-AzDataCollectionRuleLogIngestCustomLog -AzLogWorkspaceResourceId $AzLogWorkspaceResourceId `
+                                                    -SchemaSourceObject $Schema `
+                                                    -DceName $DceName `
+                                                    -DcrName $DcrName `
+                                                    -TableName $TableName `
+                                                    -LogIngestServicePricipleObjectId $LogIngestServicePricipleObjectId `
+                                                    -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                                    -AzAppId $AzAppId `
+                                                    -AzAppSecret $AzAppSecret `
+                                                    -TenantId $TenantId `
+                                                    -Verbose:$Verbose
+
+$AzDcrDceDetails = Get-AzDcrDceDetails -DcrName $DcrName `
+                                       -DceName $DceName `
+                                       -AzAppId $AzAppId `
+                                       -AzAppSecret $AzAppSecret `
+                                       -TenantId $TenantId `
+                                       -Verbose:$Verbose
+
+Post-AzLogAnalyticsLogIngestCustomLogDcrDce -DceUri $AzDcrDceDetails[2] `
+                                            -DcrImmutableId $AzDcrDceDetails[6] `
+                                            -TableName $TableName `
+                                            -DcrStream $AzDcrDceDetails[7] `
+                                            -Data $Data `
+                                            -BatchAmount $BatchAmount `
+                                            -AzAppId $AzAppId `
+                                            -AzAppSecret $AzAppSecret `
+                                            -TenantId $TenantId `
+                                            -Verbose:$Verbose
+```
+
+<br>
+
 ## Verbose-mode & More help
 If you want to get more detailed information about that is happening, you can enable verbose mode (-verbose:$true)
 ```
@@ -955,146 +1096,6 @@ RawContentLength  : 2682
 
 ```
 </details>
-
-
-# Layout of ClientInspector data-set
-Each of the data-sets (bios, applications, bitlocker, etc.) are built with the same header:
-
-## step 1/4 - Variables (naming - where to send the data)
-```
-#-------------------------------------------------------------------------------------------
-# Variables
-#-------------------------------------------------------------------------------------------
-	
-$TableName  = 'InvClientComputerInfoSystemV2'   # must not contain _CL
-$DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
-```
-
-
-## step 2/4 - Data Collection (ensure data is in correct format and any "noice" was removed and relevant information has been added
-```
-#-------------------------------------------------------------------------------------------
-# Collecting data (in)
-#-------------------------------------------------------------------------------------------
-	
-Write-Output ""
-Write-Output "Collecting Computer system information ... Please Wait !"
-
-$DataVariable = Get-CimInstance -ClassName Win32_ComputerSystem
-```
-
-## step 3/4 - Data Manipulation
-```
-#-------------------------------------------------------------------------------------------
-# Preparing data structure
-#-------------------------------------------------------------------------------------------
-
-# convert CIM array to PSCustomObject and remove CIM class information
-$DataVariable = Convert-CimArrayToObjectFixStructure -data $DataVariable -Verbose:$Verbose
-
-# add CollectionTime to existing array
-$DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
-
-# add Computer & UserLoggedOn info to existing array
-$DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
-
-# Validating/fixing schema data structure of source data
-$DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
-
-# Aligning data structure with schema (requirement for DCR)
-$DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
-```
-
-## step 4/4 - Data Out (send to LogAnalytics) - combined functions
-```
-#-------------------------------------------------------------------------------------------
-# Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
-#-------------------------------------------------------------------------------------------
-
-CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
-                                     -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
-                                     -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
-                                     -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
-                                     -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
-                                     -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
-                                     -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
-
-#-----------------------------------------------------------------------------------------------
-# Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
-#-----------------------------------------------------------------------------------------------
-
-Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
-                                                   -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
-```
-
-## step 4/4 - Data Out (send to LogAnalytics) - detailed functions - "under the hood"
-```
-#-----------------------------------------------------------------------------------------------
-# Check if table and DCR exist - or schema must be updated due to source object schema changes
-#-----------------------------------------------------------------------------------------------
-	
-# Get insight about the schema structure
-$Schema = Get-ObjectSchemaAsArray -Data $Data
-$StructureCheck = Get-AzLogAnalyticsTableAzDataCollectionRuleStatus -AzLogWorkspaceResourceId $AzLogWorkspaceResourceId `
-                                                                    -TableName $TableName `
-                                                                    -DcrName $DcrName `
-                                                                    -SchemaSourceObject $Schema `
-                                                                    -AzAppId $AzAppId `
-                                                                    -AzAppSecret $AzAppSecret `
-                                                                    -TenantId $TenantId `
-                                                                    -Verbose:$Verbose
-
-#-----------------------------------------------------------------------------------------------
-# Structure check = $true -> Create/update table & DCR with necessary schema
-#-----------------------------------------------------------------------------------------------
-
-# build schema to be used for LogAnalytics Table
-$Schema = Get-ObjectSchemaAsHash -Data $Data `
-                                 -ReturnType Table `
-                                 -Verbose:$Verbose
-
-CreateUpdate-AzLogAnalyticsCustomLogTableDcr -AzLogWorkspaceResourceId $AzLogWorkspaceResourceId `
-                                             -SchemaSourceObject $Schema `
-                                             -TableName $TableName `
-                                             -AzAppId $AzAppId `
-                                             -AzAppSecret $AzAppSecret `
-                                             -TenantId $TenantId `
-                                             -Verbose:$Verbose 
-
-
-# build schema to be used for DCR
-$Schema = Get-ObjectSchemaAsHash -Data $Data -ReturnType DCR
-
-CreateUpdate-AzDataCollectionRuleLogIngestCustomLog -AzLogWorkspaceResourceId $AzLogWorkspaceResourceId `
-                                                    -SchemaSourceObject $Schema `
-                                                    -DceName $DceName `
-                                                    -DcrName $DcrName `
-                                                    -TableName $TableName `
-                                                    -LogIngestServicePricipleObjectId $LogIngestServicePricipleObjectId `
-                                                    -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
-                                                    -AzAppId $AzAppId `
-                                                    -AzAppSecret $AzAppSecret `
-                                                    -TenantId $TenantId `
-                                                    -Verbose:$Verbose
-
-$AzDcrDceDetails = Get-AzDcrDceDetails -DcrName $DcrName `
-                                       -DceName $DceName `
-                                       -AzAppId $AzAppId `
-                                       -AzAppSecret $AzAppSecret `
-                                       -TenantId $TenantId `
-                                       -Verbose:$Verbose
-
-Post-AzLogAnalyticsLogIngestCustomLogDcrDce -DceUri $AzDcrDceDetails[2] `
-                                            -DcrImmutableId $AzDcrDceDetails[6] `
-                                            -TableName $TableName `
-                                            -DcrStream $AzDcrDceDetails[7] `
-                                            -Data $Data `
-                                            -BatchAmount $BatchAmount `
-                                            -AzAppId $AzAppId `
-                                            -AzAppSecret $AzAppSecret `
-                                            -TenantId $TenantId `
-                                            -Verbose:$Verbose
-```
 
 <br>
 
