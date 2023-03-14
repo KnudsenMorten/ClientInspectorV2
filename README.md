@@ -25,7 +25,9 @@ I have a similar solution for Servers; **ServerInspector**. Unfortunately, it is
 [Big Thanks to the great people in Microsoft product teams - you are rock stars :smile:](#thank-you-to-the-great-people-in-microsoft-product-teams---you-are-rock-stars-smile)
 
 Happy hunting :smile:
+
 <br>
+
 ## Quick Links
 [What data is being collected ?]
 
