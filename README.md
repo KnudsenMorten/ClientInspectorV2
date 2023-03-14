@@ -26,8 +26,6 @@ I have a similar solution for Servers; **ServerInspector**. Unfortunately, it is
 
 Happy hunting :smile:
 
-<br>
-
 # Quick Links
 [What data is being collected ?](#what-data-is-being-collected-)  
 [Desired State Dashboards - How to get insight of my environment from the data ?](#desired-state-dashboards---how-to-get-insight-of-my-environment-from-the-data-)  
