@@ -2796,6 +2796,247 @@ VERBOSE:
 ```
 </details>
 
+# Layout of ClientInspector data-set
+Each of the data-sets (bios, applications, bitlocker, etc.) are built with the same header:
+
+## Variables (naming - where to send the data)
+```
+#-------------------------------------------------------------------------------------------
+# Variables
+#-------------------------------------------------------------------------------------------
+	
+$TableName  = 'InvClientComputerInfoSystemV2'   # must not contain _CL
+$DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+```
+
+
+## Data Collection (ensure data is in correct format and any "noice" was removed and relevant information has been added
+```
+#-------------------------------------------------------------------------------------------
+# Collecting data (in)
+#-------------------------------------------------------------------------------------------
+	
+Write-Output ""
+Write-Output "Collecting Computer system information ... Please Wait !"
+
+$DataVariable = Get-CimInstance -ClassName Win32_ComputerSystem
+```
+
+## Data Manipulation
+```
+#-------------------------------------------------------------------------------------------
+# Preparing data structure
+#-------------------------------------------------------------------------------------------
+
+# convert CIM array to PSCustomObject and remove CIM class information
+$DataVariable = Convert-CimArrayToObjectFixStructure -data $DataVariable -Verbose:$Verbose
+
+# add CollectionTime to existing array
+$DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
+
+# add Computer & UserLoggedOn info to existing array
+$DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+
+# Validating/fixing schema data structure of source data
+$DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
+
+# Aligning data structure with schema (requirement for DCR)
+$DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
+```
+
+## Data Out (send to LogAnalytics) - combined functions
+```
+#-------------------------------------------------------------------------------------------
+# Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
+#-------------------------------------------------------------------------------------------
+
+	CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
+										 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
+										 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
+										 -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
+										 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+										 -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+										 -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
+
+#-----------------------------------------------------------------------------------------------
+# Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
+#-----------------------------------------------------------------------------------------------
+
+	Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+													   -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
+```
+
+## Data Out (send to LogAnalytics) - detailed functions - "under the hood"
+```
+#-------------------------------------------------------------------------------------------
+# Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
+#-------------------------------------------------------------------------------------------
+
+	If ( ($AzAppId) -and ($AzAppSecret) )
+		{
+			#-----------------------------------------------------------------------------------------------
+			# Check if table and DCR exist - or schema must be updated due to source object schema changes
+			#-----------------------------------------------------------------------------------------------
+				
+				# Get insight about the schema structure
+				$Schema = Get-ObjectSchemaAsArray -Data $Data
+				$StructureCheck = Get-AzLogAnalyticsTableAzDataCollectionRuleStatus -AzLogWorkspaceResourceId $AzLogWorkspaceResourceId -TableName $TableName -DcrName $DcrName -SchemaSourceObject $Schema `
+																					-AzAppId $AzAppId -AzAppSecret $AzAppSecret -TenantId $TenantId -Verbose:$Verbose
+
+			#-----------------------------------------------------------------------------------------------
+			# Structure check = $true -> Create/update table & DCR with necessary schema
+			#-----------------------------------------------------------------------------------------------
+
+				If ($StructureCheck -eq $true)
+					{
+						If ( ( $env:COMPUTERNAME -in $AzLogDcrTableCreateFromReferenceMachine) -or ($AzLogDcrTableCreateFromAnyMachine -eq $true) )    # manage table creations
+							{
+								
+								# build schema to be used for LogAnalytics Table
+								$Schema = Get-ObjectSchemaAsHash -Data $Data -ReturnType Table -Verbose:$Verbose
+
+								CreateUpdate-AzLogAnalyticsCustomLogTableDcr -AzLogWorkspaceResourceId $AzLogWorkspaceResourceId -SchemaSourceObject $Schema -TableName $TableName `
+																			 -AzAppId $AzAppId -AzAppSecret $AzAppSecret -TenantId $TenantId -Verbose:$Verbose 
+
+
+								# build schema to be used for DCR
+								$Schema = Get-ObjectSchemaAsHash -Data $Data -ReturnType DCR
+
+								CreateUpdate-AzDataCollectionRuleLogIngestCustomLog -AzLogWorkspaceResourceId $AzLogWorkspaceResourceId -SchemaSourceObject $Schema `
+																					-DceName $DceName -DcrName $DcrName -TableName $TableName `
+																					-LogIngestServicePricipleObjectId $LogIngestServicePricipleObjectId `
+																					-AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+																					-AzAppId $AzAppId -AzAppSecret $AzAppSecret -TenantId $TenantId -Verbose:$Verbose
+							}
+					}
+			} # create table/DCR
+
+
+#--------------------------------------------------------------------------
+# Sending data to Loganalytics
+#--------------------------------------------------------------------------
+
+# On a newly created DCR, sometimes we cannot retrieve the DCR info fast enough. So we skip trying to send in data !
+If ( ($DcrImmutableId -eq $null) -or ($DcrStream -eq $null) )
+	{
+		# skipping as this is a newly created DCR. Just rerun the script and it will work !
+	}
+Else
+	{
+		If ($DceURI -and $DcrImmutableId -and $DcrStream -and $Data)
+			{
+				# Add assembly to upload using http
+				Add-Type -AssemblyName System.Web
+
+				#--------------------------------------------------------------------------
+				# Obtain a bearer token used to authenticate against the data collection endpoint using Azure App & Secret
+				#--------------------------------------------------------------------------
+
+					$scope       = [System.Web.HttpUtility]::UrlEncode("https://monitor.azure.com//.default")   
+					$bodytoken   = "client_id=$AzAppId&scope=$scope&client_secret=$AzAppSecret&grant_type=client_credentials";
+					$headers     = @{"Content-Type"="application/x-www-form-urlencoded"};
+					$uri         = "https://login.microsoftonline.com/$tenantId/oauth2/v2.0/token"
+
+					$bearerToken = (Invoke-RestMethod -Uri $uri -Method "Post" -Body $bodytoken -Headers $headers).access_token
+
+					$headers = @{
+									"Authorization" = "Bearer $bearerToken";
+									"Content-Type" = "application/json";
+								}
+
+
+				#--------------------------------------------------------------------------
+				# Upload the data using Log Ingesion API using DCE/DCR
+				#--------------------------------------------------------------------------
+				
+					# initial variable
+					$indexLoopFrom = 0
+
+					# calculate size of data (entries)
+					$TotalDataLines = ($Data | Measure-Object).count
+
+					# calculate number of entries to send during each transfer - log ingestion api limits to max 1 mb per transfer
+					If ( ($TotalDataLines -gt 1) -and ($BatchAmount -eq $null) )
+						{
+							$SizeDataSingleEntryJson  = (ConvertTo-Json -Depth 100 -InputObject @($Data[0]) -Compress).length
+							$DataSendAmountDecimal    = (( 1mb - 300Kb) / $SizeDataSingleEntryJson)   # 500 Kb is overhead (my experience !)
+							$DataSendAmount           = [math]::Floor($DataSendAmountDecimal)
+						}
+					ElseIf ($BatchAmount)
+						{
+							$DataSendAmount           = $BatchAmount
+						}
+					Else
+						{
+							$DataSendAmount           = 1
+						}
+
+					# loop - upload data in batches, depending on possible size & Azure limits 
+					Do
+						{
+							$DataSendRemaining = $TotalDataLines - $indexLoopFrom
+
+							If ($DataSendRemaining -le $DataSendAmount)
+								{
+									# send last batch - or whole batch
+									$indexLoopTo    = $TotalDataLines - 1   # cause we start at 0 (zero) as first record
+									$DataScopedSize = $Data   # no need to split up in batches
+								}
+							ElseIf ($DataSendRemaining -gt $DataSendAmount)
+								{
+									# data must be splitted in batches
+									$indexLoopTo    = $indexLoopFrom + $DataSendAmount
+									$DataScopedSize = $Data[$indexLoopFrom..$indexLoopTo]
+								}
+
+							# Convert data into JSON-format
+							$JSON = ConvertTo-Json -Depth 100 -InputObject @($DataScopedSize) -Compress
+
+							If ($DataSendRemaining -gt 1)    # batch
+								{
+									write-Output ""
+								
+									# we are showing as first record is 1, but actually is is in record 0 - but we change it for gui purpose
+									Write-Output "  [ $($indexLoopFrom + 1)..$($indexLoopTo + 1) / $($TotalDataLines) ] - Posting data to Loganalytics table [ $($TableName)_CL ] .... Please Wait !"
+								}
+							ElseIf ($DataSendRemaining -eq 1)   # single record
+								{
+									write-Output ""
+									Write-Output "  [ $($indexLoopFrom + 1) / $($TotalDataLines) ] - Posting data to Loganalytics table [ $($TableName)_CL ] .... Please Wait !"
+								}
+
+							$uri = "$DceURI/dataCollectionRules/$DcrImmutableId/streams/$DcrStream"+"?api-version=2021-11-01-preview"
+						
+							# set encoding to UTF8
+							$JSON = [System.Text.Encoding]::UTF8.GetBytes($JSON)
+
+							$Result = Invoke-WebRequest -Uri $uri -Method POST -Body $JSON -Headers $headers -ErrorAction SilentlyContinue
+							$StatusCode = $Result.StatusCode
+
+							If ($StatusCode -eq "204")
+								{
+									Write-host "  SUCCESS - data uploaded to LogAnalytics"
+								}
+							ElseIf ($StatusCode -eq "RequestEntityTooLarge")
+								{
+									Write-Error "  Error 513 - You are sending too large data - make the dataset smaller"
+								}
+							Else
+								{
+									Write-Error $result
+								}
+
+							# Set new Fom number, based on last record sent
+							$indexLoopFrom = $indexLoopTo
+
+						}
+					Until ($IndexLoopTo -ge ($TotalDataLines - 1 ))
+		  # return $result
+	}
+		
+		Write-host ""
+	}
+```
 
 <br>
 
