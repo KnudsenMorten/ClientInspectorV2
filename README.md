@@ -500,6 +500,7 @@ You can find more detailed information about the module using links below:
 
 [AzLogDcringestPS (Powershell Gallery)](https://www.powershellgallery.com/packages/AzLogDcrIngestPS)
 
+<br>
 
 ## 3rd party Powershell modules
 |ModuleName|Purpose|More info|Credit|
