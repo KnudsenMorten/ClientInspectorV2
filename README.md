@@ -26,6 +26,9 @@ I have a similar solution for Servers; **ServerInspector**. Unfortunately, it is
 
 Happy hunting :smile:
 
+## Quick Links
+[What data is being collected ?]
+
 <br>
 
 # What data is being collected ?
@@ -328,7 +331,7 @@ ClientInspector (v2) is uploading the collected data into **custom logs** in **A
 
 ![Archicture](docs/Architecture.png)
 
-## Networking
+# Networking
 You have 2 options for connectivity to Azure for data upload: **public access** or **private access**
 
 ![Networking](docs/Networking.png)
@@ -504,6 +507,7 @@ You can find more detailed information about the module using links below:
 |NuGet|Common Package provider used to deploy many Powershell modules<br><br>Package Provider will automatically be installed on computer when script runs|[Link](https://www.nuget.org/packages|
 |PSWindowsUpdate|Collection of Windows Update information (pending updates, installed updates, etc.)<br><br>Module will automatically be installed on computer when script runs|[Link](https://www.powershellgallery.com/packages/PSWindowsUpdate)|Michal Gajda
 
+<br>
 
 # Running ClientInspector.ps1 - **AzLogDcrIngestPS** integration
 ClientInspector supports 3 ways to install/update/import the needed Powershell module: **Download**, **PsGallery**, **LocalPath**
