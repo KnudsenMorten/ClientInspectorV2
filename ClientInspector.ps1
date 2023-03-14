@@ -98,7 +98,8 @@ Write-Output ""
 
 <# ----- onboarding lines ----- BEGIN #>
 
-    # here you insert the lines from the DeploymentKit
+
+
 
 <#  ----- onboading lines -----  END  #>
 
