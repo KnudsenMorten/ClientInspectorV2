@@ -1027,7 +1027,7 @@ Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $D
 												   -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 ```
 
-## Data Out (send to LogAnalytics) - detailed functions - "under the hood"
+## step 4/4 - Data Out (send to LogAnalytics) - detailed functions - "under the hood"
 ```
 #-------------------------------------------------------------------------------------------
 # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
