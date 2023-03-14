@@ -509,7 +509,7 @@ You can find more detailed information about the module using links below:
 
 <br>
 
-# Running ClientInspector.ps1 - **AzLogDcrIngestPS** integration
+# Running ClientInspector.ps1 - 3 modes
 ClientInspector supports 3 ways to install/update/import the needed Powershell module: **Download**, **PsGallery**, **LocalPath**
 
 ## .\ClientInspector.ps1 -function:LocalPath
