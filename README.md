@@ -1090,6 +1090,25 @@ Data from **5000** clients doing **daily** ClientInspector inventory will cost y
 
 <br>
 
+# Contact
+If you have comments to the solution - or just want to connect with me, please contact me through these channels - would love to connect:
+
+[Github](https://github.com/KnudsenMorten)
+
+[Twitter](https://twitter.com/knudsenmortendk)
+
+[Blog](https://mortenknudsen.net/)
+
+[LinkedIn](https://www.linkedin.com/in/mortenwaltorpknudsen/)
+
+[Microsoft MVP profile](https://mvp.microsoft.com/en-us/PublicProfile/5005156?fullName=Morten%20Knudsen)
+
+[Sessionize](https://sessionize.com/mortenknudsen/)
+
+[Mail](mailto:mok@mortenknudsen.net)
+
+<br>
+
 # Big Thanks to the great people in Microsoft product teams - you are rock stars :smile:
 Lastly, I would like to give **big credits** to a few people, who I have worked together with on building **AzLogDcrIngestPS Powershell module** and **my daily work with the Azure log & viewing capabilities**:
 
@@ -1121,24 +1140,3 @@ Lastly, I would like to give **big credits** to a few people, who I have worked 
 
 **John & Shikha from Azure Workbooks**
 ![AzurePipeline](img/AzureWorkbooks.jpg)
-
-
-# Contact
-If you have comments to the solution - or just want to connect with me, here are my details - would love to connect:
-
-[Github](https://github.com/KnudsenMorten)
-
-[Twitter](https://twitter.com/knudsenmortendk)
-
-[Blog](https://mortenknudsen.net/)
-
-[LinkedIn](https://www.linkedin.com/in/mortenwaltorpknudsen/)
-
-[Microsoft MVP profile](https://mvp.microsoft.com/en-us/PublicProfile/5005156?fullName=Morten%20Knudsen)
-
-[Sessionize](https://sessionize.com/mortenknudsen/)
-
-[Mail](mailto:mok@mortenknudsen.net)
-
-
-
