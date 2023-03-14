@@ -960,7 +960,7 @@ RawContentLength  : 2682
 # Layout of ClientInspector data-set
 Each of the data-sets (bios, applications, bitlocker, etc.) are built with the same header:
 
-## Variables (naming - where to send the data)
+## step 1/4 - Variables (naming - where to send the data)
 ```
 #-------------------------------------------------------------------------------------------
 # Variables
@@ -971,7 +971,7 @@ $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
 ```
 
 
-## Data Collection (ensure data is in correct format and any "noice" was removed and relevant information has been added
+## step 2/4 - Data Collection (ensure data is in correct format and any "noice" was removed and relevant information has been added
 ```
 #-------------------------------------------------------------------------------------------
 # Collecting data (in)
@@ -983,7 +983,7 @@ Write-Output "Collecting Computer system information ... Please Wait !"
 $DataVariable = Get-CimInstance -ClassName Win32_ComputerSystem
 ```
 
-## Data Manipulation
+## step 3/4 - Data Manipulation
 ```
 #-------------------------------------------------------------------------------------------
 # Preparing data structure
@@ -1005,7 +1005,7 @@ $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVari
 $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
 ```
 
-## Data Out (send to LogAnalytics) - combined functions
+## step 4/4 - Data Out (send to LogAnalytics) - combined functions
 ```
 #-------------------------------------------------------------------------------------------
 # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
