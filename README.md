@@ -32,7 +32,6 @@ Happy hunting :smile:
 [What data is being collected ?]
 
 <br>
-
 # What data is being collected ?
 **ClientInspector** can be used to collect lots of great information of from your **Windows clients** - and send the data to **Azure LogAnalytics Custom Tables**.
 
