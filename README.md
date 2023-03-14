@@ -1054,8 +1054,8 @@ $Schema = Get-ObjectSchemaAsHash -Data $Data `
 								 -Verbose:$Verbose
 
 CreateUpdate-AzLogAnalyticsCustomLogTableDcr -AzLogWorkspaceResourceId $AzLogWorkspaceResourceId `
-											 -SchemaSourceObject $Schema `
-											 -TableName $TableName `
+                                             -SchemaSourceObject $Schema `
+                                             -TableName $TableName `
 											 -AzAppId $AzAppId `
 											 -AzAppSecret $AzAppSecret `
 											 -TenantId $TenantId `
