@@ -1,5 +1,5 @@
 # Introduction to ClientInspector (v2)
-![ClientInspector](img/ClientInspector_300.jpg)
+![ClientInspector](img/ClientInspector_300.png)
 
 **Are you in control?** - or are some of your core infrastructure processes like **patching, antivirus, bitlocker enablement** drifting? Or would you like to do **advanced inventory**, where you can lookup your **warranty state** against Lenovo or Dell warranty, then keep reading.
 
