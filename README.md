@@ -1,4 +1,6 @@
 # Introduction to ClientInspector (v2)
+![ClientInspector](img/ClientInspector_300.jpg)
+
 **Are you in control?** - or are some of your core infrastructure processes like **patching, antivirus, bitlocker enablement** drifting? Or would you like to do **advanced inventory**, where you can lookup your **warranty state** against Lenovo or Dell warranty, then keep reading.
 
 Check out **ClientInspector**, which can help you get **great insight** to your complete **client environment**.
@@ -23,8 +25,6 @@ I have a similar solution for Servers; **ServerInspector**. Unfortunately, it is
 [Big Thanks to the great people in Microsoft product teams - you are rock stars :smile:](#thank-you-to-the-great-people-in-microsoft-product-teams---you-are-rock-stars-smile)
 
 Happy hunting :smile:
-
-![ClientInspector](img/ClientInspector_300.jpg)
 
 <br>
 
