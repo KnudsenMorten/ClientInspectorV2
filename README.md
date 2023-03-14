@@ -1055,21 +1055,21 @@ $StructureCheck = Get-AzLogAnalyticsTableAzDataCollectionRuleStatus -AzLogWorksp
 #-----------------------------------------------------------------------------------------------
 
 If ($StructureCheck -eq $true)
-{
-If ( ( $env:COMPUTERNAME -in $AzLogDcrTableCreateFromReferenceMachine) -or ($AzLogDcrTableCreateFromAnyMachine -eq $true) )    # manage table creations
-{
-# build schema to be used for LogAnalytics Table
-$Schema = Get-ObjectSchemaAsHash -Data $Data `
-					 -ReturnType Table `
-					 -Verbose:$Verbose
+	{
+		If ( ( $env:COMPUTERNAME -in $AzLogDcrTableCreateFromReferenceMachine) -or ($AzLogDcrTableCreateFromAnyMachine -eq $true) )    # manage table creations
+			{
+				# build schema to be used for LogAnalytics Table
+				$Schema = Get-ObjectSchemaAsHash -Data $Data `
+												 -ReturnType Table `
+												 -Verbose:$Verbose
 
-CreateUpdate-AzLogAnalyticsCustomLogTableDcr -AzLogWorkspaceResourceId $AzLogWorkspaceResourceId `
-								 -SchemaSourceObject $Schema `
-								 -TableName $TableName `
-								 -AzAppId $AzAppId `
-								 -AzAppSecret $AzAppSecret `
-								 -TenantId $TenantId `
-								 -Verbose:$Verbose 
+				CreateUpdate-AzLogAnalyticsCustomLogTableDcr -AzLogWorkspaceResourceId $AzLogWorkspaceResourceId `
+															 -SchemaSourceObject $Schema `
+															 -TableName $TableName `
+															 -AzAppId $AzAppId `
+															 -AzAppSecret $AzAppSecret `
+															 -TenantId $TenantId `
+															 -Verbose:$Verbose 
 
 
 				# build schema to be used for DCR
