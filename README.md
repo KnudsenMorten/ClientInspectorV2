@@ -498,7 +498,7 @@ You can find more detailed information about the module using links below:
 [AzLogDcringestPS (Powershell Gallery)](https://www.powershellgallery.com/packages/AzLogDcrIngestPS)
 
 
-### Switch starting ClientInspector.ps1 for **AzLogDcrIngestPS** implementation
+### Running ClientInspector.ps1 - **AzLogDcrIngestPS** implementation
 ClientInspector supports 3 ways to install/update/import the needed Powershell module: **Download**, **PsGallery**, **LocalPath**
 
 #### .\ClientInspector.ps1 -function:LocalPath
