@@ -1012,19 +1012,19 @@ $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$V
 #-------------------------------------------------------------------------------------------
 
 CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
-									 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
-									 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
-									 -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
-									 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
-									 -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
-									 -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
+                                     -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
+                                     -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
+                                     -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
+                                     -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                     -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                     -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
 
 #-----------------------------------------------------------------------------------------------
 # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
 #-----------------------------------------------------------------------------------------------
 
 Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
-												   -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
+                                                   -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 ```
 
 ## step 4/4 - Data Out (send to LogAnalytics) - detailed functions - "under the hood"
@@ -1036,13 +1036,13 @@ Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $D
 # Get insight about the schema structure
 $Schema = Get-ObjectSchemaAsArray -Data $Data
 $StructureCheck = Get-AzLogAnalyticsTableAzDataCollectionRuleStatus -AzLogWorkspaceResourceId $AzLogWorkspaceResourceId `
-																	-TableName $TableName `
-																	-DcrName $DcrName `
-																	-SchemaSourceObject $Schema `
-																    -AzAppId $AzAppId `
-																	-AzAppSecret $AzAppSecret `
-																	-TenantId $TenantId `
-																	-Verbose:$Verbose
+                                                                    -TableName $TableName `
+                                                                    -DcrName $DcrName `
+                                                                    -SchemaSourceObject $Schema `
+                                                                    -AzAppId $AzAppId `
+                                                                    -AzAppSecret $AzAppSecret `
+                                                                    -TenantId $TenantId `
+                                                                    -Verbose:$Verbose
 
 #-----------------------------------------------------------------------------------------------
 # Structure check = $true -> Create/update table & DCR with necessary schema
@@ -1050,50 +1050,50 @@ $StructureCheck = Get-AzLogAnalyticsTableAzDataCollectionRuleStatus -AzLogWorksp
 
 # build schema to be used for LogAnalytics Table
 $Schema = Get-ObjectSchemaAsHash -Data $Data `
-								 -ReturnType Table `
-								 -Verbose:$Verbose
+                                 -ReturnType Table `
+                                 -Verbose:$Verbose
 
 CreateUpdate-AzLogAnalyticsCustomLogTableDcr -AzLogWorkspaceResourceId $AzLogWorkspaceResourceId `
                                              -SchemaSourceObject $Schema `
                                              -TableName $TableName `
-											 -AzAppId $AzAppId `
-											 -AzAppSecret $AzAppSecret `
-											 -TenantId $TenantId `
-											 -Verbose:$Verbose 
+                                             -AzAppId $AzAppId `
+                                             -AzAppSecret $AzAppSecret `
+                                             -TenantId $TenantId `
+                                             -Verbose:$Verbose 
 
 
 # build schema to be used for DCR
 $Schema = Get-ObjectSchemaAsHash -Data $Data -ReturnType DCR
 
 CreateUpdate-AzDataCollectionRuleLogIngestCustomLog -AzLogWorkspaceResourceId $AzLogWorkspaceResourceId `
-													-SchemaSourceObject $Schema `
-													-DceName $DceName `
-													-DcrName $DcrName `
-													-TableName $TableName `
-													-LogIngestServicePricipleObjectId $LogIngestServicePricipleObjectId `
-													-AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
-													-AzAppId $AzAppId `
-													-AzAppSecret $AzAppSecret `
-													-TenantId $TenantId `
-													-Verbose:$Verbose
+                                                    -SchemaSourceObject $Schema `
+                                                    -DceName $DceName `
+                                                    -DcrName $DcrName `
+                                                    -TableName $TableName `
+                                                    -LogIngestServicePricipleObjectId $LogIngestServicePricipleObjectId `
+                                                    -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                                    -AzAppId $AzAppId `
+                                                    -AzAppSecret $AzAppSecret `
+                                                    -TenantId $TenantId `
+                                                    -Verbose:$Verbose
 
-$AzDcrDceDetails = Get-AzDcrDceDetails  -DcrName $DcrName `
-										-DceName $DceName `
-									    -AzAppId $AzAppId `
-										-AzAppSecret $AzAppSecret `
-										-TenantId $TenantId `
-										-Verbose:$Verbose
+$AzDcrDceDetails = Get-AzDcrDceDetails -DcrName $DcrName `
+                                       -DceName $DceName `
+                                       -AzAppId $AzAppId `
+                                       -AzAppSecret $AzAppSecret `
+                                       -TenantId $TenantId `
+                                       -Verbose:$Verbose
 
-Post-AzLogAnalyticsLogIngestCustomLogDcrDce  -DceUri $AzDcrDceDetails[2] `
-											 -DcrImmutableId $AzDcrDceDetails[6] `
-											 -TableName $TableName `
-											 -DcrStream $AzDcrDceDetails[7] `
-											 -Data $Data `
-											 -BatchAmount $BatchAmount `
-											 -AzAppId $AzAppId `
-											 -AzAppSecret $AzAppSecret `
-											 -TenantId $TenantId `
-											 -Verbose:$Verbose
+Post-AzLogAnalyticsLogIngestCustomLogDcrDce -DceUri $AzDcrDceDetails[2] `
+                                            -DcrImmutableId $AzDcrDceDetails[6] `
+                                            -TableName $TableName `
+                                            -DcrStream $AzDcrDceDetails[7] `
+                                            -Data $Data `
+                                            -BatchAmount $BatchAmount `
+                                            -AzAppId $AzAppId `
+                                            -AzAppSecret $AzAppSecret `
+                                            -TenantId $TenantId `
+                                            -Verbose:$Verbose
 ```
 
 <br>
