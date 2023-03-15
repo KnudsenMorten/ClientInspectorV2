@@ -100,8 +100,7 @@ Write-Output ""
 
 
 
-
-<#  ----- onboading lines -----  END  #>
+<# ----- onboarding lines ----- END  #>
 
     # latest run info - needed for Intune detection to work
     $LastRun_RegPath                                 = "HKLM:\SOFTWARE\ClientInspector"
@@ -315,7 +314,7 @@ Write-Output ""
     #-------------------------------------------------------------------------------------------
 
         Write-Output ""
-        Write-Output "Collecting Bios information ... Please Wait !"
+        Write-Output "Collecting User information ... Please Wait !"
 
         $UserLoggedOnRaw = Get-Process -IncludeUserName -Name explorer | Select-Object UserName -Unique
         $UserLoggedOn    = $UserLoggedOnRaw.UserName
@@ -331,8 +330,8 @@ Write-Output ""
         # add CollectionTime to existing array
         $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
-        # add Computer info to existing array
-        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName 
+        # add Computer & ComputerFqdn & UserLoggedOn info to existing array
+        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Verbose:$Verbose
 
         # Validating/fixing schema data structure of source data
         $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
@@ -400,8 +399,8 @@ Write-Output ""
             # add CollectionTime to existing array
             $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
-            # add Computer & UserLoggedOn info to existing array
-            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn -Verbose:$Verbose
+            # add Computer, ComputerFqdn & UserLoggedOn info to existing array
+            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
 
             # Validating/fixing schema data structure of source data
             $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
@@ -458,8 +457,8 @@ Write-Output ""
             # add CollectionTime to existing array
             $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
-            # add Computer & UserLoggedOn info to existing array
-            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+            # add Computer, ComputerFqdn & UserLoggedOn info to existing array
+            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
 
             # Validating/fixing schema data structure of source data
             $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
@@ -517,8 +516,8 @@ Write-Output ""
             # add CollectionTime to existing array
             $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
-            # add Computer & UserLoggedOn info to existing array
-            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+            # add Computer, ComputerFqdn & UserLoggedOn info to existing array
+            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
 
             # Validating/fixing schema data structure of source data
             $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
@@ -575,8 +574,8 @@ Write-Output ""
             # add CollectionTime to existing array
             $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
-            # add Computer & UserLoggedOn info to existing array
-            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+            # add Computer, ComputerFqdn & UserLoggedOn info to existing array
+            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
 
             # Validating/fixing schema data structure of source data
             $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
@@ -634,8 +633,8 @@ Write-Output ""
             # add CollectionTime to existing array
             $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
-            # add Computer & UserLoggedOn info to existing array
-            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+            # add Computer, ComputerFqdn & UserLoggedOn info to existing array
+            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
 
             # Validating/fixing schema data structure of source data
             $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
@@ -699,8 +698,8 @@ Write-Output ""
             # add CollectionTime to existing array
             $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
-            # add Computer & UserLoggedOn info to existing array
-            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+            # add Computer, ComputerFqdn & UserLoggedOn info to existing array
+            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
 
             # Validating/fixing schema data structure of source data
             $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
@@ -766,8 +765,8 @@ Write-Output ""
         # add CollectionTime to existing array
         $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
-        # add Computer & UserLoggedOn info to existing array
-        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn -Verbose:$Verbose
+        # add Computer, ComputerFqdn & UserLoggedOn info to existing array
+        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
 
         # Get insight about the schema structure of an object BEFORE changes. Command is only needed to verify columns in schema
         # $SchemaBefore = Get-ObjectSchemaAsArray -Data $DataVariable -Verbose:$Verbose
@@ -843,8 +842,8 @@ Write-Output ""
         # add CollectionTime to existing array
         $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
-        # add Computer & UserLoggedOn info to existing array
-        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn -Verbose:$Verbose
+        # add Computer, ComputerFqdn & UserLoggedOn info to existing array
+        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
 
         # Get insight about the schema structure of an object BEFORE changes. Command is only needed to verify columns in schema
         # $SchemaBefore = Get-ObjectSchemaAsArray -Data $DataVariable
@@ -1011,8 +1010,8 @@ Write-Output ""
         # add CollectionTime to existing array
         $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
-        # add Computer & UserLoggedOn info to existing array
-        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+        # add Computer, ComputerFqdn & UserLoggedOn info to existing array
+        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
 
         # Validating/fixing schema data structure of source data
         $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
@@ -1264,8 +1263,8 @@ Write-Output ""
         # add CollectionTime to existing array
         $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
-        # add Computer & UserLoggedOn info to existing array
-        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+        # add Computer, ComputerFqdn & UserLoggedOn info to existing array
+        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
 
         # Validating/fixing schema data structure of source data
         $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
@@ -1349,8 +1348,8 @@ Write-Output ""
                         # add CollectionTime to existing array
                         $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
-                        # add Computer & UserLoggedOn info to existing array
-                        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+                        # add Computer, ComputerFqdn & UserLoggedOn info to existing array
+                        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
 
                         # Validating/fixing schema data structure of source data
                         $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
@@ -1394,8 +1393,8 @@ Write-Output ""
                         # add CollectionTime to existing array
                         $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
-                        # add Computer & UserLoggedOn info to existing array
-                        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+                        # add Computer, ComputerFqdn & UserLoggedOn info to existing array
+                        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
 
                         # Validating/fixing schema data structure of source data
                         $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
@@ -1442,8 +1441,8 @@ Write-Output ""
                         # add CollectionTime to existing array
                         $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
-                        # add Computer & UserLoggedOn info to existing array
-                        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+                        # add Computer, ComputerFqdn & UserLoggedOn info to existing array
+                        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
 
                         # Validating/fixing schema data structure of source data
                         $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
@@ -1534,8 +1533,8 @@ Write-Output ""
         # add CollectionTime to existing array
         $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
-        # add Computer & UserLoggedOn info to existing array
-        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+        # add Computer, ComputerFqdn & UserLoggedOn info to existing array
+        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
 
         # Validating/fixing schema data structure of source data
         $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
@@ -1615,8 +1614,8 @@ Write-Output ""
         # add CollectionTime to existing array
         $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
-        # add Computer & UserLoggedOn info to existing array
-        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+        # add Computer, ComputerFqdn & UserLoggedOn info to existing array
+        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
 
         # Validating/fixing schema data structure of source data
         $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
@@ -1697,8 +1696,8 @@ Write-Output ""
                 # add CollectionTime to existing array
                 $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
-                # add Computer & UserLoggedOn info to existing array
-                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+                # add Computer, ComputerFqdn & UserLoggedOn info to existing array
+                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
 
                 # Validating/fixing schema data structure of source data
                 $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
@@ -1767,8 +1766,8 @@ Write-Output ""
             # add CollectionTime to existing array
             $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
-            # add Computer & UserLoggedOn info to existing array
-            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+            # add Computer, ComputerFqdn & UserLoggedOn info to existing array
+            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
 
             # Validating/fixing schema data structure of source data
             $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
@@ -1826,8 +1825,8 @@ Write-Output ""
             # add CollectionTime to existing array
             $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
-            # add Computer & UserLoggedOn info to existing array
-            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+            # add Computer, ComputerFqdn & UserLoggedOn info to existing array
+            $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
 
             # Validating/fixing schema data structure of source data
             $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
@@ -1910,8 +1909,8 @@ Write-Output ""
                     # add CollectionTime to existing array
                     $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $WU_PendingUpdates -Verbose:$Verbose
 
-                    # add Computer & UserLoggedOn info to existing array
-                    $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn -Verbose:$Verbose
+                    # add Computer, ComputerFqdn & UserLoggedOn info to existing array
+                    $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
 
                     # Remove unnecessary columns in schema
                     $DataVariable = Filter-ObjectExcludeProperty -Data $DataVariable -ExcludeProperty BundledUpdates, Categories, CveIds, DownloadContents, Identity, InstallationBehavior, UninstallationSteps, `
@@ -1945,7 +1944,7 @@ Write-Output ""
 
 
     #############################################################
-    # Status of Windows Update installations during last 31 days
+    # Status of Windows Update installations
     #############################################################
 
         #-------------------------------------------------------------------------------------------
@@ -1960,43 +1959,57 @@ Write-Output ""
         #-------------------------------------------------------------------------------------------
             
             Write-Output ""
-            Write-Output "Collecting information about last installations of Windows Updates ... Please Wait !"
+            Write-Output "Collecting information about installations of Windows Updates (incl. A/V updates) ... Please Wait !"
 
-            $WU_LastInstallations = Get-WuHistory -MaxDate ((Get-date).AddDays(-31))
+            $OsInfo = Get-CimInstance -ClassName Win32_OperatingSystem
+            $ProductType = $OsInfo.ProductType  # 1 = workstation, 2 = domain controller, 3 = server
+
+            # Collection (servers)
+            If ( ($ProductType -eq "2") -or ($ProductType -eq "3") )
+                {
+                    # Getting OS install-date
+                    $DaysSinceInstallDate = (Get-Date) - (Get-date $OSInfo.InstallDate)
+
+                    If ([version]$OSInfo.Version -gt "6.3.9600")  # Win2016 and higher
+                        { 
+                            Write-Verbose "Win2016 or higher detected (last 1000 updates incl. A/V updates)"
+                            $Installed_Updates_PSWindowsUpdate_All = Get-WUHistory -MaxDate $DaysSinceInstallDate.Days -Last 1000
+                        }
+                    ElseIf ([version]$OSInfo.Version -le "6.3.9600")  # Win2012 R2 or Win2012
+                        {
+                            Write-Verbose "Windows2012 / Win2012 R2 detected (last 100 updates incl. A/V updates)"
+                            $Installed_Updates_PSWindowsUpdate_All = Get-WUHistory -Last 100
+                        }
+                    Else
+                        {
+                            Write-Verbose "No collection of installed updates"
+                            $Installed_Updates_PSWindowsUpdate_All = ""
+                        }
+                }
+
+            # Collection (workstations)
+            If ($ProductType -eq "1")
+                {
+                    # Getting OS install-date
+                    $DaysSinceInstallDate = (Get-Date) - (Get-date $OSInfo.InstallDate)
+
+                    $Installed_Updates_PSWindowsUpdate_All = Get-WUHistory -MaxDate $DaysSinceInstallDate.Days -Last 1000
+                }
 
         #-------------------------------------------------------------------------------------------
         # Preparing data structure
         #-------------------------------------------------------------------------------------------
 
-            # Add CollectionTime & ComputerName to array
-            If ($WU_LastInstallations)
+            If ($Installed_Updates_PSWindowsUpdate_All)
                 {
-                    $CountVar = ($WU_LastInstallations | Measure-Object).count
-                    
-                    $PosDataVariable = 0
-                    Do
-                        {
-                            # Remove UninstallationSteps from array
-                            $WU_LastInstallations[$PosDataVariable].PSObject.Properties.Remove("UninstallationSteps")
-
-                            # Remove Categories from array
-                            $WU_LastInstallations[$PosDataVariable].PSObject.Properties.Remove("Categories")
-    
-                            # Remove UpdateIdentity from array
-                            $WU_LastInstallations[$PosDataVariable].PSObject.Properties.Remove("UpdateIdentity")
-
-                            $PosDataVariable += 1
-                        }
-                    Until ($PosDataVariable -eq $CountVar)
+                    # Remove unnecessary columns in schema
+                    $DataVariable = Filter-ObjectExcludeProperty -Data $Installed_Updates_PSWindowsUpdate_All -ExcludeProperty UninstallationSteps,Categories,UpdateIdentity,UnMappedResultCode,UninstallationNotes,                    $DataVariable = Filter-ObjectExcludeProperty -Data $Installed_Updates_PSWindowsUpdate_All -ExcludeProperty UninstallationSteps,Categories,UpdateIdentity,UnMappedResultCode,UninstallationNotes,HResult -Verbose:$Verbose -Verbose:$Verbose
 
                     # convert CIM array to PSCustomObject and remove CIM class information
-                    $DataVariable = Convert-CimArrayToObjectFixStructure -data $WU_LastInstallations -Verbose:$Verbose
+                    $DataVariable = Convert-CimArrayToObjectFixStructure -data $DataVariable -Verbose:$Verbose
 
-                    # add CollectionTime to existing array
-                    $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
-
-                    # add Computer & UserLoggedOn info to existing array
-                    $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+                    # add Computer, ComputerFqdn & UserLoggedOn info to existing array
+                    $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
 
                     # Validating/fixing schema data structure of source data
                     $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
@@ -2006,8 +2019,9 @@ Write-Output ""
             }
         Else
             {
-                $DataVariable = $WU_LastInstallations
+                $DataVariable = ""
             }
+
 
         #-------------------------------------------------------------------------------------------
         # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
@@ -2105,8 +2119,8 @@ Write-Output ""
         # add CollectionTime to existing array
         $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
-        # add Computer & UserLoggedOn info to existing array
-        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+        # add Computer, ComputerFqdn & UserLoggedOn info to existing array
+        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
 
         # Validating/fixing schema data structure of source data
         $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
@@ -2236,8 +2250,8 @@ Write-Output ""
         # add CollectionTime to existing array
         $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
-        # add Computer & UserLoggedOn info to existing array
-        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn -Verbose:$Verbose
+        # add Computer, ComputerFqdn & UserLoggedOn info to existing array
+        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
 
         # Validating/fixing schema data structure of source data
         $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
@@ -2301,8 +2315,8 @@ Write-Output ""
                 # add CollectionTime to existing array
                 $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
-                # add Computer & UserLoggedOn info to existing array
-                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn -Verbose:$Verbose
+                # add Computer, ComputerFqdn & UserLoggedOn info to existing array
+                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
 
                 # Get insight about the schema structure of an object BEFORE changes. Command is only needed to verify schema - can be disabled
                 $SchemaBefore = Get-ObjectSchemaAsArray -Data $DataVariable -Verbose:$Verbose
@@ -2332,8 +2346,8 @@ Write-Output ""
                 # add CollectionTime to existing array
                 $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
-                # add Computer & UserLoggedOn info to existing array
-                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn -Verbose:$Verbose
+                # add Computer, ComputerFqdn & UserLoggedOn info to existing array
+                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
 
                 # Validating/fixing schema data structure of source data
                 $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
@@ -2398,8 +2412,8 @@ Write-Output ""
                 # add CollectionTime to existing array
                 $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
-                # add Computer & UserLoggedOn info to existing array
-                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn -Verbose:$Verbose
+                # add Computer, ComputerFqdn & UserLoggedOn info to existing array
+                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
 
                 # Validating/fixing schema data structure of source data
                 $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
@@ -2477,7 +2491,7 @@ Write-Output ""
         $LocalAdminGroup = (Get-localgroup -Sid S-1-5-32-544).name       # SID S-1-5-32-544 = local computer Administrators group
         If ($LocalAdminGroup)
             {
-                $DataVariable = Get-LocalGroupMember -Group  $LocalAdminGroup.name -ErrorAction SilentlyContinue
+                $DataVariable = Get-LocalGroupMember -Group  $LocalAdminGroup -ErrorAction SilentlyContinue
             }
         Else
             {
@@ -2530,8 +2544,8 @@ Write-Output ""
                 # add CollectionTime to existing array
                 $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
-                # add Computer & UserLoggedOn info to existing array
-                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn -Verbose:$Verbose
+                # add Computer, ComputerFqdn & UserLoggedOn info to existing array
+                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
 
                 # Validating/fixing schema data structure of source data
                 $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
@@ -2598,8 +2612,8 @@ Write-Output ""
                 # add CollectionTime to existing array
                 $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
-                # add Computer & UserLoggedOn info to existing array
-                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn
+                # add Computer, ComputerFqdn & UserLoggedOn info to existing array
+                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
 
                 # Validating/fixing schema data structure of source data
                 $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
@@ -2652,7 +2666,7 @@ Write-Output ""
 
 
 ###############################################################
-# GROUP POLICY REFRESH [17]
+# GROUP POLICY [17]
 ###############################################################
 
     Write-output ""
@@ -2700,8 +2714,8 @@ Write-Output ""
                 # add CollectionTime to existing array
                 $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataArray -Verbose:$Verbose
 
-                # add Computer & UserLoggedOn info to existing array
-                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName  -Column2Name UserLoggedOn -Column2Data $UserLoggedOn -Verbose:$Verbose
+                # add Computer, ComputerFqdn & UserLoggedOn info to existing array
+                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
 
                 # Validating/fixing schema data structure of source data
                 $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
@@ -2795,8 +2809,8 @@ Write-Output ""
                 # add CollectionTime to existing array
                 $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $TPM -Verbose:$Verbose
 
-                # add Computer & UserLoggedOn info to existing array
-                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name UserLoggedOn -Column2Data $UserLoggedOn -Verbose:$Verbose
+                # add Computer, ComputerFqdn & UserLoggedOn info to existing array
+                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
 
                 # Validating/fixing schema data structure of source data
                 $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
