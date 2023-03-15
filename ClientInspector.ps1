@@ -2060,8 +2060,6 @@ Write-Output ""
 
                             # Classification (e.g. Security Update)
 
-                                $UpdateClassificationCount = ($Installed_Updates_PSWindowsUpdate_All[$PosDataVariable].Categories | Measure-Object).count
-
                                 $UpdClassification = ""
                                 $UpdTarget         = ""
                                 ForEach ($Classification in $Installed_Updates_PSWindowsUpdate_All[$PosDataVariable].Categories)
@@ -2101,6 +2099,9 @@ Write-Output ""
 
                     # Remove unnecessary columns in schema
                     $DataVariable = Filter-ObjectExcludeProperty -Data $Installed_Updates_PSWindowsUpdate_All -ExcludeProperty UninstallationSteps,Categories,UpdateIdentity,UnMappedResultCode,UninstallationNotes,HResult -Verbose:$Verbose
+
+                    # add CollectionTime to existing array
+                    $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $WU_PendingUpdates -Verbose:$Verbose
 
                     # add Computer, ComputerFqdn & UserLoggedOn info to existing array
                     $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
