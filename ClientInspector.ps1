@@ -2061,7 +2061,7 @@ Write-Output ""
                             # Classification (e.g. Security Update)
 
                                 $UpdClassification = ""
-                                $UpdTarget         = ""
+                                $UpdTarget = ""
                                 ForEach ($Classification in $Installed_Updates_PSWindowsUpdate_All[$PosDataVariable].Categories)
                                     {
                                         
@@ -2069,9 +2069,9 @@ Write-Output ""
                                             {
                                                 $UpdClassification = $Classification.name
                                             }
-                                        ElseIf ($Classification.Type -ne "UpdateClassification")
+                                        ElseIf ($Classification.Type -eq "Product")
                                             {
-                                                $UpdTarget = $Classification.name
+                                                $UpdTarget = $Classification.type
                                             }
                                     }
 
@@ -2094,14 +2094,14 @@ Write-Output ""
                         }
                     Until ($PosDataVariable -eq $CountDataVariable)
 
-                    # convert CIM array to PSCustomObject and remove CIM class information
-                    $DataVariable = Convert-CimArrayToObjectFixStructure -data $DataVariable -Verbose:$Verbose
-
                     # Remove unnecessary columns in schema
                     $DataVariable = Filter-ObjectExcludeProperty -Data $Installed_Updates_PSWindowsUpdate_All -ExcludeProperty UninstallationSteps,Categories,UpdateIdentity,UnMappedResultCode,UninstallationNotes,HResult -Verbose:$Verbose
 
+                    # convert CIM array to PSCustomObject and remove CIM class information
+                    $DataVariable = Convert-CimArrayToObjectFixStructure -data $DataVariable -Verbose:$Verbose
+
                     # add CollectionTime to existing array
-                    $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $WU_PendingUpdates -Verbose:$Verbose
+                    $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
                     # add Computer, ComputerFqdn & UserLoggedOn info to existing array
                     $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
