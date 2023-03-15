@@ -48,7 +48,7 @@
     Licensed under the MIT license.
 
     .PROJECTURI
-    https://github.com/KnudsenMorten/CientInspectorV2
+    https://github.com/KnudsenMorten/ClientInspectorV2
 
     .EXAMPLE
     .\ClientInspector.ps1 -function:localpath
