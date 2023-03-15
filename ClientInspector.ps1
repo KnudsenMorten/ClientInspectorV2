@@ -2003,7 +2003,7 @@ Write-Output ""
             If ($Installed_Updates_PSWindowsUpdate_All)
                 {
                     # Remove unnecessary columns in schema
-                    $DataVariable = Filter-ObjectExcludeProperty -Data $Installed_Updates_PSWindowsUpdate_All -ExcludeProperty UninstallationSteps,Categories,UpdateIdentity,UnMappedResultCode,UninstallationNotes,                    $DataVariable = Filter-ObjectExcludeProperty -Data $Installed_Updates_PSWindowsUpdate_All -ExcludeProperty UninstallationSteps,Categories,UpdateIdentity,UnMappedResultCode,UninstallationNotes,HResult -Verbose:$Verbose -Verbose:$Verbose
+                    $DataVariable = Filter-ObjectExcludeProperty -Data $Installed_Updates_PSWindowsUpdate_All -ExcludeProperty UninstallationSteps,Categories,UpdateIdentity,UnMappedResultCode,UninstallationNotes,HResult -Verbose:$Verbose
 
                     # convert CIM array to PSCustomObject and remove CIM class information
                     $DataVariable = Convert-CimArrayToObjectFixStructure -data $DataVariable -Verbose:$Verbose
@@ -2489,13 +2489,27 @@ Write-Output ""
         Write-Output "Collecting Local Admin information ... Please Wait !"
 
         $LocalAdminGroup = (Get-localgroup -Sid S-1-5-32-544).name       # SID S-1-5-32-544 = local computer Administrators group
-        If ($LocalAdminGroup)
+
+        $DataVariable = @()
+        foreach ($Object in Get-LocalGroup -Name $LocalAdminGroup ) 
             {
-                $DataVariable = Get-LocalGroupMember -Group  $LocalAdminGroup -ErrorAction SilentlyContinue
-            }
-        Else
-            {
-                $DataVariable = ""  # issues
+              $MemberChk = [ADSI]"WinNT://$env:COMPUTERNAME/$Object"
+              $MemberList = @($MemberChk.Invoke('Members') | % {([adsi]$_).path})
+      
+              ForEach ($MemberEntry in $MemberList)
+                {
+                  # Strip type into separate column
+                  $type = $MemberEntry.substring(0,8)
+                  $member = $MemberEntry.substring(8)
+          
+                  If ($member.Contains("/"))  # exclude SID
+                    {
+                      $LocalAdminObj = New-object PsCustomObject
+                      $LocalAdminObj | Add-Member -MemberType NoteProperty -Name "Name" -Value $member
+                      $LocalAdminObj | Add-Member -MemberType NoteProperty -Name "Type" -Value $Type
+                      $DataVariable += $LocalAdminObj
+                    }
+                }
             }
 
 
@@ -2503,44 +2517,8 @@ Write-Output ""
     # Preparing data structure
     #-------------------------------------------------------------------------------------------
 
-    <#
-        In case you use Get-LocalGroupMember and get errors, it is caused by an issue with empty SIDS in the administrators groups caused by e.g. domain joins/leave
-        The below code can fisx the issue, but I have not enabled it by default !
-
-        If ($DataVariable -eq $null)
-            {
-                ########################################################################################################################
-                # Fix local admin group - The problem is empty SIDs in the Administrators Group caused by domain joins/leave/join
-                ########################################################################################################################
-                    $administrators = @(
-                    ([ADSI]"WinNT://./$($LocalAdminGroupname)").psbase.Invoke('Members') |
-                    % { 
-                        $_.GetType().InvokeMember('AdsPath','GetProperty',$null,$($_),$null) 
-                    }
-                    ) -match '^WinNT';
-
-                    $administrators = $administrators -replace "WinNT://",""
-
-                    foreach ($administrator in $administrators)
-                        {
-                            #write-host $administrator "got here"
-                            if ($administrator -like "$env:COMPUTERNAME/*" -or $administrator -like "AzureAd/*")
-                                {
-                                    continue;
-                                }
-                            elseif ($administrator -match "S-1") #checking for empty/orphaned SIDs only
-                                {
-                                    Remove-LocalGroupMember -group $LocalAdminGroupname -member $administrator
-                                }
-                        }
-            }
-        #>
-
         If ($DataVariable)
             {
-                # convert PS array to PSCustomObject and remove PS class information
-                $DataVariable = Convert-PSArrayToObjectFixStructure -data $DataVariable -Verbose:$Verbose
-    
                 # add CollectionTime to existing array
                 $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
