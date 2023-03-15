@@ -308,7 +308,7 @@ Write-Output ""
     #-------------------------------------------------------------------------------------------
 
         $TableName = 'InvClientComputerUserLoggedOnV2'
-        $DcrName   = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+        $DcrName   = "dcr-" + $AzDcrPrefix + "-" + $TableName + "_CL"
 
     #-------------------------------------------------------------------------------------------
     # Collecting data (in)
@@ -379,7 +379,7 @@ Write-Output ""
         #-------------------------------------------------------------------------------------------
             
             $TableName  = 'InvClientComputerInfoBiosV2'   # must not contain _CL
-            $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+            $DcrName    = "dcr-" + $AzDcrPrefix + "-" + $TableName + "_CL"
 
         #-------------------------------------------------------------------------------------------
         # Collecting data (in)
@@ -438,7 +438,7 @@ Write-Output ""
         #-------------------------------------------------------------------------------------------
             
             $TableName  = 'InvClientComputerInfoProcessorV2'   # must not contain _CL
-            $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+            $DcrName    = "dcr-" + $AzDcrPrefix + "-" + $TableName + "_CL"
 
         #-------------------------------------------------------------------------------------------
         # Collecting data (in)
@@ -496,7 +496,7 @@ Write-Output ""
         #-------------------------------------------------------------------------------------------
             
             $TableName  = 'InvClientComputerInfoSystemV2'   # must not contain _CL
-            $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+            $DcrName    = "dcr-" + $AzDcrPrefix + "-" + $TableName + "_CL"
 
         #-------------------------------------------------------------------------------------------
         # Collecting data (in)
@@ -554,7 +554,7 @@ Write-Output ""
         #-------------------------------------------------------------------------------------------
             
             $TableName  = 'InvClientComputerInfoV2'   # must not contain _CL
-            $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+            $DcrName    = "dcr-" + $AzDcrPrefix + "-" + $TableName + "_CL"
 
         #-------------------------------------------------------------------------------------------
         # Collecting data (in)
@@ -613,7 +613,7 @@ Write-Output ""
         #-------------------------------------------------------------------------------------------
             
             $TableName  = 'InvClientComputerOSInfoV2'   # must not contain _CL
-            $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+            $DcrName    = "dcr-" + $AzDcrPrefix + "-" + $TableName + "_CL"
 
         #-------------------------------------------------------------------------------------------
         # Collecting data (in)
@@ -672,7 +672,7 @@ Write-Output ""
         #-------------------------------------------------------------------------------------------
             
             $TableName  = 'InvClientComputerInfoLastRestartV2'   # must not contain _CL
-            $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+            $DcrName    = "dcr-" + $AzDcrPrefix + "-" + $TableName + "_CL"
 
         #-------------------------------------------------------------------------------------------
         # Collecting data (in)
@@ -746,7 +746,7 @@ Write-Output ""
         #-------------------------------------------------------------------------------------------
             
             $TableName  = 'InvClientApplicationsFromWmiV2'   # must not contain _CL
-            $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+            $DcrName    = "dcr-" + $AzDcrPrefix + "-" + $TableName + "_CL"
 
         #-------------------------------------------------------------------------------------------
         # Collecting data (in)
@@ -815,7 +815,7 @@ Write-Output ""
     #-------------------------------------------------------------------------------------------
             
         $TableName  = 'InvClientApplicationsFromRegistryV2'   # must not contain _CL
-        $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+        $DcrName    = "dcr-" + $AzDcrPrefix + "-" + $TableName + "_CL"
 
     #-------------------------------------------------------------------------------------------
     # Collecting data (in)
@@ -892,7 +892,7 @@ Write-Output ""
     #-------------------------------------------------------------------------------------------
             
         $TableName  = 'InvClientAntivirusV2'   # must not contain _CL
-        $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+        $DcrName    = "dcr-" + $AzDcrPrefix + "-" + $TableName + "_CL"
 
     #-------------------------------------------------------------------------------------------
     # Collecting data (in)
@@ -1054,7 +1054,7 @@ Write-Output ""
     #-------------------------------------------------------------------------------------------
             
         $TableName  = 'InvClientDefenderAvV2'   # must not contain _CL
-        $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+        $DcrName    = "dcr-" + $AzDcrPrefix + "-" + $TableName + "_CL"
 
     #-------------------------------------------------------------------------------------------
     # Collecting data (in)
@@ -1307,7 +1307,7 @@ Write-Output ""
     #-------------------------------------------------------------------------------------------
             
         $TableName  = 'InvClientOfficeInfoV2'   # must not contain _CL
-        $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+        $DcrName    = "dcr-" + $AzDcrPrefix + "-" + $TableName + "_CL"
 
 
     #-------------------------------------------------------------------------------------------
@@ -1486,7 +1486,7 @@ Write-Output ""
     #-------------------------------------------------------------------------------------------
             
         $TableName  = 'InvClientVpnV2'   # must not contain _CL
-        $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+        $DcrName    = "dcr-" + $AzDcrPrefix + "-" + $TableName + "_CL"
 
     #-------------------------------------------------------------------------------------------
     # Collecting data (in)
@@ -1577,7 +1577,7 @@ Write-Output ""
     #-------------------------------------------------------------------------------------------
             
         $TableName  = 'InvClientLAPSInfoV2'   # must not contain _CL
-        $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+        $DcrName    = "dcr-" + $AzDcrPrefix + "-" + $TableName + "_CL"
 
     #-------------------------------------------------------------------------------------------
     # Collecting data (in)
@@ -1658,7 +1658,7 @@ Write-Output ""
     #-------------------------------------------------------------------------------------------
             
         $TableName  = 'InvClientAdminByRequestV2'   # must not contain _CL
-        $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+        $DcrName    = "dcr-" + $AzDcrPrefix + "-" + $TableName + "_CL"
 
     #-------------------------------------------------------------------------------------------
     # Collecting data (in)
@@ -1746,7 +1746,7 @@ Write-Output ""
         #-------------------------------------------------------------------------------------------
             
             $TableName  = 'InvClientWindowsUpdateLastResultsV2'   # must not contain _CL
-            $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+            $DcrName    = "dcr-" + $AzDcrPrefix + "-" + $TableName + "_CL"
 
         #-------------------------------------------------------------------------------------------
         # Collecting data (in)
@@ -1805,7 +1805,7 @@ Write-Output ""
         #-------------------------------------------------------------------------------------------
             
             $TableName  = 'InvClientWindowsUpdateServiceManagerV2'   # must not contain _CL
-            $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+            $DcrName    = "dcr-" + $AzDcrPrefix + "-" + $TableName + "_CL"
 
         #-------------------------------------------------------------------------------------------
         # Collecting data (in)
@@ -1864,7 +1864,7 @@ Write-Output ""
         #-------------------------------------------------------------------------------------------
             
             $TableName  = 'InvClientWindowsUpdatePendingUpdatesV2'   # must not contain _CL
-            $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+            $DcrName    = "dcr-" + $AzDcrPrefix + "-" + $TableName + "_CL"
 
         #-------------------------------------------------------------------------------------------
         # Collecting data (in)
@@ -1953,7 +1953,7 @@ Write-Output ""
         #-------------------------------------------------------------------------------------------
             
             $TableName  = 'InvClientWindowsUpdateLastInstallationsV2'   # must not contain _CL
-            $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+            $DcrName    = "dcr-" + $AzDcrPrefix + "-" + $TableName + "_CL"
 
         #-------------------------------------------------------------------------------------------
         # Collecting data (in)
@@ -2043,7 +2043,7 @@ Write-Output ""
     #-------------------------------------------------------------------------------------------
             
         $TableName  = 'InvClientBitlockerInfoV2'   # must not contain _CL
-        $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+        $DcrName    = "dcr-" + $AzDcrPrefix + "-" + $TableName + "_CL"
 
     #-------------------------------------------------------------------------------------------
     # Collecting data (in)
@@ -2148,7 +2148,7 @@ Write-Output ""
     #-------------------------------------------------------------------------------------------
             
         $TableName  = 'InvClientEventlogInfoV2'   # must not contain _CL
-        $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+        $DcrName    = "dcr-" + $AzDcrPrefix + "-" + $TableName + "_CL"
 
     #-------------------------------------------------------------------------------------------
     # Collecting data (in)
@@ -2279,7 +2279,7 @@ Write-Output ""
     #-------------------------------------------------------------------------------------------
             
         $TableName  = 'InvClientNetworkAdapterInfoV2'   # must not contain _CL
-        $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+        $DcrName    = "dcr-" + $AzDcrPrefix + "-" + $TableName + "_CL"
 
     #-------------------------------------------------------------------------------------------
     # Collecting data (in)
@@ -2323,7 +2323,7 @@ Write-Output ""
 
                 # log issue - typically WMI issue
                 $TableName  = 'InvClientCollectionIssuesV2'   # must not contain _CL
-                $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+                $DcrName    = "dcr-" + $AzDcrPrefix + "-" + $TableName + "_CL"
 
                 $DataVariable = [pscustomobject]@{
                                                    IssueCategory   = "NetworkAdapterInformation"
@@ -2376,7 +2376,7 @@ Write-Output ""
     #-------------------------------------------------------------------------------------------
             
         $TableName  = 'InvClientNetworkIPv4InfoV2'   # must not contain _CL
-        $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+        $DcrName    = "dcr-" + $AzDcrPrefix + "-" + $TableName + "_CL"
 
     #-------------------------------------------------------------------------------------------
     # Collecting data (in)
@@ -2412,7 +2412,7 @@ Write-Output ""
 
                 # log issue - typically WMI issue
                 $TableName  = 'InvClientCollectionIssuesV2'   # must not contain _CL
-                $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+                $DcrName    = "dcr-" + $AzDcrPrefix + "-" + $TableName + "_CL"
 
                 $DataVariable = [pscustomobject]@{
                                                    IssueCategory   = "IPInformation"
@@ -2465,7 +2465,7 @@ Write-Output ""
     #-------------------------------------------------------------------------------------------
             
         $TableName  = 'InvClientLocalAdminsV2'   # must not contain _CL
-        $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+        $DcrName    = "dcr-" + $AzDcrPrefix + "-" + $TableName + "_CL"
 
     #-------------------------------------------------------------------------------------------
     # Collecting data (in)
@@ -2575,7 +2575,7 @@ Write-Output ""
         #-------------------------------------------------------------------------------------------
             
             $TableName  = 'InvClientWindowsFirewallInfoV2'   # must not contain _CL
-            $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+            $DcrName    = "dcr-" + $AzDcrPrefix + "-" + $TableName + "_CL"
 
         #-------------------------------------------------------------------------------------------
         # Collecting data (in)
@@ -2611,7 +2611,7 @@ Write-Output ""
 
                 # log issue - typically WMI issue
                 $TableName  = 'InvClientCollectionIssuesV2'   # must not contain _CL
-                $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+                $DcrName    = "dcr-" + $AzDcrPrefix + "-" + $TableName + "_CL"
 
                 $DataVariable = [pscustomobject]@{
                                                    IssueCategory   = "WinFwInformation"
@@ -2664,7 +2664,7 @@ Write-Output ""
     #-------------------------------------------------------------------------------------------
             
         $TableName  = 'InvClientGroupPolicyRefreshV2'   # must not contain _CL
-        $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+        $DcrName    = "dcr-" + $AzDcrPrefix + "-" + $TableName + "_CL"
 
     #-------------------------------------------------------------------------------------------
     # Collecting data (in)
@@ -2743,7 +2743,7 @@ Write-Output ""
     #-------------------------------------------------------------------------------------------
             
         $TableName  = 'InvClientHardwareTPMInfoV2'   # must not contain _CL
-        $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
+        $DcrName    = "dcr-" + $AzDcrPrefix + "-" + $TableName + "_CL"
 
     #-------------------------------------------------------------------------------------------
     # Collecting data (in)
