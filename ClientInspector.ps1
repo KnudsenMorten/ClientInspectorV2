@@ -1903,8 +1903,54 @@ Write-Output ""
 
             If ($WU_PendingUpdates)
                 {
-                    # convert CIM array to PSCustomObject and remove CIM class information
-                    $DataVariable = Convert-CimArrayToObjectFixStructure -data $WU_PendingUpdates -Verbose:$Verbose
+                    $CountDataVariable = ($WU_PendingUpdates | Measure-Object).count
+
+                    $PosDataVariable   = 0
+                    Do
+                        {
+                            # CVEs
+                                $UpdateCVEs = $WU_PendingUpdates[$PosDataVariable].CveIDs -join ";"
+                                $WU_PendingUpdates[$PosDataVariable] | Add-Member -Type NoteProperty -Name 'UpdateCVEs' -Value $UpdateCVEs -force
+
+                            # Classification (e.g. Security Update)
+
+                                $UpdateClassificationCount = ($WU_PendingUpdates[$PosDataVariable].Categories | Measure-Object).count
+
+                                $UpdClassification = ""
+                                $UpdTarget         = ""
+                                ForEach ($Classification in $WU_PendingUpdates[$PosDataVariable].Categories)
+                                    {
+                                        
+                                        If ($Classification.Type -eq "UpdateClassification")
+                                            {
+                                                $UpdClassification = $Classification.name
+                                            }
+                                        ElseIf ($Classification.Type -ne "UpdateClassification")
+                                            {
+                                                $UpdTarget = $Classification.name
+                                            }
+                                    }
+
+                                $WU_PendingUpdates[$PosDataVariable] | Add-Member -Type NoteProperty -Name 'UpdateClassification' -Value $UpdClassification -force
+                                $WU_PendingUpdates[$PosDataVariable] | Add-Member -Type NoteProperty -Name 'UpdateTarget' -Value $UpdTarget -force
+
+                            # Target (e.g. product, SQL)
+                                $UpdateTarget     = $WU_PendingUpdates[$PosDataVariable].Categories | Where-Object { $_.Type -ne "UpdateClassification" } | Select Name
+                                $UpdateTargetName = $UpdateTarget.Name
+                                $WU_PendingUpdates[$PosDataVariable] | Add-Member -Type NoteProperty -Name 'UpdateTarget' -Value $UpdateTargetName -force
+
+                            # KB
+                                $UpdateKB = $WU_PendingUpdates[$PosDataVariable].KBArticleIDs -join ";"
+                                $WU_PendingUpdates[$PosDataVariable] | Add-Member -Type NoteProperty -Name 'UpdateKB' -Value $UpdateKB -force
+
+                            # KB Published Date
+                                $UpdateKBPublished                 = $WU_PendingUpdates[$PosDataVariable].LastDeploymentChangeTime
+                                $WU_PendingUpdates[$PosDataVariable] | Add-Member -Type NoteProperty -Name 'UpdateKBPublished' -Value $UpdateKBPublished -force
+
+                            $PosDataVariable = 1 + $PosDataVariable
+                        }
+                    Until ($PosDataVariable -eq $CountDataVariable)
+
 
                     # add CollectionTime to existing array
                     $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $WU_PendingUpdates -Verbose:$Verbose
@@ -2002,11 +2048,59 @@ Write-Output ""
 
             If ($Installed_Updates_PSWindowsUpdate_All)
                 {
-                    # Remove unnecessary columns in schema
-                    $DataVariable = Filter-ObjectExcludeProperty -Data $Installed_Updates_PSWindowsUpdate_All -ExcludeProperty UninstallationSteps,Categories,UpdateIdentity,UnMappedResultCode,UninstallationNotes,HResult -Verbose:$Verbose
+                    Write-Verbose "Processing Windows updates object"
+                    $CountDataVariable = ($Installed_Updates_PSWindowsUpdate_All | Measure-Object).count
+
+                    $PosDataVariable   = 0
+                    Do
+                        {
+                            # CVEs
+                                $UpdateCVEsInfo = $Installed_Updates_PSWindowsUpdate_All[$PosDataVariable].CveIDs -join ";"
+                                $Installed_Updates_PSWindowsUpdate_All[$PosDataVariable] | Add-Member -Type NoteProperty -Name 'UpdateCVEs' -Value $UpdateCVEsInfo -force
+
+                            # Classification (e.g. Security Update)
+
+                                $UpdateClassificationCount = ($Installed_Updates_PSWindowsUpdate_All[$PosDataVariable].Categories | Measure-Object).count
+
+                                $UpdClassification = ""
+                                $UpdTarget         = ""
+                                ForEach ($Classification in $Installed_Updates_PSWindowsUpdate_All[$PosDataVariable].Categories)
+                                    {
+                                        
+                                        If ($Classification.Type -eq "UpdateClassification")
+                                            {
+                                                $UpdClassification = $Classification.name
+                                            }
+                                        ElseIf ($Classification.Type -ne "UpdateClassification")
+                                            {
+                                                $UpdTarget = $Classification.name
+                                            }
+                                    }
+
+                                $Installed_Updates_PSWindowsUpdate_All[$PosDataVariable] | Add-Member -Type NoteProperty -Name 'UpdateClassification' -Value $UpdClassification -force
+                                $Installed_Updates_PSWindowsUpdate_All[$PosDataVariable] | Add-Member -Type NoteProperty -Name 'UpdateTarget' -Value $UpdTarget -force
+
+                            # KB
+                                $KB = ($Installed_Updates_PSWindowsUpdate_All[$PosDataVariable].KBArticleIDs -join ";")
+                                If ($KB)
+                                    {
+                                        $UpdateKB = "KB" + $KB
+                                    }
+                                $Installed_Updates_PSWindowsUpdate_All[$PosDataVariable] | Add-Member -Type NoteProperty -Name 'UpdateKB' -Value $UpdateKB -force
+
+                            # KB Published Date
+                                $UpdateKBPublished = $Installed_Updates_PSWindowsUpdate_All[$PosDataVariable].LastDeploymentChangeTime
+                                $Installed_Updates_PSWindowsUpdate_All[$PosDataVariable] | Add-Member -Type NoteProperty -Name 'UpdateKBPublished' -Value $UpdateKBPublished -force
+
+                            $PosDataVariable = 1 + $PosDataVariable
+                        }
+                    Until ($PosDataVariable -eq $CountDataVariable)
 
                     # convert CIM array to PSCustomObject and remove CIM class information
                     $DataVariable = Convert-CimArrayToObjectFixStructure -data $DataVariable -Verbose:$Verbose
+
+                    # Remove unnecessary columns in schema
+                    $DataVariable = Filter-ObjectExcludeProperty -Data $Installed_Updates_PSWindowsUpdate_All -ExcludeProperty UninstallationSteps,Categories,UpdateIdentity,UnMappedResultCode,UninstallationNotes,HResult -Verbose:$Verbose
 
                     # add Computer, ComputerFqdn & UserLoggedOn info to existing array
                     $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
