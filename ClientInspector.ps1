@@ -2474,15 +2474,16 @@ Write-Output ""
         Write-Output ""
         Write-Output "Collecting Local Admin information ... Please Wait !"
 
-        $LocalAdminGroupname = (Get-localgroup -Sid S-1-5-32-544).name       # SID S-1-5-32-544 = local computer Administrators group
-        Try
+        $LocalAdminGroup = (Get-localgroup -Sid S-1-5-32-544).name       # SID S-1-5-32-544 = local computer Administrators group
+        If ($LocalAdminGroup)
             {
-                $DataVariable = Get-LocalGroupMember -Group  $LocalAdminGroupname
+                $DataVariable = Get-LocalGroupMember -Group  $LocalAdminGroup.name -ErrorAction SilentlyContinue
             }
-        Catch
+        Else
             {
-                $DataVariable = ""  # blank
+                $DataVariable = ""  # issues
             }
+
 
     #-------------------------------------------------------------------------------------------
     # Preparing data structure
