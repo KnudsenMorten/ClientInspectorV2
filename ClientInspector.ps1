@@ -138,7 +138,7 @@ Write-Output ""
             "Download"            # Typically used in Microsoft Intune environments
                 {
                     # force download using Github. This is needed for Intune remediations, since the functions library are large, and Intune only support 200 Kb at the moment
-                    Write-Output "Downloading latest version of module AzLogDcrIngestPS from https://github.com/KnudsenMorten/CientInspectorV2"
+                    Write-Output "Downloading latest version of module AzLogDcrIngestPS from https://github.com/KnudsenMorten/AzLogDcrIngestPS"
                     Write-Output "into local path $($ScriptDirectory)"
 
                     # delete existing file if found to download newest version
