@@ -315,7 +315,7 @@ Write-Output ""
     #-------------------------------------------------------------------------------------------
 
         Write-Output ""
-        Write-Output "Collecting UserLoggedOn information ... Please Wait !"
+        Write-Output "Collecting Bios information ... Please Wait !"
 
         $UserLoggedOnRaw = Get-Process -IncludeUserName -Name explorer | Select-Object UserName -Unique
         $UserLoggedOn    = $UserLoggedOnRaw.UserName
@@ -2477,17 +2477,22 @@ Write-Output ""
         $LocalAdminGroupname = (Get-localgroup -Sid S-1-5-32-544).name       # SID S-1-5-32-544 = local computer Administrators group
         Try
             {
-                $LocalAdmins = Get-LocalGroupMember -Group  $LocalAdminGroupname
+                $DataVariable = Get-LocalGroupMember -Group  $LocalAdminGroupname
             }
         Catch
             {
+                $DataVariable = ""  # blank
             }
 
     #-------------------------------------------------------------------------------------------
     # Preparing data structure
     #-------------------------------------------------------------------------------------------
 
-        If ($LocalAdmins -eq $null)
+    <#
+        In case you use Get-LocalGroupMember and get errors, it is caused by an issue with empty SIDS in the administrators groups caused by e.g. domain joins/leave
+        The below code can fisx the issue, but I have not enabled it by default !
+
+        If ($DataVariable -eq $null)
             {
                 ########################################################################################################################
                 # Fix local admin group - The problem is empty SIDs in the Administrators Group caused by domain joins/leave/join
@@ -2514,10 +2519,12 @@ Write-Output ""
                                 }
                         }
             }
-        Else
+        #>
+
+        If ($DataVariable)
             {
                 # convert PS array to PSCustomObject and remove PS class information
-                $DataVariable = Convert-PSArrayToObjectFixStructure -data $LocalAdmins -Verbose:$Verbose
+                $DataVariable = Convert-PSArrayToObjectFixStructure -data $DataVariable -Verbose:$Verbose
     
                 # add CollectionTime to existing array
                 $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
@@ -2530,26 +2537,28 @@ Write-Output ""
 
                 # Aligning data structure with schema (requirement for DCR)
                 $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
+			 
+
+                #-------------------------------------------------------------------------------------------
+                # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
+                #-------------------------------------------------------------------------------------------
+
+                    CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
+                                                         -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
+                                                         -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
+                                                         -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
+                                                         -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                                         -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                                         -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
+        
+                #-----------------------------------------------------------------------------------------------
+                # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
+                #-----------------------------------------------------------------------------------------------
+
+                    Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                                                       -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
             }
 
-        #-------------------------------------------------------------------------------------------
-        # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
-        #-------------------------------------------------------------------------------------------
-
-            CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
-                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
-                                                 -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
-                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
-                                                 -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
-                                                 -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
-        
-        #-----------------------------------------------------------------------------------------------
-        # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
-        #-----------------------------------------------------------------------------------------------
-
-            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
-                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 
 
 #####################################################################
@@ -2795,7 +2804,7 @@ Write-Output ""
             {
                 $DataVariable = [pscustomobject]@{
                                                     IssueCategory   = "TPM"
-                                                    }
+                                                 }
 
                 # add CollectionTime to existing array
                 $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
