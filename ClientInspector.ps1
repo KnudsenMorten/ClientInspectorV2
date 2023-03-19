@@ -2276,6 +2276,7 @@ Write-Output ""
         $Appl_Events_ALL     = @()
         $System_Events_ALL   = @()
         $Security_Events_ALL = @()
+        $DataVariable        = @()
 
         ###############################################################################################
 
@@ -2361,7 +2362,6 @@ Write-Output ""
 
                 # Aligning data structure with schema (requirement for DCR)
                 $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
-            }
 
                 #-------------------------------------------------------------------------------------------
                 # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
@@ -2381,6 +2381,7 @@ Write-Output ""
 
                     Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
                                                                        -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
+            }
 
 
 ###############################################################
