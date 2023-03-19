@@ -799,7 +799,7 @@ $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
 ```
 
 
-## step 2/4 - Data Collection (ensure data is in correct format and any "noice" was removed and relevant information has been added
+## step 2/4 - Data Collection
 ```
 #-------------------------------------------------------------------------------------------
 # Collecting data (in)
@@ -811,7 +811,7 @@ Write-Output "Collecting Computer system information ... Please Wait !"
 $DataVariable = Get-CimInstance -ClassName Win32_ComputerSystem
 ```
 
-## step 3/4 - Data Manipulation
+## step 3/4 - Data Manipulation (ensure data is in correct format and any "noice" was removed and relevant information has been added
 ```
 #-------------------------------------------------------------------------------------------
 # Preparing data structure
