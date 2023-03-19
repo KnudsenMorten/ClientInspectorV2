@@ -42,6 +42,12 @@ Happy hunting :smile:
 [Layout of ClientInspector data-set](#layout-of-clientinspector-data-set)  
 [Verbose-mode & More help](#verbose-mode--more-help)  
 [Cost - How much does it cost to store these data ?](#cost---how-much-does-it-cost-to-store-these-data-)  
+[Video - Run of ClientInspector (normal mode)](https://youtu.be/zv0Q-wRUAX8)
+[Video - Automatic creation of 2 tables (verbose mode)](https://youtu.be/hnzMLZsiYyM)
+[Video - Automatic creation of 2 tables (normal mode)](https://youtu.be/HFjkzkBLtdg)
+[Video - Kusto Query against data](https://youtu.be/shicoeW3dDQ)
+[Video - Dashboards](https://youtu.be/3GjIJjyDHss)
+[Video - Deployment via DeploymentKit](https://youtu.be/DulF-Y5Pyn8)
 [Contact](#contact)
 
 <br>
