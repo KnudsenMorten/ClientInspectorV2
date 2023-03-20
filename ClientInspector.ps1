@@ -167,13 +167,39 @@ Write-Output ""
                             {
                                 Write-Output "Powershell module was not found !"
                                 Write-Output "Installing in scope $Scope .... Please Wait !"
-                                Install-module -Name AzLogDcrIngestPS -Repository PSGallery -Force -Scope $Scope
+                                Try
+                                    {
+                                        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+                                        Write-Output ""
+                                        Write-Output "Checking Powershell PackageProvider NuGet ... Please Wait !"
+                                            if (Get-PackageProvider -ListAvailable -Name NuGet -ErrorAction SilentlyContinue -WarningAction SilentlyContinue) 
+                                                {
+                                                    Write-Host "  OK - PackageProvider NuGet is installed"
+                                                } 
+                                            else 
+                                                {
+                                                    try {
+                                                        Install-PackageProvider -Name NuGet -Scope $Scope -Confirm:$false -Force
+                                                    }
+                                                    catch [Exception] {
+                                                        $_.message 
+                                                        exit
+                                                    }
+                                                }
+
+                                        Install-module -Name AzLogDcrIngestPS -Repository PSGallery -Force -Scope $Scope
+                                        import-module -Name AzLogDcrIngestPS -Global -force -DisableNameChecking  -WarningAction SilentlyContinue
+                                    }
+                                Catch
+                                    {
+                                    }
                             }
 
                         Elseif ($ModuleCheck)
                             {
                                 # sort to get highest version, if more versions are installed
-                                $ModuleCheck = Sort-Object -Descending -InputObject $ModuleCheck
+                                $ModuleCheck = Sort-Object -Descending -Property Version -InputObject $ModuleCheck
                                 $ModuleCheck = $ModuleCheck[0]
 
                                 Write-Output "Checking latest version at PsGallery for AzLogDcrIngestPS module"
@@ -834,7 +860,13 @@ Write-Output ""
     #-------------------------------------------------------------------------------------------
 
         # removing apps without DisplayName fx KBs
-        $DataVariable = $DataVariable | Where-Object { $_.DisplayName -ne $null }
+        Try
+            {
+                $DataVariable = $DataVariable | Where-Object { $_.DisplayName -ne $null } -ErrorAction SilentlyContinue
+            }
+        Catch
+            {
+            }
 
         # convert PS object and remove PS class information
         $DataVariable = Convert-PSArrayToObjectFixStructure -Data $DataVariable -Verbose:$Verbose
@@ -842,8 +874,8 @@ Write-Output ""
         # add CollectionTime to existing array
         $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
 
-        # add Computer, ComputerFqdn & UserLoggedOn info to existing array
-        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
+        # add Computer & ComputerFqdn info to existing array
+        $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Verbose:$Verbose
 
         # Get insight about the schema structure of an object BEFORE changes. Command is only needed to verify columns in schema
         # $SchemaBefore = Get-ObjectSchemaAsArray -Data $DataVariable
@@ -856,6 +888,10 @@ Write-Output ""
 
         # Aligning data structure with schema (requirement for DCR)
         $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
+
+        # set variable to be used later in script ($InstalledApplications)
+        $InstalledApplications = $DataVariable
+
 
         #-------------------------------------------------------------------------------------------
         # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
@@ -1062,206 +1098,259 @@ Write-Output ""
         Write-Output ""
         Write-Output "Collecting Microsoft Defender Antivirus information ... Please Wait !"
 
-        $MPComputerStatus = Get-MpComputerStatus
-        $MPPreference = Get-MpPreference
+        Try
+            {
+                $MPComputerStatus = Get-MpComputerStatus
+            }
+        Catch
+            {
+                $MPComputerStatus = $null
+            }
+
+
+        Try
+            {
+                $MPPreference = Get-MpPreference
+            }
+        Catch
+            {
+                $MPPreference = $null
+            }
+
 
     #-------------------------------------------------------------------------------------------
     # Preparing data structure
     #-------------------------------------------------------------------------------------------
 
+        # Defender was found !
         If ($MPComputerStatus) 
             {
-                $MPComputerStatusObject = [PSCustomObject]@{
-                                                                MPComputerStatusFound = $True
-                                                            }
-            }
-        Else
-            {
-                $MPComputerStatusObject = [PSCustomObject]@{
-                                                                MPComputerStatusFound = $false
-                                                            }
-            }
+                $DefenderObject = new-object PSCustomObject
+                
+                # MPComputerStatus
+                    $DefenderObject | add-member -MemberType NoteProperty -Name MPComputerStatusFound -Value $True
 
-    # Collecting Defender AV MPPreference-settings
-        $MPPreference = Get-MpPreference
-        If ($MPPreference) 
-            {
-                $MPPreferenceObject = [PSCustomObject]@{
-                                                            MPPreferenceFound = $True
-                                                        }
-            }
-        Else
-            {
-                $MPPreferenceObject = [PSCustomObject]@{
-                                                            MPPreferenceFound = $False
-                                                        }
-            }
+                    $ObjColumns = ($MPComputerStatus | get-member -MemberType Property)
+                    ForEach ($Entry in $MPComputerStatus)
+                        {
+                            ForEach ($Column in $ObjColumns)
+                                {
+                                    $ColumnName = $Column.name
+                                    $DefenderObject | add-member -MemberType NoteProperty -Name $ColumnName -Value $Entry.$ColumnName -force
+                                }
+                        }
 
-    # Preparing data
-        $DataVariable = [PSCustomObject]@{
-            MPComputerStatusFound                         = $MPComputerStatusObject.MPComputerStatusFound
-            MPPreferenceFound                             = $MPPreferenceObject.MPPreferenceFound
-            AMEngineVersion                               = $MPComputerStatus.AMEngineVersion
-            AMProductVersion                              = $MPComputerStatus.AMProductVersion
-            AMRunningMode                                 = $MPComputerStatus.AMRunningMode
-            AMServiceEnabled                              = $MPComputerStatus.AMServiceEnabled
-            AMServiceVersion                              = $MPComputerStatus.AMServiceVersion
-            AntispywareEnabled                            = $MPComputerStatus.AntispywareEnabled
-            AntispywareSignatureAge                       = $MPComputerStatus.AntispywareSignatureAge
-            AntispywareSignatureLastUpdated               = $MPComputerStatus.AntispywareSignatureLastUpdated
-            AntispywareSignatureVersion                   = $MPComputerStatus.AntispywareSignatureVersion
-            AntivirusEnabled                              = $MPComputerStatus.AntivirusEnabled
-            AntivirusSignatureAge                         = $MPComputerStatus.AntivirusSignatureAge
-            AntivirusSignatureLastUpdated                 = $MPComputerStatus.AntivirusSignatureLastUpdated
-            AntivirusSignatureVersion                     = $MPComputerStatus.AntivirusSignatureVersion
-            BehaviorMonitorEnabled                        = $MPComputerStatus.BehaviorMonitorEnabled
-            DefenderSignaturesOutOfDate                   = $MPComputerStatus.DefenderSignaturesOutOfDate
-            DeviceControlDefaultEnforcement               = $MPComputerStatus.DeviceControlDefaultEnforcement
-            DeviceControlPoliciesLastUpdated              = $MPComputerStatus.DeviceControlPoliciesLastUpdated
-            DeviceControlState                            = $MPComputerStatus.DeviceControlState
-            FullScanAge                                   = $MPComputerStatus.FullScanAge
-            FullScanEndTime                               = $MPComputerStatus.FullScanEndTime
-            FullScanOverdue                               = $MPComputerStatus.FullScanOverdue
-            FullScanRequired                              = $MPComputerStatus.FullScanRequired
-            FullScanSignatureVersion                      = $MPComputerStatus.FullScanSignatureVersion
-            FullScanStartTime                             = $MPComputerStatus.FullScanStartTime
-            IoavProtectionEnabled                         = $MPComputerStatus.IoavProtectionEnabled
-            IsTamperProtected                             = $MPComputerStatus.IsTamperProtected
-            IsVirtualMachine                              = $MPComputerStatus.IsVirtualMachine
-            LastFullScanSource                            = $MPComputerStatus.LastFullScanSource
-            LastQuickScanSource                           = $MPComputerStatus.LastQuickScanSource
-            NISEnabled                                    = $MPComputerStatus.NISEnabled
-            NISEngineVersion                              = $MPComputerStatus.NISEngineVersion
-            NISSignatureAge                               = $MPComputerStatus.NISSignatureAge
-            NISSignatureLastUpdated                       = $MPComputerStatus.NISSignatureLastUpdated
-            NISSignatureVersion                           = $MPComputerStatus.NISSignatureVersion
-            OnAccessProtectionEnabled                     = $MPComputerStatus.OnAccessProtectionEnabled
-            ProductStatus                                 = $MPComputerStatus.ProductStatus
-            QuickScanAge                                  = $MPComputerStatus.QuickScanAge
-            QuickScanEndTime                              = $MPComputerStatus.QuickScanEndTime
-            QuickScanOverdue                              = $MPComputerStatus.QuickScanOverdue
-            QuickScanSignatureVersion                     = $MPComputerStatus.QuickScanSignatureVersion
-            QuickScanStartTime                            = $MPComputerStatus.QuickScanStartTime
-            RealTimeProtectionEnabled                     = $MPComputerStatus.RealTimeProtectionEnabled
-            RealTimeScanDirection                         = $MPComputerStatus.RealTimeScanDirection
-            RebootRequired                                = $MPComputerStatus.RebootRequired
-            TamperProtectionSource                        = $MPComputerStatus.TamperProtectionSource
-            TDTMode                                       = $MPComputerStatus.TDTMode
-            TDTStatus                                     = $MPComputerStatus.TDTStatus
-            TDTTelemetry                                  = $MPComputerStatus.TDTTelemetry
-            TroubleShootingDailyMaxQuota                  = $MPComputerStatus.TroubleShootingDailyMaxQuota
-            TroubleShootingDailyQuotaLeft                 = $MPComputerStatus.TroubleShootingDailyQuotaLeft
-            TroubleShootingEndTime                        = $MPComputerStatus.TroubleShootingEndTime
-            TroubleShootingExpirationLeft                 = $MPComputerStatus.TroubleShootingExpirationLeft
-            TroubleShootingMode                           = $MPComputerStatus.TroubleShootingMode
-            TroubleShootingModeSource                     = $MPComputerStatus.TroubleShootingModeSource
-            TroubleShootingQuotaResetTime                 = $MPComputerStatus.TroubleShootingQuotaResetTime
-            TroubleShootingStartTime                      = $MPComputerStatus.TroubleShootingStartTime
-            AllowDatagramProcessingOnWinServer            = $MPPreference.AllowDatagramProcessingOnWinServer
-            AllowNetworkProtectionDownLevel               = $MPPreference.AllowNetworkProtectionDownLevel
-            AllowNetworkProtectionOnWinServer             = $MPPreference.AllowNetworkProtectionOnWinServer
-            AllowSwitchToAsyncInspection                  = $MPPreference.AllowSwitchToAsyncInspection
-            AttackSurfaceReductionOnlyExclusions          = $MPPreference.AttackSurfaceReductionOnlyExclusions
-            AttackSurfaceReductionRules_Actions           = $MPPreference.AttackSurfaceReductionRules_Actions
-            AttackSurfaceReductionRules_Ids               = $MPPreference.AttackSurfaceReductionRules_Ids
-            CheckForSignaturesBeforeRunningScan           = $MPPreference.CheckForSignaturesBeforeRunningScan 
-            CloudBlockLevel                               = $MPPreference.CloudBlockLevel 
-            CloudExtendedTimeout                          = $MPPreference.CloudExtendedTimeout
-            ComputerID                                    = $MPPreference.ComputerID
-            ControlledFolderAccessAllowedApplications     = $MPPreference.ControlledFolderAccessAllowedApplications
-            ControlledFolderAccessProtectedFolders        = $MPPreference.ControlledFolderAccessProtectedFolders
-            DefinitionUpdatesChannel                      = $MPPreference.DefinitionUpdatesChannel
-            DisableArchiveScanning                        = $MPPreference.DisableArchiveScanning
-            DisableAutoExclusions                         = $MPPreference.DisableAutoExclusions
-            DisableBehaviorMonitoring                     = $MPPreference.DisableBehaviorMonitoring
-            DisableBlockAtFirstSeen                       = $MPPreference.DisableBlockAtFirstSeen
-            DisableCatchupFullScan                        = $MPPreference.DisableCatchupFullScan
-            DisableCatchupQuickScan                       = $MPPreference.DisableCatchupQuickScan
-            DisableCpuThrottleOnIdleScans                 = $MPPreference.DisableCpuThrottleOnIdleScans
-            DisableDatagramProcessing                     = $MPPreference.DisableDatagramProcessing 
-            DisableDnsOverTcpParsing                      = $MPPreference.DisableDnsOverTcpParsing
-            DisableDnsParsing                             = $MPPreference.DisableDnsParsing
-            DisableEmailScanning                          = $MPPreference.DisableEmailScanning
-            DisableFtpParsing                             = $MPPreference.DisableFtpParsing
-            DisableGradualRelease                         = $MPPreference.DisableGradualRelease 
-            DisableHttpParsing                            = $MPPreference.DisableHttpParsing
-            DisableInboundConnectionFiltering             = $MPPreference.DisableInboundConnectionFiltering 
-            DisableIOAVProtection                         = $MPPreference.DisableIOAVProtection
-            DisableNetworkProtectionPerfTelemetry         = $MPPreference.DisableNetworkProtectionPerfTelemetry
-            DisablePrivacyMode                            = $MPPreference.DisablePrivacyMode
-            DisableRdpParsing                             = $MPPreference.DisableRdpParsing
-            DisableRealtimeMonitoring                     = $MPPreference.DisableRealtimeMonitoring
-            DisableRemovableDriveScanning                 = $MPPreference.DisableRemovableDriveScanning
-            DisableRestorePoint                           = $MPPreference.DisableRestorePoint
-            DisableScanningMappedNetworkDrivesForFullScan = $MPPreference.DisableScanningMappedNetworkDrivesForFullScan
-            DisableScanningNetworkFiles                   = $MPPreference.DisableScanningNetworkFiles
-            DisableScriptScanning                         = $MPPreference.DisableScriptScanning
-            DisableSshParsing                             = $MPPreference.DisableSshParsing
-            DisableTDTFeature                             = $MPPreference.DisableTDTFeature
-            DisableTlsParsing                             = $MPPreference.DisableTlsParsing
-            EnableControlledFolderAccess                  = $MPPreference.EnableControlledFolderAccess
-            EnableDnsSinkhole                             = $MPPreference.EnableDnsSinkhole
-            EnableFileHashComputation                     = $MPPreference.EnableFileHashComputation 
-            EnableFullScanOnBatteryPower                  = $MPPreference.EnableFullScanOnBatteryPower
-            EnableLowCpuPriority                          = $MPPreference.EnableLowCpuPriority
-            EnableNetworkProtection                       = $MPPreference.EnableNetworkProtection
-            EngineUpdatesChannel                          = $MPPreference.EngineUpdatesChannel
-            ExclusionExtension                            = $MPPreference.ExclusionExtension
-            ExclusionIpAddress                            = $MPPreference.ExclusionIpAddress
-            ExclusionPath                                 = $MPPreference.ExclusionPath
-            ExclusionProcess                              = $MPPreference.ExclusionProcess
-            ForceUseProxyOnly                             = $MPPreference.ForceUseProxyOnly
-            HighThreatDefaultAction                       = $MPPreference.HighThreatDefaultAction
-            LowThreatDefaultAction                        = $MPPreference.LowThreatDefaultAction
-            MAPSReporting                                 = $MPPreference.MAPSReporting
-            MeteredConnectionUpdates                      = $MPPreference.MeteredConnectionUpdates
-            ModerateThreatDefaultAction                   = $MPPreference.ModerateThreatDefaultAction
-            PlatformUpdatesChannel                        = $MPPreference.PlatformUpdatesChannel 
-            ProxyBypass                                   = $MPPreference.ProxyBypass
-            ProxyPacUrl                                   = $MPPreference.ProxyPacUrl
-            ProxyServer                                   = $MPPreference.ProxyServer
-            PUAProtection                                 = $MPPreference.PUAProtection 
-            QuarantinePurgeItemsAfterDelay                = $MPPreference.QuarantinePurgeItemsAfterDelay
-            RandomizeScheduleTaskTimes                    = $MPPreference.RandomizeScheduleTaskTimes
-            RemediationScheduleDay                        = $MPPreference.RemediationScheduleDay
-            RemediationScheduleTime                       = $MPPreference.RemediationScheduleTime
-            ReportingAdditionalActionTimeOut              = $MPPreference.ReportingAdditionalActionTimeOut
-            ReportingCriticalFailureTimeOut               = $MPPreference.ReportingCriticalFailureTimeOut
-            ReportingNonCriticalTimeOut                   = $MPPreference.ReportingNonCriticalTimeOut
-            ScanAvgCPULoadFactor                          = $MPPreference.ScanAvgCPULoadFactor 
-            ScanOnlyIfIdleEnabled                         = $MPPreference.ScanOnlyIfIdleEnabled
-            ScanParameters                                = $MPPreference.ScanParameters
-            ScanPurgeItemsAfterDelay                      = $MPPreference.ScanPurgeItemsAfterDelay
-            ScanScheduleDay                               = $MPPreference.ScanScheduleDay
-            ScanScheduleOffset                            = $MPPreference.ScanScheduleOffset
-            ScanScheduleQuickScanTime                     = $MPPreference.ScanScheduleQuickScanTime
-            ScanScheduleTime                              = $MPPreference.ScanScheduleTime 
-            SchedulerRandomizationTime                    = $MPPreference.SchedulerRandomizationTime
-            ServiceHealthReportInterval                   = $MPPreference.ServiceHealthReportInterval
-            SevereThreatDefaultAction                     = $MPPreference.SevereThreatDefaultAction
-            SharedSignaturesPath                          = $MPPreference.SharedSignaturesPath
-            SignatureAuGracePeriod                        = $MPPreference.SignatureAuGracePeriod
-            SignatureBlobFileSharesSources                = $MPPreference.SignatureBlobFileSharesSources
-            SignatureBlobUpdateInterval                   = $MPPreference.SignatureBlobUpdateInterval
-            SignatureDefinitionUpdateFileSharesSources    = $MPPreference.SignatureDefinitionUpdateFileSharesSources
-            SignatureDisableUpdateOnStartupWithoutEngine  = $MPPreference.SignatureDisableUpdateOnStartupWithoutEngine
-            SignatureFallbackOrder                        = $MPPreference.SignatureFallbackOrder
-            SignatureFirstAuGracePeriod                   = $MPPreference.SignatureFirstAuGracePeriod
-            SignatureScheduleDay                          = $MPPreference.SignatureScheduleDay
-            SignatureScheduleTime                         = $MPPreference.SignatureScheduleTime
-            SignatureUpdateCatchupInterval                = $MPPreference.SignatureUpdateCatchupInterval
-            SignatureUpdateInterval                       = $MPPreference.SignatureUpdateInterval
-            SubmitSamplesConsent                          = $MPPreference.SubmitSamplesConsent
-            ThreatIDDefaultAction_Actions                 = $MPPreference.ThreatIDDefaultAction_Actions
-            ThreatIDDefaultAction_Ids                     = $MPPreference.ThreatIDDefaultAction_Ids
-            ThrottleForScheduledScanOnly                  = $MPPreference.ThrottleForScheduledScanOnly
-            TrustLabelProtectionStatus                    = $MPPreference.TrustLabelProtectionStatus
-            UILockdown                                    = $MPPreference.UILockdown 
-            UnknownThreatDefaultAction                    = $MPPreference.UnknownThreatDefaultAction
-        }
+                # MPPreference
+                    $DefenderObject | add-member -MemberType NoteProperty -Name MPPreferenceFound -Value $True
+
+                    $ObjColumns = ($MPPreference | get-member -MemberType Property)
+                    ForEach ($Entry in $MPPreference)
+                        {
+                            ForEach ($Column in $ObjColumns)
+                                {
+                                    $ColumnName = $Column.name
+                                    $DefenderObject | add-member -MemberType NoteProperty -Name $ColumnName -Value $Entry.$ColumnName -Force
+                                }
+                        }
+            }
+        Else    # no defender was found !
+            {
+                # Empty Defender info - modules not found !!
+                $DefenderObject = new-object PSCustomObject
+
+                # MPComputerStatus
+                    $DefenderObject | add-member -MemberType NoteProperty -Name MPComputerStatusFound -Value $False
+
+                    $MPComputerStatusArray = @( "AMEngineVersion", `
+                                                "AMProductVersion", `
+                                                "AMRunningMode", `
+                                                "AMServiceEnabled", `
+                                                "AMServiceVersion", `
+                                                "AntispywareEnabled", `
+                                                "AntispywareSignatureAge", `
+                                                "AntispywareSignatureLastUpdated", `
+                                                "AntispywareSignatureVersion", `
+                                                "AntivirusEnabled", `
+                                                "AntivirusSignatureAge", `
+                                                "AntivirusSignatureLastUpdated", `
+                                                "AntivirusSignatureVersion", `
+                                                "BehaviorMonitorEnabled", `
+                                                "ComputerID", `
+                                                "ComputerState", `
+                                                "DefenderSignaturesOutOfDate", `
+                                                "DeviceControlDefaultEnforcement", `
+                                                "DeviceControlPoliciesLastUpdated", `
+                                                "DeviceControlState", `
+                                                "FullScanAge", `
+                                                "FullScanEndTime", `
+                                                "FullScanOverdue", `
+                                                "FullScanRequired", `
+                                                "FullScanSignatureVersion", `
+                                                "FullScanStartTime", `
+                                                "IoavProtectionEnabled", `
+                                                "IsTamperProtected", `
+                                                "IsVirtualMachine", `
+                                                "LastFullScanSource", `
+                                                "LastQuickScanSource", `
+                                                "NISEnabled", `
+                                                "NISEngineVersion", `
+                                                "NISSignatureAge", `
+                                                "NISSignatureLastUpdated", `
+                                                "NISSignatureVersion", `
+                                                "OnAccessProtectionEnabled", `
+                                                "ProductStatus", `
+                                                "PSComputerName", `
+                                                "QuickScanAge", `
+                                                "QuickScanEndTime", `
+                                                "QuickScanOverdue", `
+                                                "QuickScanSignatureVersion", `
+                                                "QuickScanStartTime", `
+                                                "RealTimeProtectionEnabled", `
+                                                "RealTimeScanDirection", `
+                                                "RebootRequired", `
+                                                "SmartAppControlExpiration", `
+                                                "SmartAppControlState", `
+                                                "TamperProtectionSource", `
+                                                "TDTMode", `
+                                                "TDTSiloType", `
+                                                "TDTStatus", `
+                                                "TDTTelemetry", `
+                                                "TroubleShootingDailyMaxQuota", `
+                                                "TroubleShootingDailyQuotaLeft", `
+                                                "TroubleShootingEndTime", `
+                                                "TroubleShootingExpirationLeft", `
+                                                "TroubleShootingMode", `
+                                                "TroubleShootingModeSource", `
+                                                "TroubleShootingQuotaResetTime", `
+                                                "TroubleShootingStartTime"
+                                               )
+
+                # loop
+                ForEach ($Column in $MPComputerStatusArray)
+                    {
+                        $DefenderObject | add-member -MemberType NoteProperty -Name $Column -Value "" -Force
+                    }
+
+
+                # MPPreference
+                    $DefenderObject | add-member -MemberType NoteProperty -Name MPPreferenceFound -Value $False
+
+                    $MPPreferenceArray = @( "AllowDatagramProcessingOnWinServer", `
+                                            "AllowNetworkProtectionDownLevel", `
+                                            "AllowNetworkProtectionOnWinServer", `
+                                            "AllowSwitchToAsyncInspection", `
+                                            "AttackSurfaceReductionOnlyExclusions", `
+                                            "AttackSurfaceReductionRules_Actions", `
+                                            "AttackSurfaceReductionRules_Ids", `
+                                            "CheckForSignaturesBeforeRunningScan", `
+                                            "CloudBlockLevel", `
+                                            "CloudExtendedTimeout", `
+                                            "ComputerID", `
+                                            "ControlledFolderAccessAllowedApplications", `
+                                            "ControlledFolderAccessProtectedFolders", `
+                                            "DefinitionUpdatesChannel", `
+                                            "DisableArchiveScanning", `
+                                            "DisableAutoExclusions", `
+                                            "DisableBehaviorMonitoring", `
+                                            "DisableBlockAtFirstSeen", `
+                                            "DisableCatchupFullScan", `
+                                            "DisableCatchupQuickScan", `
+                                            "DisableCpuThrottleOnIdleScans", `
+                                            "DisableDatagramProcessing", `
+                                            "DisableDnsOverTcpParsing", `
+                                            "DisableDnsParsing", `
+                                            "DisableEmailScanning", `
+                                            "DisableFtpParsing", `
+                                            "DisableGradualRelease", `
+                                            "DisableHttpParsing", `
+                                            "DisableInboundConnectionFiltering", `
+                                            "DisableIOAVProtection", `
+                                            "DisableNetworkProtectionPerfTelemetry", `
+                                            "DisablePrivacyMode", `
+                                            "DisableRdpParsing", `
+                                            "DisableRealtimeMonitoring", `
+                                            "DisableRemovableDriveScanning", `
+                                            "DisableRestorePoint", `
+                                            "DisableScanningMappedNetworkDrivesForFullScan", `
+                                            "DisableScanningNetworkFiles", `
+                                            "DisableScriptScanning", `
+                                            "DisableSmtpParsing", `
+                                            "DisableSshParsing", `
+                                            "DisableTlsParsing", `
+                                            "EnableControlledFolderAccess", `
+                                            "EnableDnsSinkhole", `
+                                            "EnableFileHashComputation", `
+                                            "EnableFullScanOnBatteryPower", `
+                                            "EnableLowCpuPriority", `
+                                            "EnableNetworkProtection", `
+                                            "EngineUpdatesChannel", `
+                                            "ExclusionExtension", `
+                                            "ExclusionIpAddress", `
+                                            "ExclusionPath", `
+                                            "ExclusionProcess", `
+                                            "ForceUseProxyOnly", `
+                                            "HighThreatDefaultAction", `
+                                            "IntelTDTEnabled", `
+                                            "LowThreatDefaultAction", `
+                                            "MAPSReporting", `
+                                            "MeteredConnectionUpdates", `
+                                            "ModerateThreatDefaultAction", `
+                                            "PlatformUpdatesChannel", `
+                                            "ProxyBypass", `
+                                            "ProxyPacUrl", `
+                                            "ProxyServer", `
+                                            "PSComputerName", `
+                                            "PUAProtection", `
+                                            "QuarantinePurgeItemsAfterDelay", `
+                                            "RandomizeScheduleTaskTimes", `
+                                            "RealTimeScanDirection", `
+                                            "RemediationScheduleDay", `
+                                            "RemediationScheduleTime", `
+                                            "ReportDynamicSignatureDroppedEvent", `
+                                            "ReportingAdditionalActionTimeOut", `
+                                            "ReportingCriticalFailureTimeOut", `
+                                            "ReportingNonCriticalTimeOut", `
+                                            "ScanAvgCPULoadFactor", `
+                                            "ScanOnlyIfIdleEnabled", `
+                                            "ScanParameters", `
+                                            "ScanPurgeItemsAfterDelay", `
+                                            "ScanScheduleDay", `
+                                            "ScanScheduleOffset", `
+                                            "ScanScheduleQuickScanTime", `
+                                            "ScanScheduleTime", `
+                                            "SchedulerRandomizationTime", `
+                                            "ServiceHealthReportInterval", `
+                                            "SevereThreatDefaultAction", `
+                                            "SharedSignaturesPath", `
+                                            "SignatureAuGracePeriod", `
+                                            "SignatureBlobFileSharesSources", `
+                                            "SignatureBlobUpdateInterval", `
+                                            "SignatureDefinitionUpdateFileSharesSources", `
+                                            "SignatureDisableUpdateOnStartupWithoutEngine", `
+                                            "SignatureFallbackOrder", `
+                                            "SignatureFirstAuGracePeriod", `
+                                            "SignatureScheduleDay", `
+                                            "SignatureScheduleTime", `
+                                            "SignatureUpdateCatchupInterval", `
+                                            "SignatureUpdateInterval", `
+                                            "SubmitSamplesConsent", `
+                                            "ThreatIDDefaultAction_Actions", `
+                                            "ThreatIDDefaultAction_Ids", `
+                                            "ThrottleForScheduledScanOnly", `
+                                            "TrustLabelProtectionStatus", `
+                                            "UILockdown", `
+                                            "UnknownThreatDefaultAction"
+                                            )
+
+                # MPPreference
+                    ForEach ($Column in $MPPreferenceArray)
+                        {
+                            $DefenderObject | add-member -MemberType NoteProperty -Name $Column -Value "" -Force
+                        }
+            }
     
         # add CollectionTime to existing array
-        $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
+        $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DefenderObject -Verbose:$Verbose
 
         # add Computer, ComputerFqdn & UserLoggedOn info to existing array
         $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
@@ -1595,12 +1684,26 @@ Write-Output ""
                     #-----------------------------------------
                     # Looking for LAPS
                     #-----------------------------------------
-                    If ( ($Application.Vendor -like 'Microsoft*') -and ($Application.name -like "*Local Administrator Password*") )
+
+                    Try
                         {
-                            $LAPSSoftware = $Application.Name
-                            $LAPSVersion = $Application.Version
+                            If ( ($Application.Vendor -like 'Microsoft*') -and ($Application.name -like "*Local Administrator Password*") )
+                                {
+                                    $LAPSSoftware = $Application.Name
+                                    $LAPSVersion = $Application.Version
+                                }
+                        }
+                    Catch
+                        {
+                            # use alternative name on servers
+                            If ( ($Application.Publisher -like 'Microsoft*') -and ($Application.DisplayName -like "*Local Administrator Password*") )
+                                {
+                                    $LAPSSoftware = $Application.Publisher
+                                    $LAPSVersion = $Application.Displayname
+                                }
                         }
                 }
+
 
     #-------------------------------------------------------------------------------------------
     # Preparing data structure
@@ -1973,26 +2076,27 @@ Write-Output ""
 
                     # Aligning data structure with schema (requirement for DCR)
                     $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
-                }
 
-        #-------------------------------------------------------------------------------------------
-        # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
-        #-------------------------------------------------------------------------------------------
 
-            CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
-                                                 -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
-                                                 -DceName $DceName -DcrName $DcrName -DcrResourceGroup $AzDcrResourceGroup -TableName $TableName -Data $DataVariable `
-                                                 -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
-                                                 -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
-                                                 -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
-                                                 -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
+                    #-------------------------------------------------------------------------------------------
+                    # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
+                    #-------------------------------------------------------------------------------------------
+
+                        CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
+                                                             -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
+                                                             -DceName $DceName -DcrName $DcrName -DcrResourceGroup $AzDcrResourceGroup -TableName $TableName -Data $DataVariable `
+                                                             -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
+                                                             -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                                             -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                                             -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
         
-        #-----------------------------------------------------------------------------------------------
-        # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
-        #-----------------------------------------------------------------------------------------------
+                    #-----------------------------------------------------------------------------------------------
+                    # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
+                    #-----------------------------------------------------------------------------------------------
 
-            Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
-                                                               -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
+                        Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                                                           -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
+                }
 
 
     #############################################################
