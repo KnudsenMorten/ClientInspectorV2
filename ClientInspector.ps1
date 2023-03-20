@@ -176,6 +176,10 @@ Write-Output ""
 
                         Elseif ($ModuleCheck)
                             {
+                                # sort to get highest version, if more versions are installed
+                                $ModuleCheck = Sort-Object -Descending -InputObject $ModuleCheck
+                                $ModuleCheck = $ModuleCheck[0]
+
                                 Write-Output "Checking latest version at PsGallery for AzLogDcrIngestPS module"
                                 $online = Find-Module -Name AzLogDcrIngestPS -Repository PSGallery
 
