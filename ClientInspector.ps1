@@ -38,9 +38,6 @@
         - can convert source objects based on CIM or PS objects into PSCustomObjects/array
         - can add relevant information to each record like UserLoggedOn, Computer, CollectionTime
     
-    .VERSION
-        1.0.0
-    
     .AUTHOR
     Morten Knudsen, Microsoft MVP - https://mortenknudsen.net
 
