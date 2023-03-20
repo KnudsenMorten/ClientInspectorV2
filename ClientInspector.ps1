@@ -165,6 +165,11 @@ Write-Output ""
 
             "PsGallery"   # Can be used on any machine, where you want to install the PS module for continuesly usage
                 {
+                    # if not defined, default to CurrentUser
+                    If (!($Scope))
+                        {
+                            $Scope = "CurrentUser" # 'CurrentUser'
+                        }
 
                     $ModuleCheck = Get-Module -Name AzLogDcrIngestPS -ListAvailable -ErrorAction SilentlyContinue
                         If (!($ModuleCheck))
@@ -187,9 +192,9 @@ Write-Output ""
                                 if ( ([version]$online.version) -gt ([version]$ModuleCheck.version) ) 
                                     {
                                         Write-Output "Newer version ($($online.version)) detected"
-                                        Write-Output "Installing in scope $ScopePsGalleryInstall .... Please Wait !"
-                                        Update-module -Name AzLogDcrIngestPS -Repository PSGallery -Scope $Scope -Force
-                                        import-module -Name AzLogDcrIngestPS
+                                        Write-Output "Updating AzLogDcrIngestPS module .... Please Wait !"
+                                        Update-module -Name AzLogDcrIngestPS -Force
+                                        import-module -Name AzLogDcrIngestPS -Global -force -DisableNameChecking  -WarningAction SilentlyContinue
                                     }
                                 else
                                     {
@@ -349,7 +354,7 @@ Write-Output ""
 
         CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId `
                                              -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
-                                             -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
+                                             -DceName $DceName -DcrName $DcrName -DcrResourceGroup $AzDcrResourceGroup -TableName $TableName -Data $DataVariable `
                                              -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                              -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
                                              -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
@@ -418,7 +423,7 @@ Write-Output ""
 
         CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId `
                                              -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
-                                             -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
+                                             -DceName $DceName -DcrName $DcrName -DcrResourceGroup $AzDcrResourceGroup -TableName $TableName -Data $DataVariable `
                                              -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                              -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
                                              -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
@@ -476,7 +481,7 @@ Write-Output ""
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
+                                                 -DceName $DceName -DcrName $DcrName -DcrResourceGroup $AzDcrResourceGroup -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
                                                  -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
@@ -535,7 +540,7 @@ Write-Output ""
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
+                                                 -DceName $DceName -DcrName $DcrName -DcrResourceGroup $AzDcrResourceGroup -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
                                                  -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
@@ -593,7 +598,7 @@ Write-Output ""
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
+                                                 -DceName $DceName -DcrName $DcrName -DcrResourceGroup $AzDcrResourceGroup -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
                                                  -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
@@ -652,7 +657,7 @@ Write-Output ""
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
+                                                 -DceName $DceName -DcrName $DcrName -DcrResourceGroup $AzDcrResourceGroup -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
                                                  -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
@@ -717,7 +722,7 @@ Write-Output ""
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
+                                                 -DceName $DceName -DcrName $DcrName -DcrResourceGroup $AzDcrResourceGroup -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
                                                  -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
@@ -790,7 +795,7 @@ Write-Output ""
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
+                                                 -DceName $DceName -DcrName $DcrName -DcrResourceGroup $AzDcrResourceGroup -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
                                                  -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
@@ -867,7 +872,7 @@ Write-Output ""
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
+                                                 -DceName $DceName -DcrName $DcrName -DcrResourceGroup $AzDcrResourceGroup -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
                                                  -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
@@ -1029,7 +1034,7 @@ Write-Output ""
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
+                                                 -DceName $DceName -DcrName $DcrName -DcrResourceGroup $AzDcrResourceGroup -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
                                                  -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
@@ -1282,7 +1287,7 @@ Write-Output ""
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
+                                                 -DceName $DceName -DcrName $DcrName -DcrResourceGroup $AzDcrResourceGroup -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
                                                  -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
@@ -1461,7 +1466,7 @@ Write-Output ""
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
+                                                 -DceName $DceName -DcrName $DcrName -DcrResourceGroup $AzDcrResourceGroup -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
                                                  -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
@@ -1552,7 +1557,7 @@ Write-Output ""
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
+                                                 -DceName $DceName -DcrName $DcrName -DcrResourceGroup $AzDcrResourceGroup -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
                                                  -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
@@ -1633,7 +1638,7 @@ Write-Output ""
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
+                                                 -DceName $DceName -DcrName $DcrName -DcrResourceGroup $AzDcrResourceGroup -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
                                                  -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
@@ -1716,7 +1721,7 @@ Write-Output ""
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
+                                                 -DceName $DceName -DcrName $DcrName -DcrResourceGroup $AzDcrResourceGroup -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
                                                  -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
@@ -1788,7 +1793,7 @@ Write-Output ""
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
+                                                 -DceName $DceName -DcrName $DcrName -DcrResourceGroup $AzDcrResourceGroup -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
                                                  -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
@@ -1850,7 +1855,7 @@ Write-Output ""
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
+                                                 -DceName $DceName -DcrName $DcrName -DcrResourceGroup $AzDcrResourceGroup -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
                                                  -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
@@ -1985,7 +1990,7 @@ Write-Output ""
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
+                                                 -DceName $DceName -DcrName $DcrName -DcrResourceGroup $AzDcrResourceGroup -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
                                                  -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
@@ -2134,7 +2139,7 @@ Write-Output ""
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
+                                                 -DceName $DceName -DcrName $DcrName -DcrResourceGroup $AzDcrResourceGroup -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
                                                  -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
@@ -2239,7 +2244,7 @@ Write-Output ""
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
+                                                 -DceName $DceName -DcrName $DcrName -DcrResourceGroup $AzDcrResourceGroup -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
                                                  -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
@@ -2301,7 +2306,7 @@ Write-Output ""
                                         "4735;Microsoft-Windows-Security-Auditing"  # Security-Enabled Group Modification
                                         "4625;Microsoft-Windows-Security-Auditing"  # Failed User Account Login
                                         "4648;Microsoft-Windows-Security-Auditing"  # Account Login with Explicit Credentials
-                                        )
+                                      )
         <#
                                         "4624;Microsoft-Windows-Security-Auditing"  # Succesful User Account Login
         #>
@@ -2373,7 +2378,7 @@ Write-Output ""
 
                     CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                          -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
-                                                         -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
+                                                         -DceName $DceName -DcrName $DcrName -DcrResourceGroup $AzDcrResourceGroup -TableName $TableName -Data $DataVariable `
                                                          -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                          -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
                                                          -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
@@ -2471,7 +2476,7 @@ Write-Output ""
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
+                                                 -DceName $DceName -DcrName $DcrName -DcrResourceGroup $AzDcrResourceGroup -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
                                                  -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
@@ -2560,7 +2565,7 @@ Write-Output ""
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
+                                                 -DceName $DceName -DcrName $DcrName -DcrResourceGroup $AzDcrResourceGroup -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
                                                  -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
@@ -2647,7 +2652,7 @@ Write-Output ""
 
                     CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                          -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
-                                                         -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
+                                                         -DceName $DceName -DcrName $DcrName -DcrResourceGroup $AzDcrResourceGroup -TableName $TableName -Data $DataVariable `
                                                          -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                          -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
                                                          -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
@@ -2738,7 +2743,7 @@ Write-Output ""
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
+                                                 -DceName $DceName -DcrName $DcrName -DcrResourceGroup $AzDcrResourceGroup -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
                                                  -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
@@ -2817,7 +2822,7 @@ Write-Output ""
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
+                                                 -DceName $DceName -DcrName $DcrName -DcrResourceGroup $AzDcrResourceGroup -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
                                                  -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
@@ -2927,7 +2932,7 @@ Write-Output ""
 
             CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
-                                                 -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
+                                                 -DceName $DceName -DcrName $DcrName -DcrResourceGroup $AzDcrResourceGroup -TableName $TableName -Data $DataVariable `
                                                  -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
                                                  -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
                                                  -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
