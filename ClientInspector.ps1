@@ -162,12 +162,6 @@ Write-Output ""
 
             "PsGallery"   # Can be used on any machine, where you want to install the PS module for continuesly usage
                 {
-                    # if not defined, default to CurrentUser
-                    If (!($Scope))
-                        {
-                            $Scope = "CurrentUser" # 'CurrentUser'
-                        }
-
                     $ModuleCheck = Get-Module -Name AzLogDcrIngestPS -ListAvailable -ErrorAction SilentlyContinue
                         If (!($ModuleCheck))
                             {
