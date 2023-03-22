@@ -748,8 +748,15 @@ By default ClientInspector will send the data in batches depending on an calcula
 You can mitigate this issue, by adding the parameter BatchAmount to the Post-command. If you want to be sure, set it to 1
 
 ```
-Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName -BatchAmount 1 `
-                                                   -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
+Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName `
+                                                   -DcrName $DcrName `
+                                                   -Data $DataVariable `
+                                                   -TableName $TableName `
+                                                   -AzAppId $LogIngestAppId `
+                                                   -AzAppSecret $LogIngestAppSecret `
+                                                   -TenantId $TenantId `
+                                                   ***-BatchAmount 1*** `
+												   -Verbose:$Verbose
 ```
 
 
