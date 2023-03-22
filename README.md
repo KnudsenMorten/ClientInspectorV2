@@ -377,7 +377,7 @@ ClientInspector (v2) is uploading the collected data into **custom logs** in **A
 ![Archicture](docs/ArchitectureV2.png)
 
 ## Schema
-The crucial part of learning sending data through Azure Pipeline and DCRs are the schema. Both the DCR and LogAnalytics table needs to be matching the schema of the source object. ClientInspector with the usage of functions in AzLogDcrIngestPS module will handle these steps automatically.
+Both the DCR and LogAnalytics table has a schema, which needs to be matching the schema of the source object. This is handled by using functions in AzLogDcrIngestPS module.
 
 [Video - Automatic creation of 2 tables & DCRs (verbose mode)](https://youtu.be/rIUNs3yT-eI)  
 [Video - Automatic creation of 2 tables & DCRs (normal mode)](https://youtu.be/khQMDcON6r8)  
