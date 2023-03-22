@@ -393,10 +393,10 @@ You have 3 options for connectivity to Azure for data upload:
 **No Internet access or OS-level incompliance fx. running TLS 1.0/1.1**
 3) REST endpoint sends data via [log-hub](https://github.com/KnudsenMorten/AzLogDcrIngestPSLogHub) - a concept I have built. 
 
-## Internet-connected endpoints - OS-level compliance
+### Internet-connected endpoints - OS-level compliance
 ![Internet-connected endpoints - OS-level compliance](docs/Networking.png)
 
-## No Internet access or OS-level incompliance fx. running TLS 1.0/1.1
+### No Internet access or OS-level incompliance fx. running TLS 1.0/1.1
 ![No Internet access or OS-level incompliance fx. running TLS 1.0/1.1](docs/LogHub.png)
 
 
