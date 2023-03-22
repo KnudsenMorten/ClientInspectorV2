@@ -406,11 +406,9 @@ I recommend to have a reference computer, which is used for table/DCR management
 <br>
 Configuration:
 
-1. Create a folder on a reference machine for example C:\ClientInspectorV2. It can easily be your own computer
+1. When you run the DeploymentKit, it will automatically prepare the ClientInspector file for you, so you just need to insert the variables
 
-2. [Download the latest version of ClientInspector.ps1](https://raw.githubusercontent.com/KnudsenMorten/ClientInspectorV2/ClientInspector.ps1) - and place it in the folder created
-
-3. Open the file ClientInspector.ps1 - and insert the variables that was the output the deployment using **ClientInSpectorV2-DeploymentKit**
+2. Verify the variables have been inserted
 ```js
 $TenantId                                   = "xxxx" 
 $LogIngestAppId                             = "xxxx" 
@@ -426,27 +424,25 @@ $AzDcrDceTableCreateFromReferenceMachine    = @()
 $AzDcrDceTableCreateFromAnyMachine          = $true
 ```
 
-4. [Download the latest version of AzLogDcringestPS.ps1](https://raw.githubusercontent.com/KnudsenMorten/AzLogDcrIngestPS/main/AzLogDcrIngestPS.psm1) - and place it in the folder created
+3. Start Powershell as local admin
 
-5. Start Powershell as local admin
-
-6. Start the script using this command
+4. Start the script using this command
 ```js
-C:\ClientInspector\ClientInspector.ps1 -PsFunctionLibrary LocalPath_Import -verbose:$true
+C:\ClientInspector\ClientInspector.ps1 -verbose:$true
 ```
 
-7. It wil now run for 10-15 min and create the necessary tables & Data Collection Rules - based on the actual structure in your environment
+5. It wil now run for 10-15 min and create the necessary tables & Data Collection Rules - based on the actual structure in your environment
 
-8. When first run of the script has completed, then run it again. Now data will be sent into the solution.
+6. When first run of the script has completed, then run it again. Now data will be sent into the solution.
 
-9. Verify data is coming in using Kusto queries in the different tables. NOTE: In can take up approx 10 min for the first upload of data, as the pipeline needs to be created in backend
+7. Verify data is coming in using Kusto queries in the different tables. NOTE: In can take approx 10-15 min for the first upload of data, as the pipeline needs to be created in backend
 
-10. As the last change, we need to change 2 parameters in the parameters to tell ClientInspector to only make schema changes when run from the reference machine
+8. As the last change, we need to change 2 parameters in the parameters to tell ClientInspector to only make schema changes when run from the reference machine
 ```js
 $AzLogDcrTableCreateFromReferenceMachine    = @("<<MyReferenceMachineComputerName>>")   # sample @("ComputerName")
 $AzLogDcrTableCreateFromAnyMachine          = $false    # important so changes can only happen on reference machine
 ```
-11. You are now ready to deploy it to your test group
+9. You are now ready to deploy it to your test group
 
 </details>
 
@@ -494,15 +490,13 @@ You will run the inventory script by a traditional package / deployment
     
 1. [Download the CMD-file ClientInspector.cmd](https://raw.githubusercontent.com/KnudsenMorten/ClientInspectorV2/ConfigMgr/ClientInspector.cmd)
 
-2. [Download the latest version of ClientInspector.ps1](https://raw.githubusercontent.com/KnudsenMorten/ClientInspectorV2/ClientInspector.ps1)
+2. Create a source structure on your ConfigMgr package source directory for example called ClientInspector. 
 
-3. Create a source structure on your ConfigMgr package source directory for example called ClientInspector. 
+3. Copy the 2 needed files **ClientInspector.cmd** and **ClientInspector.ps1** into the directory
 
-4. Copy the 2 needed files **ClientInspector.cmd** and **ClientInspector.ps1** into the directory
+4. Make a package - and point the package to run **ClientInspector.cmd**
 
-5. Make a package - and point the package to run **ClientInspector.cmd**
-
-6. Make a deployment. NOTE: Make source to configure the deployment to download the package down to the client
+5. Make a deployment. NOTE: Make source to configure the deployment to download the package down to the client
 
 </details>
 
@@ -541,6 +535,8 @@ You can find more detailed information about the module using links below:
 
 # Running ClientInspector.ps1 - 3 modes
 ClientInspector supports 3 ways to install/update/import the needed Powershell module: **Download**, **PsGallery**, **LocalPath**
+
+By default, it will download latest version from PsGallery into CurrentUser scope.
 
 ## .\ClientInspector.ps1 -function:LocalPath
 ClientInspector will look for **AzLogDcrIngest.psm1** file in the directory where the script will run from. 
