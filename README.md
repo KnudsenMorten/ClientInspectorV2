@@ -406,9 +406,12 @@ You need to allow the following endpoints in your firewall:
 |global.handler.control.monitor.azure.com|Access control service|Port 443|Outbound|Yes|
 |dce logs ingestion uri<br><br>sample<br>https://dce-log-platform-management-client-demo-p-iur0.westeurope-1.ingest.monitor.azure.com|Ingest logs data|Port 443|Outbound|Yes|
 
+<br>
 
 ### No Internet access or OS-level incompliance fx. running TLS 1.0/1.1
 ![No Internet access or OS-level incompliance fx. running TLS 1.0/1.1](docs/Loghub.png)
+
+[Check out the log-hub concept](https://github.com/KnudsenMorten/AzLogDcrIngestPSLogHub)
 
 
 <br>
