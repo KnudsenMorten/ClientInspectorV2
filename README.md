@@ -418,7 +418,7 @@ You need to allow the following endpoints in your firewall:
 <br>
 
 # Implementation
-Hopefully you will experience, that it is pretty easy to get everything up and running. The steps are outlined below.
+Hopefully you will experience, that it is pretty easy to get everything up and running. The 3 steps are outlined below.
 
 Before getting started, I urge you to read in more detail about the components in the intro below.
 
