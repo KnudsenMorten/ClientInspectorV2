@@ -97,6 +97,15 @@ Write-Output ""
 
 
 
+
+
+# This variable can be used to set verbose mode-flag (true/false), if you test using Powershell ISE. 
+# Normally you will set the verbose-flag on the commandline
+# Remember to remove the # in front of $Verbose to activate it. 
+# Remember to add the # in front of #verbose, when you want to control it through the commandline
+
+# $Verbose                                    = $true
+
 <# ----- onboarding lines ----- END  #>
 
     # latest run info - needed for Intune detection to work
@@ -109,7 +118,7 @@ Write-Output ""
     [datetime]$CollectionTime                        = ( Get-date ([datetime]::Now.ToUniversalTime()) -format "yyyy-MM-ddTHH:mm:ssK" )
 
     # script run mode - normal or verbose
-    If ($psBoundParameters['verbose'] -eq $true)
+    If ( ($psBoundParameters['verbose'] -eq $true) -or ($verbose -eq $true) )
         {
             Write-Output "Verbose mode ON"
             $global:Verbose = $true
