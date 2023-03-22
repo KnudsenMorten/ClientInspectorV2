@@ -401,7 +401,7 @@ This is for endpoints running older versions of TLS: TLS 1.0/1.1. Azure will not
 ![Internet-connected endpoints - OS-level compliance](docs/Networking.png)
 
 ### No Internet access or OS-level incompliance fx. running TLS 1.0/1.1
-![No Internet access or OS-level incompliance fx. running TLS 1.0/1.1](docs/LogHub.png)
+![No Internet access or OS-level incompliance fx. running TLS 1.0/1.1](docs/Loghub.png)
 
 
 You need to allow the following endpoints in your firewall:
