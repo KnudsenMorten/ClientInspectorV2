@@ -861,7 +861,7 @@ Else
                             # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
                             #-----------------------------------------------------------------------------------------------
 
-                                $ResultPost = Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                $ResultPost = Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName -BatchAmount 1 `
                                                                                                  -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
                     
                     } # If $DataVariable
@@ -3050,6 +3050,10 @@ Else
 
         If ($TPM)
             {
+
+                # convert CIM array to PSCustomObject and remove CIM class information
+                $TPM = Convert-CimArrayToObjectFixStructure -data $TPM -Verbose:$Verbose
+
                 # Get TPM Version, cannot be found using Get-TPM - must be retrieved from WMI
                 $TPMInfo_WMI = Get-CimInstance -Namespace "Root\CIMV2\Security\MicrosoftTpm" -query "Select * from Win32_Tpm"
                 If ($TPMInfo_WMI)
