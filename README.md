@@ -7,7 +7,7 @@ Check out **ClientInspector**, which can help you get **great insight** to your 
 
 ClientInspector is **free** to the community - built to be a **cool showcase** of how you can bring back **data** from your clients using **Azure Log Ingestion Pipeline**, **Azure Data Collection Rules**, **Azure LogAnalytics**; view them with **Azure Monitor & Azure Dashboards** - and get "drift-alerts" using **Microsoft Sentinel**.
 
-[Video - Dashboards](https://youtu.be/0MKPgzvDNRk) 
+[Video 3m 01s - Dashboards](https://youtu.be/0MKPgzvDNRk)  
 
 ![Overview](docs/OverviewV2.png)
 
@@ -63,7 +63,7 @@ Happy hunting :smile:
 [Video 2m 19s - Data manipulation](https://youtu.be/OZWj7xZHLI8)  
 [Video 1m 58s - Kusto queries against data](https://youtu.be/_GlI0h7ZOsg)  
 [Video 3m 01s - Dashboards](https://youtu.be/0MKPgzvDNRk)  
-[Video 9m 48s - Sample usage of data - lookup against Lenovo warranty db](https://youtu.be/3ZDyTwiLU0w)  
+[Video 0m 48s - Sample usage of data - lookup against Lenovo warranty db](https://youtu.be/3ZDyTwiLU0w)  
 [Video 7m 25s - Deployment via ClientInspector DeploymentKit](https://youtu.be/_RNlSqRcetg)  
 
 <br>
@@ -153,7 +153,7 @@ Get-ObjectSchemaAsArray -Data $DataVariable -Verbose:$Verbose
 # Desired State Dashboards - How to get insight of my environment from the data ?
 As part of the initial deployment using [ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit), you will have access to lots of Azure Dashboards and Azure Workbooks. 
 
-[Video - Dashboards](https://youtu.be/0MKPgzvDNRk)  
+[Video 3m 01s - Dashboards](https://youtu.be/0MKPgzvDNRk)  
 
 The idea of the dashboards is that they will show where your infrastucture is drifting from 'desired state'. Think of them as KPIs, where the infrastructure is not in control.
 
@@ -227,8 +227,8 @@ If you want to add more dashboards or workbooks, you will typically start by inv
 # How do I query the data? - Kusto (KQL) is the answer
 If you don't know Kusto language, I recommend you to start playing around with it, as it is a really powerful language.
 
-[Video - Kusto queries against data](https://youtu.be/_GlI0h7ZOsg)  
-[Video - Dashboards](https://youtu.be/0MKPgzvDNRk)  
+[Video 1m 58s - Kusto queries against data](https://youtu.be/_GlI0h7ZOsg)  
+[Video 3m 01s - Dashboards](https://youtu.be/0MKPgzvDNRk)  
 
 [Write your first query with Kusto Query Language](https://learn.microsoft.com/en-us/training/modules/write-first-query-kusto-query-language/)
 
@@ -363,7 +363,7 @@ $ComputerInfoArray
 ## Sample query 4: Integrating data with other sources (warrantycheck against Lenovo warranty-database)
 When we have the data in Azure LogAnalytics, we can start to integrate the data with other sources, like Dell or Lenovo warranty data via REST api lookup.
 
-[Video - Sample usage of data - lookup against Lenovo warranty db](https://youtu.be/3ZDyTwiLU0w)  
+[Video 0m 48s - Sample usage of data - lookup against Lenovo warranty db](https://youtu.be/3ZDyTwiLU0w)  
 
 Here is an example of output, which was auto-created by a powershell script - extracting a list of computers & serial number - and then doing lookup to Lenovo warranty database to retrieve information about when the computer was purchased - and its warranty state.
 
@@ -379,9 +379,9 @@ ClientInspector (v2) is uploading the collected data into **custom logs** in **A
 ## Schema
 Both the DCR and LogAnalytics table has a schema, which needs to be matching the schema of the source object. This is handled by using functions in AzLogDcrIngestPS module.
 
-[Video - Automatic creation of 2 tables & DCRs (verbose mode)](https://youtu.be/rIUNs3yT-eI)  
-[Video - Automatic creation of 2 tables & DCRs (normal mode)](https://youtu.be/khQMDcON6r8)  
-[Video - See schema of DCR and table)](https://youtu.be/NDSNhvpa4Gs)
+[Video 1m 40s - Automatic creation of 2 tables & DCRs (verbose mode)](https://youtu.be/rIUNs3yT-eI)  
+[Video 1m 37s - Automatic creation of 2 tables & DCRs (normal mode)](https://youtu.be/khQMDcON6r8)  
+[Video 1m 34s - See schema of DCR and table)](https://youtu.be/NDSNhvpa4Gs)  
 
 ## Networking
 You have 3 options for connectivity to Azure for data upload: 
@@ -587,6 +587,8 @@ ClientInspector supports 3 ways to install/update/import the needed Powershell m
 
 By default, it will download latest version from PsGallery into CurrentUser scope.
 
+[Video 3m 19s - Running ClientInspector using commandline (normal mode)](https://youtu.be/BericD4pT0Q)  
+
 ## .\ClientInspector.ps1 -function:LocalPath
 ClientInspector will look for **AzLogDcrIngest.psm1** file in the directory where the script will run from. 
 If AzLogDcrIngest.psm1 is missing, script will terminate - otherwise it will do an import-module.
@@ -649,7 +651,7 @@ OK - Running latest version
 <br>
 
 ## Sample output of ClientInspector
-[Video - Running ClientInspector using commandline (normal mode)](https://youtu.be/BericD4pT0Q)  
+[Video 3m 19s - Running ClientInspector using commandline (normal mode)](https://youtu.be/BericD4pT0Q)  
 
 <br>
 
