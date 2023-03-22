@@ -450,13 +450,12 @@ The steps to setup ClientInspector in your environment are:
   <summary>How to configure the initial setup of Azure LogAnalytics tables and Data Collection Rules (first-time)</summary>
 
 <br>
-I recommend to have a reference computer, which is used for table/DCR management. This way it is a controlled process, if changes must be made for example change of data structure
+I recommend to have a reference computer, which is used for table/DCR management. This way it is a controlled process, if changes must be made - for example if the source object schema changes.
 <br>
 Configuration:
 
 1. When you run the DeploymentKit, it will automatically prepare the ClientInspector file for you, so you just need to insert the variables
 
-2. Verify the variables have been inserted
 ```js
 $TenantId                                   = "xxxx" 
 $LogIngestAppId                             = "xxxx" 
@@ -472,34 +471,32 @@ $AzDcrDceTableCreateFromReferenceMachine    = @()
 $AzDcrDceTableCreateFromAnyMachine          = $true
 ```
 
-3. Start Powershell as local admin
+2. Start Powershell as local admin
 
-4. Start the script using this command
+3. Start the script using this command
 ```js
 C:\ClientInspector\ClientInspector.ps1 -verbose:$true
 ```
 
-5. It wil now run for 10-15 min and create the necessary tables & Data Collection Rules - based on the actual structure in your environment
+4. ClientInspector will run for 10-20 min and create the necessary tables & Data Collection Rules - based on the actual structure in your environment. Please go through the results on the screen and look for any errors (red)
 
-6. When first run of the script has completed, then run it again. Now data will be sent into the solution.
+5. When everything looks good, re-run the script and it will go through much faster. Verify data is coming in using Kusto queries in the different tables. NOTE: It can take approx 10-15 min for the first upload of data, as the pipeline needs to be created in backend
 
-7. Verify data is coming in using Kusto queries in the different tables. NOTE: In can take approx 10-15 min for the first upload of data, as the pipeline needs to be created in backend
-
-8. As the last change, we need to change 2 parameters in the parameters to tell ClientInspector to only make schema changes when run from the reference machine
+6. As the last change, we need to change 2 parameters in the parameters to tell ClientInspector to only make schema changes when running from the reference machine.
 ```js
 $AzLogDcrTableCreateFromReferenceMachine    = @("<<MyReferenceMachineComputerName>>")   # sample @("ComputerName")
 $AzLogDcrTableCreateFromAnyMachine          = $false    # important so changes can only happen on reference machine
 ```
-9. You are now ready to deploy it to your test group
+7. You are now ready to deploy it to your test group
 
 </details>
 
-3. Setup deployment job to let ClientInspector run every day to collect the inventory. You can run the ClientInspector script using your favorite deployment tool. Scripts for Microsoft Intune and ConfigMgr (or any other tool running a CMD-file) are provided. 
+3. Setup deployment job to let ClientInspector run every day to collect the inventory. You can run the ClientInspector script using your favorite deployment tool. Scripts for Microsoft Intune and ConfigMgr are provided. 
 <details>
   <summary>How to deploy using Microsoft Intune ?</summary>
 
 <br>
-  You will run the inventory script using the method remediation script in Microsoft Intune.
+  You will run the inventory script using 'proactive remediations' in Microsoft Intune.
   
 1. [Download the detection script ClientInspector_Detection.ps1](https://raw.githubusercontent.com/KnudsenMorten/ClientInspectorV2/main/Intune/ClientInspector_Detection.ps1)
 
@@ -527,6 +524,11 @@ NOTE: For remediation script, use the **ClientInspector.ps1** file
 
 ![Flow](img/Intune-remediation-5.png)
 
+NOTE:
+Intune has a limitation of 200 Kb for a remediation script. In case you reach this, I propose to split the script into 2 scripts.
+
+Remember to include the header-section including UserLoggedOn section as header of the second file. UserLoggedOn is used to show which user is logged on.
+
 </details>
 
 
@@ -534,7 +536,7 @@ NOTE: For remediation script, use the **ClientInspector.ps1** file
   <summary>How to deploy using ConfigMgr (or any other tool running a CMD-file) ?</summary>
   
 <br>
-You will run the inventory script by a traditional package / deployment
+You will run the inventory script by a traditional package + deployment
     
 1. [Download the CMD-file ClientInspector.cmd](https://raw.githubusercontent.com/KnudsenMorten/ClientInspectorV2/ConfigMgr/ClientInspector.cmd)
 
