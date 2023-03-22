@@ -9,6 +9,7 @@ ClientInspector is **free** to the community - built to be a **cool showcase** o
 
 ![Overview](docs/OverviewV2.png)
 
+### Sample Dashboards
 ![KPIs](img/KPI-Dashboard.png)
 
 ![Antivirus](img/Sample-Bitlocker-2.png)
