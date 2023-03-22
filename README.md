@@ -501,7 +501,7 @@ You will run the inventory script by a traditional package / deployment
 
 4. Make a package - and point the package to run **ClientInspector.cmd**
 
-5. Make a deployment. NOTE: Make source to configure the deployment to download the package down to the client
+5. Make a deployment
 
 </details>
 
@@ -524,9 +524,11 @@ Core features of Powershell module **AzLogDcrIngestPS**:
 
 You can find more detailed information about the module using links below:
 
-[AzLogDcringestPS (Github)](https://github.com/KnudsenMorten/AzLogDcrIngestPS)
+[AzLogDcrIngestPS (Github)](https://github.com/KnudsenMorten/AzLogDcrIngestPS)
 
-[AzLogDcringestPS (Powershell Gallery)](https://www.powershellgallery.com/packages/AzLogDcrIngestPS)
+[AzLogDcrIngestPS (Powershell Gallery)](https://www.powershellgallery.com/packages/AzLogDcrIngestPS)
+
+[AzLogDcrIngestPSLogHub (Github)](https://github.com/KnudsenMorten/AzLogDcrIngestPSLogHub)
 
 <br>
 
@@ -1136,7 +1138,7 @@ RELATED LINKS
 <br>
 
 # Cost - How much does it cost to store these data ?
-Data from **5000** clients doing **daily** ClientInspector inventory will cost you approx **USD 100 per month**
+Data from **500** clients doing **daily** ClientInspector inventory will cost you approx **DKK 200 per month / USD 27 per month**
 
 <br>
 
