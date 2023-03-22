@@ -753,7 +753,7 @@ Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $D
 ```
 
 
-## step 4/4 - Data Out (send to LogAnalytics) - detailed functions - "under the hood"
+## 4/4 (detailed, "under the hood") - Data Out (send to LogAnalytics)
 ```
 #-----------------------------------------------------------------------------------------------
 # Check if table and DCR exist - or schema must be updated due to source object schema changes
