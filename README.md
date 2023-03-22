@@ -142,7 +142,7 @@ Initially, you will have access to Azure Dashboards installed by the [ClientInSp
 
 The idea of the dashboards is that they will show where your infrastucture is drifting from best practice. Think of them as KPIs, where we might not be in control.
 
-![Oerview](docs/overview.png)
+![Overview](docs/overview.png)
 
 Instead of having a task with patching and managing antivirus, we will have KPIs, which will show, where computers are **not** patched - or where realtime protection in anvirus is **not** running - or machines which **has bluescreened** during the last 24 hours.
 
