@@ -386,16 +386,11 @@ Both the DCR and LogAnalytics table has a schema, which needs to be matching the
 ## Networking
 You have 3 options for connectivity to Azure for data upload: 
 
-**Internet-connected endpoints - OS-level compliance**  
-1) REST endpoint sends to DCE via public IP of DCE (public access)
-2) REST endpoint sends to DCE via private link of DCE (private access)
-
-Endpoint must be running minimum TLS 1.2
-
-**No Internet access or OS-level incompliance (running TLS 1.0/1.1)**  
-3) REST endpoint sends data via [log-hub](https://github.com/KnudsenMorten/AzLogDcrIngestPSLogHub) - a concept I have built. 
-
-This is for endpoints running older versions of TLS: TLS 1.0/1.1. Azure will not accept connectivity from these devices directly.
+|Upload method|Connectivity Details|OS compliance|
+|:------------|:-------------------|:------------|
+|Public access|REST endpoint sends to DCE via public IP of DCE|Endpoint supports TLS 1.2|
+|Private access|REST endpoint sends to DCE via private link of DCE|Endpoint supports TLS 1.2|
+|Log-hub|REST endpoint sends data via [log-hub](https://github.com/KnudsenMorten/AzLogDcrIngestPSLogHub) - a concept I have built.|Endpoint doesn't support TLS 1.2. Azure will not accept connectivity from these devices directly|
 
 ### Internet-connected endpoints - OS-level compliance
 ![Internet-connected endpoints - OS-level compliance](docs/Networking.png)
