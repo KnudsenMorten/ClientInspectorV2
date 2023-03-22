@@ -215,9 +215,7 @@ All of the sample Azure Dashboards are created based on pinned parts from Azure 
 [Link to see the provided Azure Dashboards](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-dashboards-part-of-deployment)
 
 ## Can I make my own workbooks & dashboards - yes, you can :smile:
-If you want to add more views (or workbooks), you can start by investigating the collected data in the custom logs tables using KQL quries. 
-
-Then make your new views in the workbooks - and pin your favorites to your dashboards.
+If you want to add more dashboards or workbooks, you will typically start by investigating the collected data in the custom logs tables using KQL quries. When you have found the desired query, you can make new views in workbooks - and pin your favorites to your dashboards.
 
 <br>
 
