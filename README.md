@@ -409,9 +409,10 @@ You need to allow the following endpoints in your firewall:
 <br>
 
 ### No Internet access or OS-level incompliance fx. running TLS 1.0/1.1
+[Check out the log-hub concept using this link](https://github.com/KnudsenMorten/AzLogDcrIngestPSLogHub)
+
 ![No Internet access or OS-level incompliance fx. running TLS 1.0/1.1](docs/Loghub.png)
 
-[Check out the log-hub concept](https://github.com/KnudsenMorten/AzLogDcrIngestPSLogHub)
 
 
 <br>
