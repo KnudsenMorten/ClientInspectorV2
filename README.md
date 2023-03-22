@@ -743,7 +743,7 @@ Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $D
 <br>
 
 **TIP:  error 513 - entity is too large**  
-By default ClientInspector will send the data in batches depending on an calculated average size per record. In case your data is of different size, you might receive an error 513. In this case you are hitting the limitation of 1 mb for each upload (Azure Pipeline limitation). 
+By default ClientInspector will send the data in batches depending on an calculated average size per record. In case your recodset is of different size, you might receive an error 513. In this case you are hitting the limitation of 1 mb for each upload (Azure Pipeline limitation). I have seen this issue when retrieving the list of all installed applications. Apparently the applications are storing information of very different degree of information.
 
 You can mitigate this issue, by adding the parameter BatchAmount to the Post-command. If you want to be sure, set it to 1
 
