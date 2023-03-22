@@ -7,13 +7,14 @@ Check out **ClientInspector**, which can help you get **great insight** to your 
 
 ClientInspector is **free** to the community - built to be a **cool showcase** of how you can bring back **data** from your clients using **Azure Log Ingestion Pipeline**, **Azure Data Collection Rules**, **Azure LogAnalytics**; view them with **Azure Monitor & Azure Dashboards** - and get "drift-alerts" using **Microsoft Sentinel**.
 
+![Overview](docs/OverviewV2.png)
+
 ![KPIs](img/KPI-Dashboard.png)
 
 ![Antivirus](img/Sample-Bitlocker-2.png)
 
 ![Bluescreens](img/Sample-Bluescreens.png)
 
-![Overview](docs/OverviewV2.png)
 
 
 #### Disclaimer
