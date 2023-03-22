@@ -696,7 +696,7 @@ Write-Output "Collecting Computer system information ... Please Wait !"
 $DataVariable = Get-CimInstance -ClassName Win32_ComputerSystem
 ```
 
-## step 3/4 - Data Manipulation (ensure data is in correct format and any "noice" was removed and relevant information has been added)
+## step 3/4 - Data Manipulation (ensure data is in correct format and any "noice" is removed and relevant information is added)
 ```
 #-------------------------------------------------------------------------------------------
 # Preparing data structure
@@ -815,6 +815,12 @@ Post-AzLogAnalyticsLogIngestCustomLogDcrDce -DceUri $AzDcrDceDetails[2] `
 If you want to get more detailed information about that is happening, you can enable verbose mode (-verbose:$true)
 ```
 .\ClientInspector.ps1 -verbose:$true -function:localpath
+
+```
+
+If you prefer to test using Powershell ISE, you can also enable verbose-mode using the variable $Verbose
+```
+$Verbose                                    = $false # can be $true or $false
 
 ```
 
