@@ -28,9 +28,9 @@ It is important for me to state that I'm not trying to build a separate manageme
 
 Nothing beats Microsoft Azure/M365 management and security stack. They are rock star solutions. 
 
-But I'm really **passioned** about the **logging capabilities** and the power of being able to data back from clients, servers and cloud - and getting **cool valueable information out of the data**.
+But I'm really **passioned** about the **logging capabilities** and the power **to bring data back from clients, servers, cloud and 3rd party systems** - and getting **cool valueable information out of the data**.
 
-I have a similar solution for Servers; **ServerInspector**. Unfortunately, it is not public.
+I have a similar solution for **servers** - **ServerInspector**. Unfortunately, it is not public.
 
 [Big Thanks to the great people in Microsoft product teams - you are rock stars :smile:](#thank-you-to-the-great-people-in-microsoft-product-teams---you-are-rock-stars-smile)
 
@@ -89,16 +89,19 @@ The script collects the following information (settings, information, configurat
 18. TPM information - relavant to detect machines with/without TPM
 
 Feel free to add more cool data-collections to suit your needs. 
-If you want to take part in the community, please send me your collections, if you think they can be of great great value to others.
-
-Drop me an email on mok@mortenknudsen.net with your code, then I will include it - for the benefit of the whole community.
+If you want to take part in the community, please send me an email with your collections, if you think they can be of benefit of the whole community.
 
 <br>
 
 # Source data - what data can I use ?
-You can use **any source data** which can be retrieved by Powershell into an object (wmi, cim, external data, rest api, xml-format, json-format, csv-format, etc.)
+You can use **any source data** which can be retrieved into Powershell (wmi, cim, external data, rest api, xml-format, json-format, csv-format, etc.)
 
-ClientInspector uses several the 24 functions within the Powershell module, **AzLogDcIngestPS**, to handle source data manipulation to **remove "noice" in data**, to **rename prohibited colums in tables/DCR** - and support needs for **transparency** with extra insight like **UserLoggedOn**, **CollectionTime**, **Computer**:
+It is very important to understand, that the data typically needs to be manipulated before sending them - to ensure they are valid and any irrelevant data has been removed.
+
+ClientInspector uses all of the 24 functions within the Powershell module, **AzLogDcIngestPS**, to handle source data manipulation to **remove "noice" in data**, to **rename prohibited colums in tables/DCR** - and support needs for **transparency** with extra insight like **UserLoggedOn**, **CollectionTime**, **Computer**:
+
+Check out the usage in each of the samples.
+
 
 <details>
   <summary>Examples of how to use functions Convert-CimArrayToObjectFixStructure, Add-CollectionTimeToAllEntriesInArray, Add-ColumnDataToAllEntriesInArray, ValidateFix-AzLogAnalyticsTableSchemaColumnNames, Build-DataArrayToAlignWithSchema, Filter-ObjectExcludeProperty</summary>
@@ -148,11 +151,14 @@ Get-ObjectSchemaAsArray -Data $DataVariable -Verbose:$Verbose
 <br>
 
 # Desired State Dashboards - How to get insight of my environment from the data ?
-Initially, you will have access to Azure Dashboards installed by the [ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit)
+As part of the initial deployment using [ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit), you will have access to lots of Azure Dashboards and Azure Workbooks. 
 
-The idea of the dashboards is that they will show where your infrastucture is drifting from best practice. Think of them as KPIs, where we might not be in control.
+The idea of the dashboards is that they will show where your infrastucture is drifting from 'desired state'. Think of them as KPIs, where the infrastructure is not in control.
 
-Instead of having a task with patching and managing antivirus, we will have KPIs, which will show, where computers are **not** patched - or where realtime protection in anvirus is **not** running - or machines which **has bluescreened** during the last 24 hours.
+Instead of having a task with patching and managing antivirus, you can consider to have KPIs, which will show, where computers are **not** patched - or where realtime protection in anvirus is **not** running - or machines which **has bluescreened** during the last 24 hours.
+
+This is the same concept as **Microsoft Secure Score**.
+
 
 ![Antivirus](img/Sample-Bitlocker-2.png)
 
