@@ -558,7 +558,7 @@ You will run the inventory script by a traditional package + deployment
 
 ClientInspector requires the Powershell module, **AzLogDcrIngestPS**
 
-Core features of Powershell module **AzLogDcrIngestPS**:
+Core features of the Powershell module **AzLogDcrIngestPS** includes:
 * create/update the DCRs and tables automatically - based on the source object schema
 * validate the schema for naming convention issues. If exist found, it will mitigate the issues
 * update schema of DCRs and tables, if the structure of the source object changes
@@ -567,7 +567,7 @@ Core features of Powershell module **AzLogDcrIngestPS**:
 * can convert source objects based on CIM or PS objects into PSCustomObjects/array
 * can add relevant information to each record like UserLoggedOn, Computer, CollectionTime
 
-You can find more detailed information about the module using links below:
+You can find more detailed information about the module using the links below:
 
 [AzLogDcrIngestPS (Github)](https://github.com/KnudsenMorten/AzLogDcrIngestPS)
 
@@ -578,6 +578,8 @@ You can find more detailed information about the module using links below:
 <br>
 
 ## 3rd party Powershell modules
+To retrieve Windows Update informations, I'm using a well-known Powershell module, PSWindowsUpdate.
+
 |ModuleName|Purpose|More info|Credit|
 |:---------|:------|:--------|:-----|
 |NuGet|Common Package provider used to deploy many Powershell modules<br><br>Package Provider will automatically be installed on computer when script runs|[Link](https://www.nuget.org/packages|
