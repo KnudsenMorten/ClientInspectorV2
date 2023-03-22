@@ -208,7 +208,7 @@ This is the same concept as **Microsoft Secure Score**.
 
 [Link to see the complete list of provided Azure Workbooks](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit#azure-workbooks-part-of-deployment)
 
-When deployed by ClientInspectorV2-DeploymentKit, you will have access to sample Azure Dashboards to get you started. They are created based on pinned parts from Azure Workbooks, so if you want to drill down, you can click on a link and will get access to the detailed information.
+Al of the sample Azure Dashboards are created based on pinned parts from Azure Workbooks, so if you want to drill down, you can click on a link and will get access to the detailed information.
 
 ![Dashboards](img/Dashboards-screen.jpg)
 
