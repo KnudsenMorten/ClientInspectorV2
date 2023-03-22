@@ -957,7 +957,7 @@ Else
                 # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
                 #-----------------------------------------------------------------------------------------------
 
-                    $ResultPost = Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                    $ResultPost = Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName -BatchAmount 1 `
                                                                                      -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 
             
@@ -1639,27 +1639,47 @@ Else
             $VPNSoftware = ""
             $VPNVersion = ""
 
-        # Checking
             ForEach ($Application in $InstalledApplications)
                 {
-                    #-----------------------------------------
-                    # Looking for Cisco AnyConnect
-                    #-----------------------------------------
-                    If ( ($Application.Vendor -like 'Cisco*') -and ($Application.name -like "*AnyConnect*") )
-                        {
-                            $VPNSoftware = $Application.Name
-                            $VPNVersion = $Application.Version
-                        }
 
-                    #-----------------------------------------
-                    # Looking for Palo Alto
-                    #-----------------------------------------
-                    If ( ($Application.Vendor -like 'Palo Alto*') -and ($Application.name -like "*Global*") )
+                    Try
                         {
-                            $VPNSoftware = $Application.Name
-                            $VPNVersion = $Application.Version
+                            #-----------------------------------------
+                            # Looking for Palo Alto
+                            #-----------------------------------------
+                                If ( ($Application.Vendor -like 'Palo Alto*') -and ($Application.name -like "*Global*") )
+                                    {
+                                        $VPNSoftware = $Application.Name
+                                        $VPNVersion = $Application.Version
+                                    }
+
+                                ElseIf ( ($Application.Publisher -like 'Palo Alto*') -and ($Application.name -like "*Global*") )
+                                    {
+                                        $VPNSoftware = $Application.DisplayName
+                                        $VPNVersion = $Application.DisplayVersion
+                                    }
+
+                            #-----------------------------------------
+                            # Looking for Cisco AnyConnect
+                            #-----------------------------------------
+                                If ( ($Application.Vendor -like 'Cisco*') -and ($Application.name -like "*AnyConnect*") )
+                                    {
+                                        $VPNSoftware = $Application.Name
+                                        $VPNVersion = $Application.Version
+                                    }
+
+                                ElseIf ( ($Application.Publisher -like 'Cisco*') -and ($Application.name -like "*AnyConnect*") )
+                                    {
+                                        $VPNSoftware = $Application.DisplayName
+                                        $VPNVersion = $Application.DisplayVersion
+                                    }
+
+                        }
+                    Catch
+                        {
                         }
                 }
+
 
     #-------------------------------------------------------------------------------------------
     # Preparing data structure
@@ -1739,20 +1759,22 @@ Else
 
                     Try
                         {
-                            If ( ($Application.Vendor -like 'Microsoft*') -and ($Application.name -like "*Local Administrator Password*") )
+                            If ( ($Application.name -like "*Local Administrator Password*") )
                                 {
                                     $LAPSSoftware = $Application.Name
                                     $LAPSVersion = $Application.Version
                                 }
+
+                            # use alternative name on servers
+                            ElseIf ( ($Application.DisplayName -like "*Local Administrator Password*") )
+                                {
+                                    $LAPSSoftware = $Application.DisplayName
+                                    $LAPSVersion = $Application.DisplayVersion
+                                }
+
                         }
                     Catch
                         {
-                            # use alternative name on servers
-                            If ( ($Application.Publisher -like 'Microsoft*') -and ($Application.DisplayName -like "*Local Administrator Password*") )
-                                {
-                                    $LAPSSoftware = $Application.Publisher
-                                    $LAPSVersion = $Application.Displayname
-                                }
                         }
                 }
 
@@ -1825,17 +1847,31 @@ Else
         $ABRSoftware = ""
         $ABRVersion = ""
 
-        ForEach ($Application in $InstalledApplications)
-            {
-                #-----------------------------------------
-                # Looking for Admin By Request
-                #-----------------------------------------
-                If ( ($Application.Vendor -like 'FastTrack*') -and ($Application.name -like "*Admin By Request*") )
-                    {
-                        $ABRSoftware = $Application.Name
-                        $ABRVersion = $Application.Version
-                    }
-            }
+        # Checking
+            ForEach ($Application in $InstalledApplications)
+                {
+
+                    Try
+                        {
+                            If ( ($Application.name -like "*Admin By Request*") )
+                                {
+                                    $ABRSoftware = $Application.Name
+                                    $ABRVersion = $Application.Version
+                                }
+
+                            # use alternative name on servers
+                            ElseIf ( ($Application.DisplayName -like "*Admin By Request*") )
+                                {
+                                    $ABRSoftware = $Application.DisplayName
+                                    $ABRVersion = $Application.DisplayVersion
+                                }
+
+                        }
+                    Catch
+                        {
+                        }
+                }
+
 
     #-------------------------------------------------------------------------------------------
     # Preparing data structure
