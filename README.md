@@ -578,7 +578,7 @@ You can find more detailed information about the module using the links below:
 <br>
 
 ## 3rd party Powershell modules
-To retrieve Windows Update informations, I'm using a well-known Powershell module, PSWindowsUpdate.
+I prefer to retrieve Windows Update information using a well-known Powershell module, PSWindowsUpdate.
 
 |ModuleName|Purpose|More info|Credit|
 |:---------|:------|:--------|:-----|
