@@ -673,7 +673,7 @@ The security of **ClientInspector** are divided into 4 layers: **data-in**, **da
 # Layout of ClientInspector data-set
 Each of the data-sets (bios, applications, bitlocker, etc.) are built with the same 4-phased structure:
 
-## step 1/4 - Variables (naming - where to send the data)
+## 1/4 - Variables (naming - where to send the data)
 ```
 #-------------------------------------------------------------------------------------------
 # Variables
@@ -684,7 +684,7 @@ $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
 ```
 
 
-## step 2/4 - Data Collection
+## 2/4 - Data Collection
 ```
 #-------------------------------------------------------------------------------------------
 # Collecting data (in)
@@ -696,7 +696,7 @@ Write-Output "Collecting Computer system information ... Please Wait !"
 $DataVariable = Get-CimInstance -ClassName Win32_ComputerSystem
 ```
 
-## step 3/4 - Data Manipulation (ensure data is in correct format and any "noice" is removed and relevant information is added)
+## 3/4 - Data Manipulation (ensure data is in correct format and any "noice" is removed and relevant information is added)
 ```
 #-------------------------------------------------------------------------------------------
 # Preparing data structure
@@ -718,7 +718,7 @@ $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVari
 $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
 ```
 
-## step 4/4 - Data Out (send to LogAnalytics) - combined functions
+## 4/4 - Data Out (send to LogAnalytics) - combined functions
 ```
 #-------------------------------------------------------------------------------------------
 # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
@@ -739,6 +739,17 @@ CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWork
 Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
                                                    -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
 ```
+
+TIP:  error 513 - entity is too large
+By default ClientInspector will send the data in batches depending on an calculated average size per record. In case your data is of different size, you might receive an error 513. In this case you are hitting the limitation of 1 mb for each upload (Azure Pipeline limitation). 
+
+You can mitigate this issue, by adding the parameter BatchAmount to the Post-command. If you want to be sure, set it to 1
+
+```
+Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName -BatchAmount 1 `
+                                                   -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
+```
+
 
 ## step 4/4 - Data Out (send to LogAnalytics) - detailed functions - "under the hood"
 ```
@@ -820,7 +831,7 @@ If you want to get more detailed information about that is happening, you can en
 
 If you prefer to test using Powershell ISE, you can also enable verbose-mode using the variable $Verbose
 ```
-$Verbose                                    = $false # can be $true or $false
+$Verbose = $false # can be $true or $false
 
 ```
 
