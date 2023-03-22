@@ -13,6 +13,9 @@ ClientInspector is **free** to the community - built to be a **cool showcase** o
 
 ![Bluescreens](img/Sample-Bluescreens.png)
 
+![Overview](docs/OverviewV2.png)
+
+
 #### Disclaimer
 It is important for me to state that I'm not trying to build a separate management tool, which will compete with Microsoft security and management stack. 
 
@@ -141,8 +144,6 @@ Get-ObjectSchemaAsArray -Data $DataVariable -Verbose:$Verbose
 Initially, you will have access to Azure Dashboards installed by the [ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit)
 
 The idea of the dashboards is that they will show where your infrastucture is drifting from best practice. Think of them as KPIs, where we might not be in control.
-
-![Overview](docs/OverviewV2.png)
 
 Instead of having a task with patching and managing antivirus, we will have KPIs, which will show, where computers are **not** patched - or where realtime protection in anvirus is **not** running - or machines which **has bluescreened** during the last 24 hours.
 
