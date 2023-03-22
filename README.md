@@ -390,7 +390,7 @@ You have 3 options for connectivity to Azure for data upload:
 |:------------|:-------------------|:------------|
 |Public access|REST endpoint sends to DCE via public IP of DCE|Endpoint supports TLS 1.2|
 |Private access|REST endpoint sends to DCE via private link of DCE|Endpoint supports TLS 1.2|
-|Log-hub|REST endpoint sends data via [log-hub](https://github.com/KnudsenMorten/AzLogDcrIngestPSLogHub) - a concept I have built.|Endpoint doesn't support TLS 1.2. Azure will not accept connectivity from these devices directly|
+|Log-hub|REST endpoint sends data via [log-hub](https://github.com/KnudsenMorten/AzLogDcrIngestPSLogHub) - a concept I have built.|Endpoint doesn't support TLS 1.2.<br> Azure will not accept connectivity from these devices directly|
 
 ### Internet-connected endpoints - OS-level compliance
 ![Internet-connected endpoints - OS-level compliance](docs/Networking.png)
