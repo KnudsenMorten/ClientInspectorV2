@@ -54,16 +54,18 @@ Happy hunting :smile:
 [Layout of ClientInspector data-set](#layout-of-clientinspector-data-set)  
 [Verbose-mode & More help](#verbose-mode--more-help)  
 [Cost - How much does it cost to store these data ?](#cost---how-much-does-it-cost-to-store-these-data-)  
-[Video - Running ClientInspector using commandline (normal mode)](https://youtu.be/BericD4pT0Q)  
-[Video - Automatic creation of 2 tables & DCRs (verbose mode)](https://youtu.be/rIUNs3yT-eI)  
-[Video - Automatic creation of 2 tables & DCRs (normal mode)](https://youtu.be/khQMDcON6r8)  
-[Video - See schema of DCR and table)](https://youtu.be/NDSNhvpa4Gs)  
-[Video - Data manipulation](https://youtu.be/OZWj7xZHLI8)  
-[Video - Kusto queries against data](https://youtu.be/_GlI0h7ZOsg)  
-[Video - Dashboards](https://youtu.be/0MKPgzvDNRk)  
-[Video - Sample usage of data - lookup against Lenovo warranty db](https://youtu.be/3ZDyTwiLU0w)  
-[Video - Deployment via ClientInspector DeploymentKit](https://youtu.be/_RNlSqRcetg)  
 [Contact](#contact)
+
+# Videos of solution
+[Video 3m 19s - Running ClientInspector using commandline (normal mode)](https://youtu.be/BericD4pT0Q)  
+[Video 1m 40s - Automatic creation of 2 tables & DCRs (verbose mode)](https://youtu.be/rIUNs3yT-eI)  
+[Video 1m 37s - Automatic creation of 2 tables & DCRs (normal mode)](https://youtu.be/khQMDcON6r8)  
+[Video 1m 34s - See schema of DCR and table)](https://youtu.be/NDSNhvpa4Gs)  
+[Video 2m 19s - Data manipulation](https://youtu.be/OZWj7xZHLI8)  
+[Video 1m 58s - Kusto queries against data](https://youtu.be/_GlI0h7ZOsg)  
+[Video 3m 01s - Dashboards](https://youtu.be/0MKPgzvDNRk)  
+[Video 9m 48s - Sample usage of data - lookup against Lenovo warranty db](https://youtu.be/3ZDyTwiLU0w)  
+[Video 7m 25s - Deployment via ClientInspector DeploymentKit](https://youtu.be/_RNlSqRcetg)  
 
 <br>
 
