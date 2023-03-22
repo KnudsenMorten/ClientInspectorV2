@@ -673,7 +673,7 @@ The security of **ClientInspector** are divided into 4 layers: **data-in**, **da
 # Layout of ClientInspector data-set
 Each of the data-sets (bios, applications, bitlocker, etc.) are built with the same 4-phased structure:
 
-## 1/4 - Variables (naming - where to send the data)
+## Phase 1/4 - Variables (naming - where to send the data)
 ```
 #-------------------------------------------------------------------------------------------
 # Variables
@@ -684,7 +684,7 @@ $DcrName    = "dcr-" + $AzDcrPrefixClient + "-" + $TableName + "_CL"
 ```
 
 
-## 2/4 - Data Collection
+## Phase 2/4 - Data Collection
 ```
 #-------------------------------------------------------------------------------------------
 # Collecting data (in)
@@ -696,7 +696,7 @@ Write-Output "Collecting Computer system information ... Please Wait !"
 $DataVariable = Get-CimInstance -ClassName Win32_ComputerSystem
 ```
 
-## 3/4 - Data Manipulation (ensure data is in correct format and any "noice" is removed and relevant information is added)
+## Phase 3/4 - Data Manipulation (ensure data is in correct format and any "noice" is removed and relevant information is added)
 ```
 #-------------------------------------------------------------------------------------------
 # Preparing data structure
@@ -718,7 +718,7 @@ $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVari
 $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
 ```
 
-## 4/4 - Data Out (send to LogAnalytics) - combined functions
+## Phase 4/4 - Data Out (send to LogAnalytics) - combined functions
 ```
 #-------------------------------------------------------------------------------------------
 # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
@@ -762,7 +762,7 @@ Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName `
 ```
 
 
-## 4/4 (detailed, "under the hood") - Data Out (send to LogAnalytics)
+## Phase 4/4 "under the hood" - Data Out (send to LogAnalytics)
 ```
 #-----------------------------------------------------------------------------------------------
 # Check if table and DCR exist - or schema must be updated due to source object schema changes
