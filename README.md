@@ -9,6 +9,11 @@ ClientInspector is **free** to the community - built to be a **cool showcase** o
 
 ![Overview](docs/OverviewV2.png)
 
+### Archicture & flow of ClientInspector
+ClientInspector (v2) is uploading the collected data into **custom logs** in **Azure LogAnalytics workspace** - using **Log ingestion API**, **Azure Data Collection Rules (DCR)** and **Azure Data Collection Endpoints (DCE)**. 
+
+![Archicture](docs/ArchitectureV2.png)
+
 ### Sample Dashboards
 ![KPIs](img/KPI-Dashboard.png)
 
