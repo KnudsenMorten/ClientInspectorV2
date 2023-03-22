@@ -653,7 +653,7 @@ OK - Running latest version
 
 <br>
 
-# Sample output of ClientInspector
+## Sample output of ClientInspector
 
 <details>
   <summary>Normal mode - .\ClientInspector -function:download -verbose:$false</summary>
