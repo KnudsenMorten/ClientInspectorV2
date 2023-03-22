@@ -355,7 +355,7 @@ Here is an example of output, which was auto-created by a powershell script - ex
 # Archicture & flow of ClientInspector
 ClientInspector (v2) is uploading the collected data into **custom logs** in **Azure LogAnalytics workspace** - using **Log ingestion API**, **Azure Data Collection Rules (DCR)** and **Azure Data Collection Endpoints (DCE)**. 
 
-![Archicture](docs/Architecture.png)
+![Archicture](docs/ArchitectureV2.png)
 
 # Networking
 You have 2 options for connectivity to Azure for data upload: **public access** or **private access**
