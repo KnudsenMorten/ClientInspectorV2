@@ -582,7 +582,7 @@ To retrieve Windows Update informations, I'm using a well-known Powershell modul
 
 |ModuleName|Purpose|More info|Credit|
 |:---------|:------|:--------|:-----|
-|NuGet|Common Package provider used to deploy many Powershell modules<br><br>Package Provider will automatically be installed on computer when script runs|[Link](https://www.nuget.org/packages |
+|NuGet|Common Package provider used to deploy many Powershell modules<br><br>Package Provider will automatically be installed on computer when script runs|[Link](https://www.nuget.org/packages)|
 |PSWindowsUpdate|Collection of Windows Update information (pending updates, installed updates, etc.)<br><br>Module will automatically be installed on computer when script runs|[Link](https://www.powershellgallery.com/packages/PSWindowsUpdate)|Michal Gajda
 
 <br>
