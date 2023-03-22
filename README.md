@@ -400,15 +400,16 @@ This is for endpoints running older versions of TLS: TLS 1.0/1.1. Azure will not
 ### Internet-connected endpoints - OS-level compliance
 ![Internet-connected endpoints - OS-level compliance](docs/Networking.png)
 
-### No Internet access or OS-level incompliance fx. running TLS 1.0/1.1
-![No Internet access or OS-level incompliance fx. running TLS 1.0/1.1](docs/Loghub.png)
-
-
 You need to allow the following endpoints in your firewall:
 |Endpoint|Purpose|Port|Direction|Bypass HTTPS Inspection|
 |:-------|:------|:----|:-------|:----------------------|
 |global.handler.control.monitor.azure.com|Access control service|Port 443|Outbound|Yes|
 |dce logs ingestion uri<br><br>sample<br>https://dce-log-platform-management-client-demo-p-iur0.westeurope-1.ingest.monitor.azure.com|Ingest logs data|Port 443|Outbound|Yes|
+
+
+### No Internet access or OS-level incompliance fx. running TLS 1.0/1.1
+![No Internet access or OS-level incompliance fx. running TLS 1.0/1.1](docs/Loghub.png)
+
 
 <br>
 
