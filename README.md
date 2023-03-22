@@ -7,7 +7,6 @@ Check out **ClientInspector**, which can help you get **great insight** to your 
 
 ClientInspector is **free** to the community - built to be a **cool showcase** of how you can bring back **data** from your clients using **Azure Log Ingestion Pipeline**, **Azure Data Collection Rules**, **Azure LogAnalytics**; view them with **Azure Monitor & Azure Dashboards** - and get "drift-alerts" using **Microsoft Sentinel**.
 
-[Video - Running ClientInspector using commandline (normal mode)](https://youtu.be/BericD4pT0Q)  
 [Video - Dashboards](https://youtu.be/0MKPgzvDNRk) 
 
 ![Overview](docs/OverviewV2.png)
@@ -583,7 +582,7 @@ To retrieve Windows Update informations, I'm using a well-known Powershell modul
 
 |ModuleName|Purpose|More info|Credit|
 |:---------|:------|:--------|:-----|
-|NuGet|Common Package provider used to deploy many Powershell modules<br><br>Package Provider will automatically be installed on computer when script runs|[Link](https://www.nuget.org/packages|
+|NuGet|Common Package provider used to deploy many Powershell modules<br><br>Package Provider will automatically be installed on computer when script runs|[Link](https://www.nuget.org/packages |
 |PSWindowsUpdate|Collection of Windows Update information (pending updates, installed updates, etc.)<br><br>Module will automatically be installed on computer when script runs|[Link](https://www.powershellgallery.com/packages/PSWindowsUpdate)|Michal Gajda
 
 <br>
