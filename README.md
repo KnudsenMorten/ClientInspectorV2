@@ -45,7 +45,7 @@ Happy hunting :smile:
 [What data is being collected ?](#what-data-is-being-collected-)  
 [Desired State Dashboards - How to get insight of my environment from the data ?](#desired-state-dashboards---how-to-get-insight-of-my-environment-from-the-data-)  
 [How do I query the data? - Kusto (KQL) is the answer](#how-do-i-query-the-data---kusto-kql-is-the-answer)  
-[Archicture & flow of ClientInspector](#archicture--flow-of-clientinspector)  
+[Archicture & flow of ClientInspector](#archicture-schema--networking)  
 [Networking](#networking)  
 [Implementation](#implementation)  
 [Dependencies](#dependencies)  
