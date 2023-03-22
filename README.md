@@ -418,10 +418,9 @@ You need to allow the following endpoints in your firewall:
 <br>
 
 # Implementation
-Hopefully you will experience, that it is pretty easy to get everything up and running.
+Hopefully you will experience, that it is pretty easy to get everything up and running. The steps are outlined below.
 
-The steps are outlined below.
-Below getting started, I urge you to read in more detail about the components.
+Before getting started, I urge you to read in more detail about the components in the intro below.
 
 <details>
   <summary>Intro of the Azure components used as part of ClientInspector</summary>
