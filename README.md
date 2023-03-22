@@ -377,7 +377,7 @@ ClientInspector (v2) is uploading the collected data into **custom logs** in **A
 ![Archicture](docs/ArchitectureV2.png)
 
 ## Schema
-Both the DCR and LogAnalytics table has a schema, which needs to be matching the schema of the source object. This is handled by using functions in AzLogDcrIngestPS module.
+Both the DCR and LogAnalytics table has a schema, which needs to match the schema of the source object. This is handled by using functions in AzLogDcrIngestPS module.
 
 [Video 1m 40s - Automatic creation of 2 tables & DCRs (verbose mode)](https://youtu.be/rIUNs3yT-eI)  
 [Video 1m 37s - Automatic creation of 2 tables & DCRs (normal mode)](https://youtu.be/khQMDcON6r8)  
@@ -407,8 +407,6 @@ You need to allow the following endpoints in your firewall:
 [Check out the log-hub concept using this link](https://github.com/KnudsenMorten/AzLogDcrIngestPSLogHub)
 
 ![No Internet access or OS-level incompliance fx. running TLS 1.0/1.1](docs/Loghub.png)
-
-
 
 <br>
 
