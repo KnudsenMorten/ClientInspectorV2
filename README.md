@@ -16,7 +16,7 @@ ClientInspector is **free** to the community - built to be a **cool showcase** o
 #### Disclaimer
 It is important for me to state that I'm not trying to build a separate management tool, which will compete with Microsoft security and management stack. 
 
-Nothing beats Microsoft Azure and M365 management and security stack. They are rock star solutions. 
+Nothing beats Microsoft Azure/M365 management and security stack. They are rock star solutions. 
 
 But I'm really **passioned** about the **logging capabilities** and the power of being able to data back from clients, servers and cloud - and getting **cool valueable information out of the data**.
 
@@ -81,14 +81,14 @@ The script collects the following information (settings, information, configurat
 Feel free to add more cool data-collections to suit your needs. 
 If you want to take part in the community, please send me your collections, if you think they can be of great great value to others.
 
-Drop me an email on mok @ mortenknudsen.net with your code, then I will include it - for the benefit of the whole community.
+Drop me an email on mok@mortenknudsen.net with your code, then I will include it - for the benefit of the whole community.
 
 <br>
 
 # Source data - what data can I use ?
 You can use **any source data** which can be retrieved by Powershell into an object (wmi, cim, external data, rest api, xml-format, json-format, csv-format, etc.)
 
-ClientInspector uses several functions within the Powershell module, **AzLogDcIngestPS**, to handle source data adjustsments to **remove "noice" in data**, to **remove prohibited colums in tables/DCR** - and support needs for **transparency** with extra insight like **UserLoggedOn**, **CollectionTime**, **Computer**:
+ClientInspector uses several the 24 functions within the Powershell module, **AzLogDcIngestPS**, to handle source data manipulation to **remove "noice" in data**, to **rename prohibited colums in tables/DCR** - and support needs for **transparency** with extra insight like **UserLoggedOn**, **CollectionTime**, **Computer**:
 
 <details>
   <summary>Examples of how to use functions Convert-CimArrayToObjectFixStructure, Add-CollectionTimeToAllEntriesInArray, Add-ColumnDataToAllEntriesInArray, ValidateFix-AzLogAnalyticsTableSchemaColumnNames, Build-DataArrayToAlignWithSchema, Filter-ObjectExcludeProperty</summary>
@@ -140,7 +140,8 @@ Get-ObjectSchemaAsArray -Data $DataVariable -Verbose:$Verbose
 # Desired State Dashboards - How to get insight of my environment from the data ?
 Initially, you will have access to Azure Dashboards installed by the [ClientInSpectorV2-DeploymentKit](https://github.com/KnudsenMorten/ClientInspectorV2-DeploymentKit)
 
-The idea of the dashboards are that they will show where your infrastucture if drifting from best practice. Think of them as KPIs, where we might not be in control.
+The idea of the dashboards is that they will show where your infrastucture is drifting from best practice. Think of them as KPIs, where we might not be in control.
+![Highlevel](img/Highlevel.png)
 
 Instead of having a task with patching and managing antivirus, we will have KPIs, which will show, where computers are **not** patched - or where realtime protection in anvirus is **not** running - or machines which **has bluescreened** during the last 24 hours.
 
