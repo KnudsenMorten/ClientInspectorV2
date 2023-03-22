@@ -1,5 +1,5 @@
 ﻿#Requires -RunAsAdministrator
-#Requires -Version 5.0
+#Requires -Version 5.1
 
 <#
     .NAME
