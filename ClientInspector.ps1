@@ -28,16 +28,7 @@
         (16)  Windows firewall - settings for all 3 modes
         (17)  Group Policy - last refresh
         (18)  TPM information - relavant to detect machines with/without TPM
-
-    Core features included:
-        - create/update the DCRs and tables automatically - based on the source object schema
-        - validate the schema for naming convention issues. If exist found, it will mitigate the issues
-        - update schema of DCRs and tables, if the structure of the source object changes
-        - auto-fix if something goes wrong with a DCR or table
-        - can remove data from the source object, if there are colums of data you don't want to send
-        - can convert source objects based on CIM or PS objects into PSCustomObjects/array
-        - can add relevant information to each record like UserLoggedOn, Computer, CollectionTime
-    
+  
     .AUTHOR
     Morten Knudsen, Microsoft MVP - https://mortenknudsen.net
 
