@@ -56,7 +56,7 @@ Happy hunting :smile:
 [Contact](#contact)
 
 # Videos of solution
-[Video 3m 19s - Running ClientInspector using commandline (normal mode)](https://youtu.be/BericD4pT0Q)  
+[Video 3m 19s - Running ClientInspector using commandline (normal mode)](https://youtu.be/4kA4BE0zJ9g)  
 [Video 1m 40s - Automatic creation of 2 tables & DCRs (verbose mode)](https://youtu.be/rIUNs3yT-eI)  
 [Video 1m 37s - Automatic creation of 2 tables & DCRs (normal mode)](https://youtu.be/khQMDcON6r8)  
 [Video 1m 34s - See schema of DCR and table)](https://youtu.be/NDSNhvpa4Gs)  
@@ -585,7 +585,7 @@ ClientInspector supports 3 ways to install/update/import the needed Powershell m
 
 By default, it will download latest version from PsGallery into CurrentUser scope.
 
-[Video 3m 19s - Running ClientInspector using commandline (normal mode)](https://youtu.be/BericD4pT0Q)  
+[Video 3m 19s - Running ClientInspector using commandline (normal mode)](https://youtu.be/4kA4BE0zJ9g)  
 
 ## .\ClientInspector.ps1 -function:LocalPath
 ClientInspector will look for **AzLogDcrIngest.psm1** file in the directory where the script will run from. 
@@ -649,7 +649,8 @@ OK - Running latest version
 <br>
 
 ## Sample output of ClientInspector
-[Video 3m 19s - Running ClientInspector using commandline (normal mode)](https://youtu.be/BericD4pT0Q)  
+[Video 3m 19s - Running ClientInspector using commandline (normal mode)](https://youtu.be/4kA4BE0zJ9g)  
+
 
 <br>
 
