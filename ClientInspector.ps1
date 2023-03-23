@@ -223,6 +223,7 @@ Else
                                             # No new version detected ... continuing !
                                             Write-Output "OK - Running latest version"
                                             $UpdateAvailable = $False
+                                            import-module -Name AzLogDcrIngestPS -Global -force -DisableNameChecking  -WarningAction SilentlyContinue
                                         }
                                 }
                 }
