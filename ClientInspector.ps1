@@ -132,6 +132,19 @@ Else
 # FUNCTIONS
 ############################################################################################################################################
 
+    $PowershellVersion  = [version]$PSVersionTable.PSVersion
+    If ([Version]$PowershellVersion -ge "5.1")
+        {
+            $PS_WMF_Compliant  = $true
+            $EnableUploadViaLogHub  = $false
+        }
+    Else
+        {
+            $PS_WMF_Compliant  = $false
+            $EnableUploadViaLogHub  = $true
+            Import-module "$($LogHubPsModulePath)\AzLogDcrIngestPS.psm1" -Global -force -DisableNameChecking  -WarningAction SilentlyContinue
+        }
+
     # directory where the script was started
     $ScriptDirectory = $PSScriptRoot
 
@@ -279,11 +292,8 @@ Else
     # Initial Powershell module check
     #-------------------------------------------------------------------------------------------------------------
 
-        Try
-            {
-                Import-Module -Name PSWindowsUpdate
-            }
-        Catch
+        $ModuleCheck = Get-Module -Name PSWindowsUpdate -ListAvailable -ErrorAction SilentlyContinue
+        If (!($ModuleCheck))
             {
                 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
