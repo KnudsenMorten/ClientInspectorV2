@@ -150,7 +150,7 @@ Else
 
     switch ($Function)
         {   
-            "Download"            # Typically used in Microsoft Intune environments
+            "Download"
                 {
                     # force download using Github. This is needed for Intune remediations, since the functions library are large, and Intune only support 200 Kb at the moment
                     Write-Output "Downloading latest version of module AzLogDcrIngestPS from https://github.com/KnudsenMorten/AzLogDcrIngestPS"
@@ -251,20 +251,6 @@ Else
                         {
                             Write-Output "Required Powershell function was NOT found .... terminating !"
                             Exit
-                        }
-                }
-
-            # Used by Morten Knudsen for development
-            "DevMode"
-                {
-                    If (Test-Path "$Env:OneDrive\Documents\GitHub\AzLogDcrIngestPS-Dev\AzLogDcrIngestPS.psm1")
-                        {
-                            Import-module "$Env:OneDrive\Documents\GitHub\AzLogDcrIngestPS-Dev\AzLogDcrIngestPS.psm1" -Global -force -DisableNameChecking  -WarningAction SilentlyContinue
-                        }
-                    Else
-                        {
-                            Write-Output "Required Powershell function was NOT found .... terminating !"
-                            break
                         }
                 }
         }
@@ -1095,7 +1081,7 @@ Else
                                             Alternative2AntivirusProductStateTimestamp = $Alternative2AntivirusProductStateTimestamp
                                             Alternative2AntivirusDefinitionStatus = $Alternative2AntivirusDefinitionStatus
                                             Alternative2AntivirusRealTimeStatus = $Alternative2AntivirusRealTimeStatus
-                                            }
+                                          }
     
         # add CollectionTime to existing array
         $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
@@ -1691,7 +1677,6 @@ Else
                                             VPNSoftware     = $VPNSoftware
                                             VPNVersion      = $VPNVersion
                                          }
-
             
         # add CollectionTime to existing array
         $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
@@ -2475,13 +2460,13 @@ Else
         ###############################################################################################
 
         $Application_EventId_Array = @(
-                                        )
+                                      )
 
 
         $System_EventId_Array      = @(
                                         "6008;Eventlog"  # Unexpected shutdown ; Providername = Eventlog
                                         "7001;Microsoft-Windows-WinLogon" # Windows logon
-                                        )
+                                      )
 
         $Security_EventId_Array    = @( 
                                         "4740;Microsoft-Windows-Security-Auditing"  # Accounts Lockouts
@@ -2492,9 +2477,6 @@ Else
                                         "4625;Microsoft-Windows-Security-Auditing"  # Failed User Account Login
                                         "4648;Microsoft-Windows-Security-Auditing"  # Account Login with Explicit Credentials
                                       )
-        <#
-                                        "4624;Microsoft-Windows-Security-Auditing"  # Succesful User Account Login
-        #>
 
         ###############################################################################################
 
@@ -3149,12 +3131,4 @@ Else
 
     #  Set last run value in registry
         $Result = New-ItemProperty -Path $LastRun_RegPath -Name $LastRun_RegKey -Value $Now -PropertyType STRING -Force | Out-Null
-
-Try
-    {
-        Stop-Transcript
-    }
-Catch
-    {
-    }
 
