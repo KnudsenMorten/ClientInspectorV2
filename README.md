@@ -44,7 +44,7 @@ Happy hunting :smile:
 [What data is being collected ?](#what-data-is-being-collected-)  
 [Desired State Dashboards - How to get insight of my environment from the data ?](#desired-state-dashboards---how-to-get-insight-of-my-environment-from-the-data-)  
 [How do I query the data? - Kusto (KQL) is the answer](#how-do-i-query-the-data---kusto-kql-is-the-answer)  
-[Archicture, Schema & Networking](#archicture-schema--networking)  
+[Architecture, Schema & Networking](#archicture-schema--networking)  
 [Implementation](#implementation)  
 [Dependencies](#dependencies)  
 [Running ClientInspector.ps1 - 3 modes](#running-clientinspectorps1---3-modes)  
@@ -371,7 +371,7 @@ Here is an example of output, which was auto-created by a powershell script - ex
 
 <br>
    
-# Archicture, Schema & Networking
+# Architecture, Schema & Networking
 ClientInspector (v2) is uploading the collected data into **custom logs** in **Azure LogAnalytics workspace** - using **Log ingestion API**, **Azure Data Collection Rules (DCR)** and **Azure Data Collection Endpoints (DCE)**. 
 
 ![Archicture](docs/ArchitectureV2.png)
