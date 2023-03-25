@@ -34,7 +34,7 @@ But I'm really **passioned** about the **logging capabilities** and the power **
 
 I have a similar solution for **servers** - **ServerInspector**. Unfortunately, it is not public.
 
-[Big Thanks to the great people in Microsoft product teams - you are rock stars :smile:](#thank-you-to-the-great-people-in-microsoft-product-teams---you-are-rock-stars-smile)
+[Big Thanks to the great people in Microsoft product teams - you are rock stars :smile:](#big-thanks-to-the-great-people-in-microsoft-product-teams---you-are-rock-stars-smile)
 
 Happy hunting :smile:
 
