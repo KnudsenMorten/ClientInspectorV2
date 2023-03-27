@@ -512,7 +512,9 @@ NOTE: For remediation script, use the **ClientInspector.ps1** file
 ![Flow](img/Intune-remediation-2.png)
 
 
-**NOTE:  Intune has a limitation of 200 Kb in size for a remediation script.**  
+### Intune limitation
+
+NOTE: Intune has a limitation of 200 Kb in size for a remediation script.**  
 
 ![Intune-error](img/intune-size-alert.png)
 
