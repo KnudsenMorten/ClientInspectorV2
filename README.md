@@ -22,7 +22,6 @@ ClientInspector (v2) is uploading the collected data into **custom logs** in **A
 ![Bluescreens](img/Sample-Bluescreens.png)
 
 
-
 #### Disclaimer
 It is important for me to state that I'm not trying to build a separate management tool, which will compete with Microsoft security and management stack. 
 
@@ -1047,6 +1046,18 @@ RELATED LINKS
 
 # Cost - How much does it cost to store these data ?
 Data from **500** clients doing **daily** ClientInspector inventory will cost you approx **DKK 200 per month / USD 27 per month**
+
+<br>
+
+# Bugs-findings, please inform me
+Today, ClientInspectorV1 is used on thousands of computers (and ServerInspectorV1 on thousands of servers)
+
+Since ClientInspectorV2 is a complete rebuild from V1 with e.g. new naming convention, I cannot promise you that bugs will not be found.
+But I can promise you, that I will fix them as fast as my sparetime allows. Please send me an email on mok@mortenknudsen.net with your findings.
+Consider to fork the Github site - or keep an eye out for updates in the dashboards/workbooks or the ClientInspector script. 
+
+Furthermore ClientInspector is built to cover different designs and platforms, but you can have configurations, which are unique and not covered by collectins or dashboards.
+But the open approach allows you to tweak both the dashboards, workbooks and ClientInspector script, so it will work 100% for you. Consider it a show-case to do more with Azure logging technologies - it is not a paid product with 24x7 support. It is free to everyone !
 
 <br>
 
