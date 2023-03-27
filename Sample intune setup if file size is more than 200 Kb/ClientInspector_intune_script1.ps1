@@ -75,19 +75,8 @@ Write-Output ""
 
 <# ----- onboarding lines ----- BEGIN #>
 
-$TenantId                                   = "f0fa27a0-8e7c-4f63-9a77-ec94786b7c9e" 
-$LogIngestAppId                             = "3ea6e820-bf7b-477e-b45b-fe5e78392285" 
-$LogIngestAppSecret                         = "b-v8Q~jA85hYgjf3N6JKy_NJFrBH_o-QdNR1Ga.T" 
 
-$DceName                                    = "dce-log-management-client-demo1-t" 
-$LogAnalyticsWorkspaceResourceId            = "/subscriptions/fce4f282-fcc6-43fb-94d8-bf1701b862c3/resourceGroups/rg-logworkspaces-client-demo1-t/providers/Microsoft.OperationalInsights/workspaces/log-management-client-demo1-t" 
 
-$AzDcrResourceGroup                         = "rg-dcr-log-management-client-demo1-t"
-$AzDcrPrefix                                = "clt" 
-$AzDcrSetLogIngestApiAppPermissionsDcrLevel = $false
-$AzDcrLogIngestServicePrincipalObjectId     = "a5598f6c-5681-4185-9092-09d36ce35c85" 
-$AzLogDcrTableCreateFromReferenceMachine    = @("STRV-MOK-DT-02","STRV-MOK-LT-02")
-$AzLogDcrTableCreateFromAnyMachine          = $false
 
 # On some computers doing a WMI query after applications is REALLY slow. When testing, it is nice to be able to disable this collection temporarely
 $Collect_Applications_WMI                   = $true

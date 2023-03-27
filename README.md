@@ -522,6 +522,8 @@ NOTE: For remediation script, use the **ClientInspector.ps1** file
 
 In case you reach this, I propose to split the script into 2 scripts. Remember to include the header-section including UserLoggedOn section as header of the second file. UserLoggedOn is used to show which user is logged on.
 
+![Intune-split](img/Intune-split.png)
+
 </details>
 
 
