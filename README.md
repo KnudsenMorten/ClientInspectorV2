@@ -521,7 +521,7 @@ In case you reach this, I propose to split the script into 2 scripts.
 
 ![Intune-split](img/intune-split.png)
 
-![Intune-split](img/intune-split-overview.png)
+![Intune-split](img/intune-split-picture.png)
 
 Remember to include the header-section including UserLoggedOn section as header of the second file. UserLoggedOn is used to show which user is logged on.
 
