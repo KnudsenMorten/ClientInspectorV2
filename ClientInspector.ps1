@@ -1461,15 +1461,42 @@ Else
         # Looking for Microsoft 365 Office
         #-----------------------------------------
             $OfficeVersion = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Office\ClickToRun\Configuration" -ErrorAction SilentlyContinue
-
+            $OfficePolicies = Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\office\16.0\common\officeupdate" -ErrorAction SilentlyContinue
+                
                 #-------------------------------------------------------------------------------------------
                 # Preparing data structure
                 #-------------------------------------------------------------------------------------------
-                If ($OfficeVersion)
+                If ($OfficeVerion)
                     {
                         $FoundO365Office = $True
 
-                        $DataVariable = $OfficeVersion
+                        # Merge results into new OfficeObject
+                        $OfficeObject = new-object PSCustomObject
+                
+                        # $OfficeVersion
+                            $ObjColumns = ($OfficeVersion | get-member -MemberType NoteProperty)
+                            ForEach ($Entry in $OfficeVersion)
+                                {
+                                    ForEach ($Column in $ObjColumns)
+                                        {
+                                            $ColumnName = $Column.name
+                                            $OfficeObject | add-member -MemberType NoteProperty -Name $ColumnName -Value $Entry.$ColumnName -force
+                                        }
+                                }
+
+                        # $OfficePolicies
+                            $ObjColumns = ($OfficePolicies | get-member -MemberType NoteProperty)
+                            ForEach ($Entry in $OfficePolicies)
+                                {
+                                    ForEach ($Column in $ObjColumns)
+                                        {
+                                            $ColumnName = $Column.name
+                                            $OfficeObject | add-member -MemberType NoteProperty -Name $ColumnName -Value $Entry.$ColumnName -force
+                                        }
+                                }
+
+
+                        $DataVariable = $OfficeObject
 
                         # convert PS array to PSCustomObject and remove PS class information
                         $DataVariable = Convert-PSArrayToObjectFixStructure -Data $DataVariable -Verbose:$Verbose
