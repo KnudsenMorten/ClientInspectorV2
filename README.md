@@ -49,7 +49,8 @@ Happy hunting :smile:
 [Security](#security)  
 [Layout of ClientInspector data-set](#layout-of-clientinspector-data-set)  
 [Verbose-mode & More help](#verbose-mode--more-help)  
-[Cost - How much does it cost to store these data ?](#cost---how-much-does-it-cost-to-store-these-data-)  
+[Cost - How much does it cost to store these data ?](#cost---how-much-does-it-cost-to-store-these-data-) 
+[Bug findings, please inform me](#bugs-findings-please-inform-me)  
 [Contact](#contact)
 
 # Videos of solution
@@ -1052,8 +1053,8 @@ Data from **500** clients doing **daily** ClientInspector inventory will cost yo
 # Bugs-findings, please inform me
 Today, ClientInspectorV1 is used on thousands of computers (and ServerInspectorV1 on thousands of servers)
 
-Since ClientInspectorV2 is a complete rebuild from V1 with e.g. new naming convention, I cannot promise you that bugs will not be found.
-But I can promise you, that I will fix them as fast as my sparetime allows. Please send me an email on mok@mortenknudsen.net with your findings.
+Since ClientInspectorV2 is a complete rebuild from V1 with e.g. new naming convention, I cannot promise you that bugs will not be found.  
+But I can promise you, that I will fix them as fast as my sparetime allows. Please send me an email on mok@mortenknudsen.net with your findings.  
 Consider to fork the Github site - or keep an eye out for updates in the dashboards/workbooks or the ClientInspector script. 
 
 Furthermore ClientInspector is built to cover different designs and platforms, but you can have configurations, which are unique and not covered by collectins or dashboards.
