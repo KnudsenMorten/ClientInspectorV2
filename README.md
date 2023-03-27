@@ -491,7 +491,7 @@ $AzLogDcrTableCreateFromAnyMachine          = $false    # important so changes c
 <br>
   You will run the inventory script using 'proactive remediations' in Microsoft Intune.
   
-1. [Download the detection script ClientInspector_Detection.ps1](https://raw.githubusercontent.com/KnudsenMorten/ClientInspectorV2/main/Intune/ClientInspector_Detection.ps1)
+1. [Download the detection script ClientInspector_Detection.ps1](https://raw.githubusercontent.com/KnudsenMorten/ClientInspectorV2/raw/main/Intune/ClientInspector_Detection.ps1)
 
 2. Open the file with your favorite editor. Adjust the frequency on how often you want the inventory to run
 ```js
@@ -531,7 +531,7 @@ In case you reach this, I propose to split the script into 2 scripts. Remember t
 <br>
 You will run the inventory script by a traditional package + deployment
     
-1. [Download the CMD-file ClientInspector.cmd](https://raw.githubusercontent.com/KnudsenMorten/ClientInspectorV2/ConfigMgr/ClientInspector.cmd)
+1. [Download the CMD-file ClientInspector.cmd](https://raw.githubusercontent.com/KnudsenMorten/ClientInspectorV2/raw/main/ConfigMgr/ClientInspector.cmd)
 
 2. Create a source structure on your ConfigMgr package source directory for example called ClientInspector. 
 
