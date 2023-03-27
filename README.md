@@ -531,7 +531,7 @@ In case you reach this, I propose to split the script into 2 scripts. Remember t
 <br>
 You will run the inventory script by a traditional package + deployment
     
-1. [Download the CMD-file ClientInspector.cmd](https://raw.githubusercontent.com/KnudsenMorten/ClientInspectorV2/raw/main/ConfigMgr/ClientInspector.cmd)
+1. [Download the CMD-file ClientInspector.cmd](https://github.com/KnudsenMorten/ClientInspectorV2/raw/main/ConfigMgr/ClientInspector.cmd) (right-click and choose 'save link as')
 
 2. Create a source structure on your ConfigMgr package source directory for example called ClientInspector. 
 
