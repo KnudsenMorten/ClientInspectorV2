@@ -521,6 +521,8 @@ In case you reach this, I propose to split the script into 2 scripts.
 
 ![Intune-split](img/intune-split.png)
 
+![Intune-split](img/intune-split-overview.png)
+
 Remember to include the header-section including UserLoggedOn section as header of the second file. UserLoggedOn is used to show which user is logged on.
 
 I have prepared a [sample script-setup](https://github.com/KnudsenMorten/ClientInspectorV2/tree/main/Sample%20intune%20setup%20if%20file%20size%20is%20more%20than%20200%20Kb), where you can see how to separate them. Note: the code is NOT updated in these scripts, so make sure to take the sections from the master ClientInspector-file.
