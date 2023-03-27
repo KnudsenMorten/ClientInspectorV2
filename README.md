@@ -520,9 +520,21 @@ NOTE: For remediation script, use the **ClientInspector.ps1** file
 
 **NOTE:  Intune has a limitation of 200 Kb in size for a remediation script.**  
 
-In case you reach this, I propose to split the script into 2 scripts. Remember to include the header-section including UserLoggedOn section as header of the second file. UserLoggedOn is used to show which user is logged on.
+![Intune-error](img/Intune-size-alert.png)
+
+In case you reach this, I propose to split the script into 2 scripts. 
 
 ![Intune-split](img/Intune-split.png)
+
+Remember to include the header-section including UserLoggedOn section as header of the second file. UserLoggedOn is used to show which user is logged on.
+
+I have prepared a sample script-setup, where you can see how to separate them. Note: the code is NOT updated in these scripts, so make sure to take the sections from the master ClientInspector-file.
+
+Basically the structure is:
+
+File 1 contains header + UserLoggedOn (section 1) + section 2-9 + writes check-flag to HKLM\Software\ClientInspector\ClientInspector_System_1  
+
+File 2 contains header + UserLoggedOn (section 1) + section 10-18 + writes check-flag to HKLM\Software\ClientInspector\ClientInspector_System_2  
 
 </details>
 
