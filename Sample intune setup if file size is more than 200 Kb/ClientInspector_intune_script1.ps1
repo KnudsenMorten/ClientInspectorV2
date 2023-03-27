@@ -3,7 +3,7 @@
 
 <#
     .NAME
-    ClientInspector
+    ClientInspector (part 1 of 2)
 
     .SYNOPSIS
     This script will collect lots of information from the client - and send the data Azure LogAnalytics Custom Tables.
@@ -1797,6 +1797,103 @@ Else
 
         # Aligning data structure with schema (requirement for DCR)
         $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
+
+    #-------------------------------------------------------------------------------------------
+    # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
+    #-------------------------------------------------------------------------------------------
+
+        $ResultMgmt = CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId `
+                                                           -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
+                                                           -DceName $DceName -DcrName $DcrName -DcrResourceGroup $AzDcrResourceGroup -TableName $TableName -Data $DataVariable `
+                                                           -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
+                                                           -AzDcrSetLogIngestApiAppPermissionsDcrLevel $AzDcrSetLogIngestApiAppPermissionsDcrLevel `
+                                                           -AzLogDcrTableCreateFromAnyMachine $AzLogDcrTableCreateFromAnyMachine `
+                                                           -AzLogDcrTableCreateFromReferenceMachine $AzLogDcrTableCreateFromReferenceMachine
+        
+    #-----------------------------------------------------------------------------------------------
+    # Upload data to LogAnalytics using DCR / DCE / Log Ingestion API
+    #-----------------------------------------------------------------------------------------------
+
+        $ResultPost = Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName -DcrName $DcrName -Data $DataVariable -TableName $TableName `
+                                                                         -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose
+
+
+###############################################################
+# ADMIN BY REQUEST [9]
+###############################################################
+
+    Write-output ""
+    Write-output "#########################################################################################"
+    Write-output "ADMIN BY REQUEST [9]"
+    Write-output ""
+
+    #-------------------------------------------------------------------------------------------
+    # Variables
+    #-------------------------------------------------------------------------------------------
+            
+        $TableName  = 'InvClientAdminByRequestV2'   # must not contain _CL
+        $DcrName    = "dcr-" + $AzDcrPrefix + "-" + $TableName + "_CL"
+
+    #-------------------------------------------------------------------------------------------
+    # Collecting data (in)
+    #-------------------------------------------------------------------------------------------
+            
+        Write-Output ""
+        Write-Output "Collecting Admin By Request information ... Please Wait !"
+
+        # Default Values
+        $ABRSoftware = ""
+        $ABRVersion = ""
+
+        # Checking
+            ForEach ($Application in $InstalledApplications)
+                {
+
+                    Try
+                        {
+                            If ( ($Application.name -like "*Admin By Request*") )
+                                {
+                                    $ABRSoftware = $Application.Name
+                                    $ABRVersion = $Application.Version
+                                }
+
+                            # use alternative name on servers
+                            ElseIf ( ($Application.DisplayName -like "*Admin By Request*") )
+                                {
+                                    $ABRSoftware = $Application.DisplayName
+                                    $ABRVersion = $Application.DisplayVersion
+                                }
+
+                        }
+                    Catch
+                        {
+                        }
+                }
+
+
+    #-------------------------------------------------------------------------------------------
+    # Preparing data structure
+    #-------------------------------------------------------------------------------------------
+
+        If ($ABRSoftware)
+            {
+                $DataVariable = [pscustomobject]@{
+                                                    ABRSoftware     = $ABRSoftware
+                                                    ABRVersion      = $ABRVersion
+                                                 }
+    
+                # add CollectionTime to existing array
+                $DataVariable = Add-CollectionTimeToAllEntriesInArray -Data $DataVariable -Verbose:$Verbose
+
+                # add Computer, ComputerFqdn & UserLoggedOn info to existing array
+                $DataVariable = Add-ColumnDataToAllEntriesInArray -Data $DataVariable -Column1Name Computer -Column1Data $Env:ComputerName -Column2Name ComputerFqdn -Column2Data $DnsName -Column3Name UserLoggedOn -Column3Data $UserLoggedOn -Verbose:$Verbose
+
+                # Validating/fixing schema data structure of source data
+                $DataVariable = ValidateFix-AzLogAnalyticsTableSchemaColumnNames -Data $DataVariable -Verbose:$Verbose
+
+                # Aligning data structure with schema (requirement for DCR)
+                $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
+            }
 
     #-------------------------------------------------------------------------------------------
     # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
