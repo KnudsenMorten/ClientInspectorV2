@@ -442,7 +442,9 @@ The steps to setup ClientInspector in your environment are:
 
 <br>
 I recommend to have a reference computer, which is used for table/DCR management. This way it is a controlled process, if changes must be made - for example if the source object schema changes.
+
 <br>
+
 Configuration:
 
 1. When you run the DeploymentKit, it will automatically prepare the ClientInspector file for you, so you just need to insert the variables
