@@ -655,6 +655,21 @@ OK - Running latest version
 <br>
 
 # Security
+## Code signing
+Both the ClientInspector.ps1-file and the AzLogDcrIngestPS module (AzLogDcrIngest.psm1) is signed with my code signing certificate (2LINKIT - my company), so you can run it, if you require scripts to be signed.
+![Signed](img/codesigning1.png)
+
+Please [download the public key certificate](https://github.com/KnudsenMorten/ClientInspectorV2/raw/main/Trusted_Publisher_Certificate/2LINKIT-TrustedPublisher.cer) and put it into your 'trusted publisher' container to trust the publisher (2LINKIT - my company). You can deploy this using Intune or Group Policy.
+
+![Trusted Publisher](img/codesigning4.png)  
+![Trusted Publisher](img/codesigning3.png)  
+![Trusted Publisher](img/codesigning2.png)  
+
+
+### Intune deployment doesn't require trusted publisher to be in place
+By default Intune will do a BYPASS when running a remediation scripts.
+
+## Structure
 The security of **ClientInspector** are divided into 4 layers: **data-in**, **data-upload** (send to backend) and **data-view** (dashboards) - and **schema-management**
 
 | Phase | Security Implementation |Delegations / Permissions|
