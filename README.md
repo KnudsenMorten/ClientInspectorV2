@@ -511,20 +511,14 @@ NOTE: For remediation script, use the **ClientInspector.ps1** file
 
 ![Flow](img/Intune-remediation-2.png)
 
-![Flow](img/Intune-remediation-3.png)
-
-![Flow](img/Intune-remediation-4.png)
-
-![Flow](img/Intune-remediation-5.png)
-
 
 **NOTE:  Intune has a limitation of 200 Kb in size for a remediation script.**  
 
-![Intune-error](img/Intune-size-alert.png)
+![Intune-error](img/intune-size-alert.png)
 
 In case you reach this, I propose to split the script into 2 scripts. 
 
-![Intune-split](img/Intune-split.png)
+![Intune-split](img/intune-split.png)
 
 Remember to include the header-section including UserLoggedOn section as header of the second file. UserLoggedOn is used to show which user is logged on.
 
@@ -535,6 +529,14 @@ Basically the structure is:
 File 1 contains header + UserLoggedOn (section 1) + section 2-9 + writes check-flag to HKLM\Software\ClientInspector\ClientInspector_System_1  
 
 File 2 contains header + UserLoggedOn (section 1) + section 10-18 + writes check-flag to HKLM\Software\ClientInspector\ClientInspector_System_2  
+
+
+![Flow](img/Intune-remediation-3.png)
+
+![Flow](img/Intune-remediation-4.png)
+
+![Flow](img/Intune-remediation-5.png)
+
 
 </details>
 
