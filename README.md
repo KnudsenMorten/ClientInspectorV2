@@ -491,7 +491,7 @@ $AzLogDcrTableCreateFromAnyMachine          = $false    # important so changes c
 <br>
   You will run the inventory script using 'proactive remediations' in Microsoft Intune.
   
-1. [Download the detection script ClientInspector_Detection.ps1](https://github.com/KnudsenMorten/ClientInspectorV2/raw/main/Intune/ClientInspector_Detection.ps1)
+1. [Download the detection script ClientInspector_Detection.ps1](https://github.com/KnudsenMorten/ClientInspectorV2/raw/main/Intune/ClientInspector_Detection.ps1) (right-click and choose 'save link as')
 
 2. Open the file with your favorite editor. Adjust the frequency on how often you want the inventory to run
 ```js
