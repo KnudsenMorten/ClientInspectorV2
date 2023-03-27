@@ -1058,7 +1058,7 @@ But **I can promise you**, that I will fix them as fast as my sparetime allows. 
 
 Consider to fork the Github site - or keep an eye out for updates in the dashboards/workbooks or the ClientInspector script. 
 
-Furthermore ClientInspector is built to cover different designs and platforms, but you can have configurations, which are unique and not covered by collectins or dashboards.
+Furthermore ClientInspector is built to cover different designs and platforms, but you can have configurations, which are unique and not covered by collections or dashboards.
 But the open approach allows you to tweak both the dashboards, workbooks and ClientInspector script, so it will work 100% for you. Consider it a show-case to do more with Azure logging technologies - it is not a paid product with 24x7 support. It is free to everyone !
 
 <br>
