@@ -1460,7 +1460,7 @@ Else
         #-----------------------------------------
         # Looking for Microsoft 365 Office
         #-----------------------------------------
-            $OfficeVersion = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Office\ClickToRun\Configuration" -ErrorAction SilentlyContinue
+            $OfficeVersion  = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Office\ClickToRun\Configuration" -ErrorAction SilentlyContinue
             $OfficePolicies = Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\office\16.0\common\officeupdate" -ErrorAction SilentlyContinue
                 
                 #-------------------------------------------------------------------------------------------
@@ -1495,7 +1495,6 @@ Else
                                         }
                                 }
 
-
                         $DataVariable = $OfficeObject
 
                         # convert PS array to PSCustomObject and remove PS class information
@@ -1513,6 +1512,7 @@ Else
                         # Aligning data structure with schema (requirement for DCR)
                         $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$Verbose
                     }
+
 
         #-----------------------------------------
         # Looking for Office 2016 (standalone)
