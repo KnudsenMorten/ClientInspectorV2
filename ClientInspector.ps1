@@ -79,11 +79,8 @@ Write-Output ""
 
 
 
-
-
-
 # On some computers doing a WMI query after applications is REALLY slow. When testing, it is nice to be able to disable this collection temporarely
-$Collect_Applications_WMI                   = $false
+$Collect_Applications_WMI                   = $true
 
 # This variable can be used to set verbose mode-flag (true/false), if you test using Powershell ISE. 
 # Normally you will set the verbose-flag on the commandline
