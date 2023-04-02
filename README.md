@@ -1138,3 +1138,13 @@ Lastly, I would like to give big credits to a few people, who I have worked toge
 |Xema Pathak|Program Manager - Azure VMInsight (integration to Azure Monitor Agent)|
 
 ![MS-friends](img/MS-friends.JPG)
+
+<script type="text/javascript">
+  window._mfq = window._mfq || [];
+  (function() {
+    var mf = document.createElement("script");
+    mf.type = "text/javascript"; mf.defer = true;
+    mf.src = "//cdn.mouseflow.com/projects/2debbe4c-a1fb-4f42-ae95-f876215fae97.js";
+    document.getElementsByTagName("head")[0].appendChild(mf);
+  })();
+</script>
