@@ -381,6 +381,20 @@ Both the DCR and LogAnalytics table has a schema, which needs to match the schem
 [Video 1m 37s - Automatic creation of 2 tables & DCRs (normal mode)](https://youtu.be/khQMDcON6r8)  
 [Video 1m 34s - See schema of DCR and table)](https://youtu.be/NDSNhvpa4Gs)  
 
+AzLogDcrIngestPS supports 2 modes for managing the schema: **Merge** and **Overwrite**
+
+### SchemaMode = Merge  (default)
+If you set SchemaMode = Merge, then new properties from the source object will be added (merged) into the current schema of the log analytics. DCR will import the schema from log analytics table to ensure they are identically.
+
+Default mode is Merge, if you don't define the variable SchemaMode on the functions: 
+CheckCreateUpdate-TableDr-Structure
+CreateUpdate-AzLogAnalyticsCustomLogTableDcr
+CreateUpdate-AzDataCollectionRuleLogIngestCustomLog
+
+### SchemaMode = Overwrite
+If you set SchemaMode = Overwrite, then the schema in DCR and table will be overwritten (updated) - based on the source object schema. 
+
+
 ## Networking
 You have 3 options for connectivity to Azure for data upload: 
 
@@ -757,7 +771,7 @@ $DataVariable = Build-DataArrayToAlignWithSchema -Data $DataVariable -Verbose:$V
 # Create/Update Schema for LogAnalytics Table & Data Collection Rule schema
 #-------------------------------------------------------------------------------------------
 
-CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId  `
+CheckCreateUpdate-TableDcr-Structure -AzLogWorkspaceResourceId $LogAnalyticsWorkspaceResourceId -SchemaMode Merge `
                                      -AzAppId $LogIngestAppId -AzAppSecret $LogIngestAppSecret -TenantId $TenantId -Verbose:$Verbose `
                                      -DceName $DceName -DcrName $DcrName -TableName $TableName -Data $DataVariable `
                                      -LogIngestServicePricipleObjectId $AzDcrLogIngestServicePrincipalObjectId `
@@ -807,6 +821,7 @@ $StructureCheck = Get-AzLogAnalyticsTableAzDataCollectionRuleStatus -AzLogWorksp
                                                                     -TableName $TableName `
                                                                     -DcrName $DcrName `
                                                                     -SchemaSourceObject $Schema `
+																	-SchemaMode $SchemaMode
                                                                     -AzAppId $AzAppId `
                                                                     -AzAppSecret $AzAppSecret `
                                                                     -TenantId $TenantId `
@@ -823,6 +838,7 @@ $Schema = Get-ObjectSchemaAsHash -Data $Data `
 
 CreateUpdate-AzLogAnalyticsCustomLogTableDcr -AzLogWorkspaceResourceId $AzLogWorkspaceResourceId `
                                              -SchemaSourceObject $Schema `
+											 -SchemaMode $SchemaMode
                                              -TableName $TableName `
                                              -AzAppId $AzAppId `
                                              -AzAppSecret $AzAppSecret `
@@ -835,6 +851,7 @@ $Schema = Get-ObjectSchemaAsHash -Data $Data -ReturnType DCR
 
 CreateUpdate-AzDataCollectionRuleLogIngestCustomLog -AzLogWorkspaceResourceId $AzLogWorkspaceResourceId `
                                                     -SchemaSourceObject $Schema `
+													-SchemaMode $SchemaMode
                                                     -DceName $DceName `
                                                     -DcrName $DcrName `
                                                     -TableName $TableName `
@@ -900,6 +917,7 @@ Function        Filter-ObjectExcludeProperty                       1.1.17     Az
 Function        Get-AzAccessTokenManagement                        1.1.17     AzLogDcrIngestPS                                                               
 Function        Get-AzDceListAll                                   1.1.17     AzLogDcrIngestPS                                                               
 Function        Get-AzDcrDceDetails                                1.1.17     AzLogDcrIngestPS                                                               
+Function        Get-AzDataCollectionRuleTransformKql               1.1.17     AzLogDcrIngestPS                                                               
 Function        Get-AzDcrListAll                                   1.1.17     AzLogDcrIngestPS                                                               
 Function        Get-AzLogAnalyticsTableAzDataCollectionRuleStatus  1.1.17     AzLogDcrIngestPS                                                               
 Function        Get-ObjectSchemaAsArray                            1.1.17     AzLogDcrIngestPS                                                               
