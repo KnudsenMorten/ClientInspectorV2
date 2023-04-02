@@ -1122,7 +1122,7 @@ If you have comments to the solution - or just want to connect with me, please c
 <br>
 
 # Big Thanks to the great people in Microsoft product teams - you are rock stars :smile:
-Lastly, I would like to give **big credits** to a few people, who I have worked together with on building **AzLogDcrIngestPS Powershell module** and **my daily work with the Azure log & viewing capabilities**:
+Lastly, I would like to give big credits to a few people, who I have worked together with on building AzLogDcrIngestPS Powershell module and my daily work with the Azure log & viewing capabilities:
 
 |Name|Role|
 |:---|:---|
@@ -1137,18 +1137,4 @@ Lastly, I would like to give **big credits** to a few people, who I have worked 
 |Jeff Wolford|Program Manager - Azure Monitor Agent|
 |Xema Pathak|Program Manager - Azure VMInsight (integration to Azure Monitor Agent)|
 
-
-**Ivan & Evgeny from Azure Pipeline**
-![AzurePipeline](img/AzurePipeline.jpg)
-
-
-**Program Managers from Azure LogAnalytics**
-![AzurePipeline](img/LogAnalytics.jpg)
-
-
-**Nick, Shayoni & Xema from Azure Data Collection Rules, Azure Monitor Agent and Azure VMInsight**
-![AzurePipeline](img/AzureDCR_AMA.jpg)
-
-
-**John & Shikha from Azure Workbooks**
-![AzurePipeline](img/AzureWorkbooks.jpg)
+![MS-friends](img/MS-friends.JPG)
