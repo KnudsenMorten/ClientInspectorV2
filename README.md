@@ -805,7 +805,8 @@ Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName `
                                                    -AzAppSecret $LogIngestAppSecret `
                                                    -TenantId $TenantId `
                                                    -BatchAmount 1 `
-												   -Verbose:$Verbose
+												   -Verbose:$Verbose `
+												   
 ```
 
 
