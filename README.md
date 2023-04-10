@@ -805,7 +805,7 @@ Post-AzLogAnalyticsLogIngestCustomLogDcrDce-Output -DceName $DceName `
                                                    -AzAppSecret $LogIngestAppSecret `
                                                    -TenantId $TenantId `
                                                    -BatchAmount 1 `
-												   -Verbose:$Verbose `
+                                                   -Verbose:$Verbose `
 												   
 ```
 
@@ -839,7 +839,7 @@ $Schema = Get-ObjectSchemaAsHash -Data $Data `
 
 CreateUpdate-AzLogAnalyticsCustomLogTableDcr -AzLogWorkspaceResourceId $AzLogWorkspaceResourceId `
                                              -SchemaSourceObject $Schema `
-											 -SchemaMode $SchemaMode
+                                             -SchemaMode $SchemaMode
                                              -TableName $TableName `
                                              -AzAppId $AzAppId `
                                              -AzAppSecret $AzAppSecret `
